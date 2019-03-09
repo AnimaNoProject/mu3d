@@ -330,3 +330,5 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
+
+source/CMakeLists\.txt\.user
