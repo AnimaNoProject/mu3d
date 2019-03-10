@@ -1,8 +1,6 @@
 # 3D-Mesh-Unfolding
 
-******************************
-# Compile Instructions
-******************************
+## Compile Instructions
 
 ******************************
 Install OpenGL
@@ -17,6 +15,12 @@ $ wget http://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-linux-
 $ chmod +x qt-opensource-linux-x64-5.7.0.run
 $ ./qt-opensource-linux-x64-5.7.0.run
 $ sudo apt-get install libfontconfig1
+
+******************************
+Install Boost
+******************************
+
+$ sudo apt-get install libboost-all-dev
 
 ******************************
 Install CGAL
