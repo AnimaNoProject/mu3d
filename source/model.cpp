@@ -135,8 +135,13 @@ void Model::draw()
     // set the model Matrix
     _program->setUniformValue(_program->uniformLocation("modelMatrix"), _modelMatrix);
     // draw all triangles
-    f->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    f->glPolygonMode(GL_FRONT_AND_BACK, _wireframe ? GL_LINE : GL_FILL);
     f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+}
+
+void Model::switchRenderMode()
+{
+    _wireframe = !_wireframe;
 }
 
 void Model::debugModel()

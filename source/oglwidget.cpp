@@ -10,6 +10,8 @@ OGLWidget::OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWid
     surfaceFormat.setVersion(4,5);
     surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
     this->setFormat(surfaceFormat);
+
+    this->setFocusPolicy(Qt::ClickFocus); // focus for key events can be gained by clicking or tabbing
 }
 
 void OGLWidget::importModel(const char* filename)
@@ -84,8 +86,32 @@ void OGLWidget::resizeGL(int w, int h)
     _projMatrix.perspective(45.f, float(w) / h, 0.01f, 1000.0f);
 }
 
+void OGLWidget::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key())
+    {
+        // Key_F1 -> switch between WireFrame and filled mode
+        case Qt::Key_F1:
+            _model->switchRenderMode();
+            break;
+    }
+    update();
+}
+
+void OGLWidget::wheelEvent(QWheelEvent *event)
+{
+
+    float steps = (event->angleDelta().y() / 8) / 15;
+    _cameraMatrix.translate(0, 0, steps * 0.5f);
+    update();
+}
+
 void OGLWidget::mousePressEvent(QMouseEvent *event)
 {
-    _cameraMatrix.translate(0, 0, -1);
+
 }
-void OGLWidget::mouseMoveEvent(QMouseEvent *event){}
+
+void OGLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+
+}

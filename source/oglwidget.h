@@ -5,6 +5,8 @@
 
 #include <QMatrix4x4>
 
+#include <QWheelEvent>
+
 #include "model.h"
 
 class Model;
@@ -26,6 +28,8 @@ protected:
     void resizeGL(int w, int h) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 private:
     QOpenGLShaderProgram *_program;
 

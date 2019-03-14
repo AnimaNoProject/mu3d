@@ -27,6 +27,7 @@ public:
     Model(QOpenGLShaderProgram* program);
     ~Model();
     void draw();
+    void switchRenderMode();
 private:
     Polyhedron _mesh;
     QMatrix4x4 _modelMatrix;
@@ -42,4 +43,6 @@ private:
 
     void createGLModelContext();
     void debugModel();
+
+    bool _wireframe = true;
 };
