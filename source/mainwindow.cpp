@@ -7,11 +7,11 @@ MainWindow::MainWindow(int height, int width, QString title)
 
     // add openglwidegts for rendering
     _modelWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
-    //planar = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
+    _planarWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
     _modelWidget->setFixedSize(height / 2, width / 2);
-    //planar->setFixedSize(height / 2, width / 2);
+    _planarWidget->setFixedSize(height / 2, width / 2);
     layout->addWidget(_modelWidget);
-    //layout->addWidget(planar);
+    layout->addWidget(_planarWidget);
 
     // Add action to load a model
     QAction *loadFile = this->menuBar()->addMenu("File")->addAction("Load Model");
@@ -34,5 +34,5 @@ void MainWindow::loadModel()
     if(filename.isNull())
         return;
 
-    _modelWidget->importModel(new Model(filename.toLocal8Bit().data()));
+    _modelWidget->importModel(filename.toLocal8Bit().data());
 }

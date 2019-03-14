@@ -53,8 +53,10 @@ const std::vector<GLushort> indices = {// front
                                 3, 2, 6,
                                 6, 7, 3};
 
-Model::Model(const char* filename)
+Model::Model(const char* filename, QOpenGLShaderProgram* program)
 {
+    _program = program;
+
     // open file buffer
     std::filebuf filebuffer;
     if(filebuffer.open(filename, std::ios::in))
@@ -67,23 +69,58 @@ Model::Model(const char* filename)
 
     _vertices = vertices2;
     _indices = indices;
+    _modelMatrix.setToIdentity();
+
+    createGLModelContext();
 
     debugModel(); // print debugging relevant informations
 }
 
-std::vector<QVector3D> Model::getVertices()
+void Model::createGLModelContext()
 {
-    return _vertices;
+    // delcare Vertex and Index buffer
+    _vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    _ibo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+    _program->bind();
+
+    // create and bind VAO
+    _vao.create();
+    QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
+
+    // get openglfunctions from the current context (important OGLWidget needs to call makeCurrent)
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+
+    // create VBO and allocate buffer
+    _vbo.create();
+    _vbo.bind();
+    _vbo.allocate(_vertices.data(), _vertices.size() * sizeof(QVector3D));
+    _vbo.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    f->glEnableVertexAttribArray(0);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    _vbo.release();
+
+    // create IBO and allocate buffer
+    _ibo.create();
+    _ibo.bind();
+    _ibo.allocate(_indices.data(), _indices.size() * sizeof(GLushort));
+    _ibo.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+
+    vaoBinder.release();
+    _ibo.release();
+
+    _program->release();
 }
 
-std::vector<GLushort> Model::getIndices()
+void Model::draw()
 {
-    return _indices;
-}
-
-QMatrix4x4 Model::getModelMatrix()
-{
-    return _modelMatrix;
+    // get opengl functions
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    // bind the VAO
+    QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
+    // set the model Matrix
+    _program->setUniformValue(_program->uniformLocation("modelMatrix"), _modelMatrix);
+    // draw all triangles
+    f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
 }
 
 void Model::debugModel()
@@ -93,11 +130,16 @@ void Model::debugModel()
         std::cout << v->point() << std::endl;
 }
 
-Model::Model()
+Model::Model(QOpenGLShaderProgram* program)
 {
+    _program = program;
+
     // if no .off file is specified use standard cube to draw
     _vertices = vertices;
     _indices = indices;
+    _modelMatrix.setToIdentity();
+
+    createGLModelContext();
 }
 
 Model::~Model()
