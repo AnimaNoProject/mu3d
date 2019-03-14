@@ -18,7 +18,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(CGAL)
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(OpenGL)
-find_package(Boost 1.69)
+find_package(Boost)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OpenGL_INCLUDE_DIRS})

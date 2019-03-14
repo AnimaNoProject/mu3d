@@ -3,7 +3,7 @@
 #include <CGAL/Polyhedron_3.h>
 
 #include <QOpenGLBuffer>
-#include <QOpenGLFunctions>
+#include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 

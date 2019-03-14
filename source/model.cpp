@@ -6,7 +6,7 @@ const float height = 4;
 const float depth = 4;
 
 // default cube vertices
-const std::vector<QVector3D> vertices = {
+const std::vector<QVector3D> defaultCubeVertices = {
     // front
     QVector3D(-width / 2.0f, -height / 2.0f,  depth / 2.0f),
     QVector3D(width / 2.0f, -height / 2.0f,  depth / 2.0f),
@@ -19,22 +19,8 @@ const std::vector<QVector3D> vertices = {
     QVector3D(-width / 2.0f,  height / 2.0f, -depth / 2.0f)
 };
 
-// default cube vertices
-const std::vector<QVector3D> vertices2 = {
-    // front
-    QVector3D(-width, -height,  depth),
-    QVector3D(width, -height,  depth),
-    QVector3D(width,  height,  depth),
-    QVector3D(-width,  height,  depth),
-    // back
-    QVector3D(-width, -height, -depth),
-    QVector3D(width, -height, -depth),
-    QVector3D(width,  height, -depth),
-    QVector3D(-width,  height, -depth)
-};
-
 // default cube indices
-const std::vector<GLushort> indices = {// front
+const std::vector<GLushort> defaultCubeIndices = {// front
                                 0, 1, 2,
                                 2, 3, 0,
                                 // top
@@ -67,13 +53,42 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
         filebuffer.close();
     }
 
-    _vertices = vertices2;
-    _indices = indices;
+    // get all vertices
+    for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
+    {
+        _vertices.push_back(QVector3D(v->point().x(), v->point().y(), v->point().z()));
+    }
+
+    // loop through all facets
+    for (Polyhedron::Facet_iterator fi = _mesh.facets_begin(); fi != _mesh.facets_end(); ++fi)
+    {
+        // get the first facet
+        Polyhedron::Halfedge_around_facet_circulator hfc = fi->facet_begin();
+        // assert that all facets are triangles
+        CGAL_assertion(CGAL::circulator_size(hfc) >= 3);
+        do
+        {
+            uint foundindex = 0;
+            // loop through vertices and save their index if they match
+            for(std::vector<int>::size_type i = 0; i != _vertices.size(); ++i)
+            {
+                if((float)hfc->vertex()->point().x() == _vertices[i].x() &&
+                    (float)hfc->vertex()->point().y() == _vertices[i].y() &&
+                    (float)hfc->vertex()->point().z() == _vertices[i].z())
+                {
+                    foundindex = i;
+                    break;
+                }
+            }
+            _indices.push_back(foundindex);
+        } while (++hfc != fi->facet_begin());
+    }
+
     _modelMatrix.setToIdentity();
 
     createGLModelContext();
 
-    debugModel(); // print debugging relevant informations
+    //debugModel();
 }
 
 void Model::createGLModelContext()
@@ -88,7 +103,7 @@ void Model::createGLModelContext()
     QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
 
     // get openglfunctions from the current context (important OGLWidget needs to call makeCurrent)
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
 
     // create VBO and allocate buffer
     _vbo.create();
@@ -114,20 +129,34 @@ void Model::createGLModelContext()
 void Model::draw()
 {
     // get opengl functions
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
     // bind the VAO
     QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
     // set the model Matrix
     _program->setUniformValue(_program->uniformLocation("modelMatrix"), _modelMatrix);
     // draw all triangles
+    f->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
 }
 
 void Model::debugModel()
 {
-    CGAL::set_ascii_mode( std::cout);
     for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
-        std::cout << v->point() << std::endl;
+    {
+        std::cout << "Vertex: " << v->point().x() << "," << v->point().y() << "," << v->point().z() << std::endl;
+    }
+
+    for (Polyhedron::Facet_iterator fi = _mesh.facets_begin(); fi != _mesh.facets_end(); ++fi)
+    {
+        Polyhedron::Halfedge_around_facet_circulator hfc = fi->facet_begin();
+        CGAL_assertion(CGAL::circulator_size(hfc) >= 3);
+        std::cout << "Triangle: ";
+        do
+        {
+            std::cout << "V(" << hfc->vertex()->point().x() << "," << hfc->vertex()->point().y() << ","  << hfc->vertex()->point().z() << ")";
+        } while (++hfc != fi->facet_begin());
+        std::cout << std::endl;
+    }
 }
 
 Model::Model(QOpenGLShaderProgram* program)
@@ -135,8 +164,8 @@ Model::Model(QOpenGLShaderProgram* program)
     _program = program;
 
     // if no .off file is specified use standard cube to draw
-    _vertices = vertices;
-    _indices = indices;
+    _vertices = defaultCubeVertices;
+    _indices = defaultCubeIndices;
     _modelMatrix.setToIdentity();
 
     createGLModelContext();

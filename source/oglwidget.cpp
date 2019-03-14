@@ -84,5 +84,8 @@ void OGLWidget::resizeGL(int w, int h)
     _projMatrix.perspective(45.f, float(w) / h, 0.01f, 1000.0f);
 }
 
-void OGLWidget::mousePressEvent(QMouseEvent *event){}
+void OGLWidget::mousePressEvent(QMouseEvent *event)
+{
+    _cameraMatrix.translate(0, 0, -1);
+}
 void OGLWidget::mouseMoveEvent(QMouseEvent *event){}
