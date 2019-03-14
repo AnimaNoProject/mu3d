@@ -1,9 +1,11 @@
 #pragma once
 #include <QMainWindow>
-#include <QMenuBar>
 #include <QFileDialog>
 #include <QHBoxLayout>
+#include <QMenuBar>
+#include <QAction>
 #include "oglwidget.h"
+#include "model.h"
 
 class MainWindow : public QMainWindow
 {
@@ -12,9 +14,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(int height, int width, QString title);
     ~MainWindow();
-private:
-    OGLWidget *model;
-    OGLWidget *planar;
-
     void loadModel();
+private:
+    OGLWidget* _modelWidget;
+    OGLWidget* _planarWidget;
 };
