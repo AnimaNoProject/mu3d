@@ -7,10 +7,13 @@ OGLWidget::OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWid
 
     // set surface format to request OpenGL 4.5
     QSurfaceFormat surfaceFormat = this->format();
+    surfaceFormat.setDepthBufferSize(24);
+    surfaceFormat.setSamples(4);
     surfaceFormat.setVersion(4,5);
     surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+    surfaceFormat.setSwapBehavior(QSurfaceFormat::TripleBuffer);
     this->setFormat(surfaceFormat);
-
+    this->create();
     this->setFocusPolicy(Qt::ClickFocus); // focus for key events can be gained by clicking or tabbing
 }
 
@@ -35,7 +38,8 @@ void OGLWidget::initializeGL()
 
     // if context gets destroyed, cleanup before initializeGL is called again
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OGLWidget::cleanup);
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0.5, 0.5, 0.5, 1);
+    //glEnable(GL_LINE_SMOOTH);
 
     // create new shader program
     _program = new QOpenGLShaderProgram();
@@ -45,10 +49,7 @@ void OGLWidget::initializeGL()
     _program->link();
 
     _model = new Model(_program); // use default model until something is imported
-
-    // move back, camera will be constant
-    _cameraMatrix.setToIdentity();
-    _cameraMatrix.translate(0, 0, -20);
+    _camera = new Camera();
 }
 
 void OGLWidget::cleanup()
@@ -73,7 +74,7 @@ void OGLWidget::paintGL()
 
     // bind shaderprogram and set variables
     _program->bind();
-    _program->setUniformValue(_program->uniformLocation("viewProjMatrix"), _projMatrix * _cameraMatrix);
+    _program->setUniformValue(_program->uniformLocation("viewProjMatrix"), _projMatrix * _camera->getMatrix());
     _model->draw();
 
     _program->release();
@@ -102,16 +103,25 @@ void OGLWidget::wheelEvent(QWheelEvent *event)
 {
 
     float steps = (event->angleDelta().y() / 8) / 15;
-    _cameraMatrix.translate(0, 0, steps * 0.5f);
+    _camera->zoom(steps);
     update();
 }
 
 void OGLWidget::mousePressEvent(QMouseEvent *event)
 {
-
+    _lastPos = event->pos();
 }
 
 void OGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    float dx = event->x() - _lastPos.x();
+    float dy = event->y() - _lastPos.y();
 
+    if(event->buttons() == Qt::LeftButton)
+    {
+        _camera->rotate(dx, dy);
+        update();
+    }
+
+    _lastPos = event->pos();
 }

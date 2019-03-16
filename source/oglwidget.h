@@ -4,9 +4,11 @@
 #include <QOpenGLShaderProgram>
 
 #include <QMatrix4x4>
+#include <QPoint>
 
 #include <QWheelEvent>
 
+#include "camera.h"
 #include "model.h"
 
 class Model;
@@ -21,7 +23,6 @@ public:
     void importModel(const char* filename);
 public slots:
     void cleanup();
-
 protected:
     void initializeGL() override;
     void paintGL() override;
@@ -37,7 +38,8 @@ private:
     const  QString* _fshaderFile;
 
     Model* _model;
-
+    Camera* _camera;
     QMatrix4x4 _projMatrix;
-    QMatrix4x4 _cameraMatrix;
+
+    QPoint _lastPos;
 };

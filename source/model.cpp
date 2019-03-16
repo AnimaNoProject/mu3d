@@ -135,8 +135,27 @@ void Model::draw()
     // set the model Matrix
     _program->setUniformValue(_program->uniformLocation("modelMatrix"), _modelMatrix);
     // draw all triangles
-    f->glPolygonMode(GL_FRONT_AND_BACK, _wireframe ? GL_LINE : GL_FILL);
-    f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+    if(_wireframe)
+    {
+        _program->setUniformValue(_program->uniformLocation("color"), _lineColor);
+        f->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+    }
+    else
+    {
+        // draw the solids
+        _program->setUniformValue(_program->uniformLocation("color"), _fillColor);
+        f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        f->glPolygonOffset(1, 1);
+        f->glEnable(GL_POLYGON_OFFSET_FILL);
+        f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+        f->glDisable(GL_POLYGON_OFFSET_FILL);
+        // draw the lines
+        _program->setUniformValue(_program->uniformLocation("color"), _lineColor);
+        f->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        f->glLineWidth(10);
+        f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+    }
 }
 
 void Model::switchRenderMode()

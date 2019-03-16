@@ -32,6 +32,8 @@ set(3d-mesh-unfolding_SRCS
     oglwidget.cpp
     model.h
     model.cpp
+    camera.h
+    camera.cpp
 )
 
 # create the executeable from all source files

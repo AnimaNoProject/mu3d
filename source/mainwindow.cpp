@@ -8,8 +8,8 @@ MainWindow::MainWindow(int height, int width, QString title)
     // add openglwidegts for rendering
     _modelWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
     _planarWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
-    _modelWidget->setFixedSize(height / 2, width / 2);
-    _planarWidget->setFixedSize(height / 2, width / 2);
+    _modelWidget->setMinimumSize(height / 2, width /2);
+    _planarWidget->setMinimumSize(height / 2, width /2);
     layout->addWidget(_modelWidget);
     layout->addWidget(_planarWidget);
 

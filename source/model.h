@@ -44,5 +44,8 @@ private:
     void createGLModelContext();
     void debugModel();
 
-    bool _wireframe = true;
+    const QVector4D _lineColor = QVector4D(0.0, 0.0, 0.0, 1.0);
+    const QVector4D _fillColor = QVector4D(1.0, 1.0, 1.0, 1.0);
+
+    bool _wireframe = false;
 };
