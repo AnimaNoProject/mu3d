@@ -1,6 +1,6 @@
 #include "camera.h"
 
-Camera::Camera() : _angleX(0), _angleY(0), _delta(-10)
+Camera::Camera() : _delta(-10), _angleX(0), _angleY(0)
 {
 }
 

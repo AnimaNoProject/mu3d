@@ -56,7 +56,7 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     // get all vertices
     for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
     {
-        _vertices.push_back(QVector3D(v->point().x(), v->point().y(), v->point().z()));
+        _vertices.push_back(QVector3D(float(v->point().x()), float(v->point().y()), float(v->point().z())));
     }
 
     // loop through all facets
@@ -68,15 +68,15 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
         CGAL_assertion(CGAL::circulator_size(hfc) >= 3);
         do
         {
-            uint foundindex = 0;
+            unsigned short foundindex = 0;
             // loop through vertices and save their index if they match
             for(std::vector<int>::size_type i = 0; i != _vertices.size(); ++i)
             {
-                if((float)hfc->vertex()->point().x() == _vertices[i].x() &&
-                    (float)hfc->vertex()->point().y() == _vertices[i].y() &&
-                    (float)hfc->vertex()->point().z() == _vertices[i].z())
+                if(float(hfc->vertex()->point().x()) == _vertices[i].x() &&
+                   float(hfc->vertex()->point().y()) == _vertices[i].y() &&
+                   float(hfc->vertex()->point().z()) == _vertices[i].z())
                 {
-                    foundindex = i;
+                    foundindex = ushort(i);
                     break;
                 }
             }
@@ -88,7 +88,14 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
 
     createGLModelContext();
 
-    //debugModel();
+    kruskal();
+}
+
+void Model::kruskal()
+{
+    // TODO iterate through graph to create dual graph, use line length as weight
+
+    // TODO use kruskal to find minimum spanning tree
 }
 
 void Model::createGLModelContext()
@@ -108,16 +115,16 @@ void Model::createGLModelContext()
     // create VBO and allocate buffer
     _vbo.create();
     _vbo.bind();
-    _vbo.allocate(_vertices.data(), _vertices.size() * sizeof(QVector3D));
+    _vbo.allocate(_vertices.data(), int(_vertices.size() * sizeof(QVector3D)));
     _vbo.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
     f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     _vbo.release();
 
     // create IBO and allocate buffer
     _ibo.create();
     _ibo.bind();
-    _ibo.allocate(_indices.data(), _indices.size() * sizeof(GLushort));
+    _ibo.allocate(_indices.data(), int(_indices.size() * sizeof(GLushort)));
     _ibo.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
 
     vaoBinder.release();
@@ -139,7 +146,7 @@ void Model::draw()
     {
         _program->setUniformValue(_program->uniformLocation("color"), _lineColor);
         f->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+        f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
     }
     else
     {
@@ -148,13 +155,13 @@ void Model::draw()
         f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         f->glPolygonOffset(1, 1);
         f->glEnable(GL_POLYGON_OFFSET_FILL);
-        f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+        f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
         f->glDisable(GL_POLYGON_OFFSET_FILL);
         // draw the lines
         _program->setUniformValue(_program->uniformLocation("color"), _lineColor);
         f->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         f->glLineWidth(10);
-        f->glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_SHORT, 0);
+        f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
     }
 }
 
@@ -194,6 +201,7 @@ Model::Model(QOpenGLShaderProgram* program)
 
     createGLModelContext();
 }
+
 
 Model::~Model()
 {

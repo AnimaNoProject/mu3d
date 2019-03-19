@@ -61,7 +61,7 @@ void OGLWidget::cleanup()
     // delete the program and buffer
     makeCurrent();
     delete _program;
-    _program = 0;
+    _program = nullptr;
     doneCurrent();
 }
 

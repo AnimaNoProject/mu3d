@@ -18,8 +18,8 @@ class OGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     Q_OBJECT
 
 public:
-    OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = 0);
-    ~OGLWidget();
+    OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = nullptr);
+    virtual ~OGLWidget() override;
     void importModel(const char* filename);
 public slots:
     void cleanup();

@@ -2,6 +2,8 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
 
+#include <boost/graph/kruskal_min_spanning_tree.hpp>
+
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLVertexArrayObject>
@@ -12,6 +14,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <list>
 
 #include "oglwidget.h"
 
@@ -19,6 +22,16 @@ class OGLWidget;
 
 typedef CGAL::Simple_cartesian<double> Kernel;
 typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
+typedef Kernel::Vector_3 Vector;
+typedef Kernel::Point_3 Point;
+
+typedef boost::graph_traits<Polyhedron>::vertex_descriptor VertexDescriptor;
+typedef boost::graph_traits<Polyhedron>::vertex_iterator VertexIterator;
+typedef boost::graph_traits<Polyhedron>::edge_descriptor EdgeDescriptor;
+
+typedef std::map<VertexDescriptor, int> VertexIndexMap;
+typedef boost::associative_property_map<VertexIndexMap> VertexIndexPmap;
+
 
 class Model
 {
@@ -28,6 +41,8 @@ public:
     ~Model();
     void draw();
     void switchRenderMode();
+
+    void kruskal();
 private:
     Polyhedron _mesh;
     QMatrix4x4 _modelMatrix;
