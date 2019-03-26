@@ -1,9 +1,4 @@
 #pragma once
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/Polyhedron_3.h>
-
-#include <boost/graph/kruskal_min_spanning_tree.hpp>
-
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLVertexArrayObject>
@@ -16,22 +11,12 @@
 #include <iostream>
 #include <list>
 
+#include <math.h>
+
 #include "oglwidget.h"
+#include "graph.h"
 
 class OGLWidget;
-
-typedef CGAL::Simple_cartesian<double> Kernel;
-typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
-typedef Kernel::Vector_3 Vector;
-typedef Kernel::Point_3 Point;
-
-typedef boost::graph_traits<Polyhedron>::vertex_descriptor VertexDescriptor;
-typedef boost::graph_traits<Polyhedron>::vertex_iterator VertexIterator;
-typedef boost::graph_traits<Polyhedron>::edge_descriptor EdgeDescriptor;
-
-typedef std::map<VertexDescriptor, int> VertexIndexMap;
-typedef boost::associative_property_map<VertexIndexMap> VertexIndexPmap;
-
 
 class Model
 {
@@ -42,8 +27,10 @@ public:
     void draw();
     void switchRenderMode();
 
+    void createDualGraph();
     void kruskal();
 private:
+    Graph _graph;
     Polyhedron _mesh;
     QMatrix4x4 _modelMatrix;
     std::vector<QVector3D> _vertices;
@@ -56,11 +43,10 @@ private:
     QOpenGLShaderProgram* _program;
     OGLWidget* _context;
 
-    void createGLModelContext();
-    void debugModel();
-
     const QVector4D _lineColor = QVector4D(0.0, 0.0, 0.0, 1.0);
     const QVector4D _fillColor = QVector4D(1.0, 1.0, 1.0, 1.0);
 
     bool _wireframe = false;
+
+    void createGLModelContext();
 };

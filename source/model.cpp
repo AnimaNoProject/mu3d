@@ -62,6 +62,8 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     // loop through all facets
     for (Polyhedron::Facet_iterator fi = _mesh.facets_begin(); fi != _mesh.facets_end(); ++fi)
     {
+        _graph.addFace(fi);
+
         // get the first facet
         Polyhedron::Halfedge_around_facet_circulator hfc = fi->facet_begin();
         // assert that all facets are triangles
@@ -87,15 +89,18 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     _modelMatrix.setToIdentity();
 
     createGLModelContext();
-
+    createDualGraph();
     kruskal();
+}
+
+void Model::createDualGraph()
+{
+    _graph.calculateDual();
 }
 
 void Model::kruskal()
 {
-    // TODO iterate through graph to create dual graph, use line length as weight
-
-    // TODO use kruskal to find minimum spanning tree
+    // TODO: use kruskal to find minimum spanning tree
 }
 
 void Model::createGLModelContext()
@@ -168,26 +173,6 @@ void Model::draw()
 void Model::switchRenderMode()
 {
     _wireframe = !_wireframe;
-}
-
-void Model::debugModel()
-{
-    for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
-    {
-        std::cout << "Vertex: " << v->point().x() << "," << v->point().y() << "," << v->point().z() << std::endl;
-    }
-
-    for (Polyhedron::Facet_iterator fi = _mesh.facets_begin(); fi != _mesh.facets_end(); ++fi)
-    {
-        Polyhedron::Halfedge_around_facet_circulator hfc = fi->facet_begin();
-        CGAL_assertion(CGAL::circulator_size(hfc) >= 3);
-        std::cout << "Triangle: ";
-        do
-        {
-            std::cout << "V(" << hfc->vertex()->point().x() << "," << hfc->vertex()->point().y() << ","  << hfc->vertex()->point().z() << ")";
-        } while (++hfc != fi->facet_begin());
-        std::cout << std::endl;
-    }
 }
 
 Model::Model(QOpenGLShaderProgram* program)

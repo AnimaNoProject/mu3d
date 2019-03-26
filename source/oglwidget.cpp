@@ -11,7 +11,7 @@ OGLWidget::OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWid
     surfaceFormat.setSamples(4);
     surfaceFormat.setVersion(4,5);
     surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
-    surfaceFormat.setSwapBehavior(QSurfaceFormat::TripleBuffer);
+    surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     this->setFormat(surfaceFormat);
     this->create();
     this->setFocusPolicy(Qt::ClickFocus); // focus for key events can be gained by clicking or tabbing
