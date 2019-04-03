@@ -10,6 +10,8 @@ typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
 
 typedef Polyhedron::Facet_handle Facet;
 
+#define DEBUG 1
+
 class Graph
 {
 public:
@@ -22,6 +24,7 @@ private:
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;
     std::vector<Edge> _mspEdges;
+    std::vector<Edge> _cutEdges;
 
     int getFacetID(Facet facet);
     bool hasEdge(Edge edge);

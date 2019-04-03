@@ -86,22 +86,25 @@ void Graph::calculateMSP()
             if(!isAcyclic(i, adjacenceList))
             {
                 _mspEdges.erase(remove(_mspEdges.begin(), _mspEdges.end(), edge), _mspEdges.end());
+                _cutEdges.push_back(edge);
             }
         }
     }
 
+#ifdef DEBUG
     std::cout << "number of faces: " << _facets.size() << std::endl;
     std::cout << "number of edges: " << _mspEdges.size() << std::endl;
 
     // debugging purpose: show all edges of the MSP
-    //std::cout << "MSP over the edges" << std::endl;
-    //for(Edge& edge : _mspEdges)
-    //    std::cout << "Edge: " << edge._sFace << "<->" << edge._tFace << std::endl;
+    std::cout << "MSP over the edges" << std::endl;
+    for(Edge& edge : _mspEdges)
+        std::cout << "Edge: " << edge._sFace << "<->" << edge._tFace << std::endl;
 
     if(isSingleComponent())
         std::cout << "Graph is a single component!" << std::endl;
     else
         std::cout << "Graph is a NOT single component!" << std::endl;
+#endif
 }
 
 bool Graph::isSingleComponent()
@@ -130,9 +133,9 @@ bool Graph::isSingleComponent()
         if(!discovered[i])
         {
             isSingleComponent = false;
-            // debugging show not connected faces
-            //std::cout << "not connected face: " << i << std::endl;
-
+#ifdef DEBUG
+            std::cout << "not connected face: " << i << std::endl;
+#endif
         }
     }
     return isSingleComponent;
