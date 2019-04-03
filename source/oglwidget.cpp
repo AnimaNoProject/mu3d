@@ -103,7 +103,7 @@ void OGLWidget::wheelEvent(QWheelEvent *event)
 {
 
     float steps = (event->angleDelta().y() / 8) / 15;
-    _camera->zoom(steps);
+    _camera->zoom(steps * 0.5f);
     update();
 }
 

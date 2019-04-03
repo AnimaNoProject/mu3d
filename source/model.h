@@ -26,9 +26,6 @@ public:
     ~Model();
     void draw();
     void switchRenderMode();
-
-    void createDualGraph();
-    void kruskal();
 private:
     Graph _graph;
     Polyhedron _mesh;

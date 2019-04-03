@@ -36,6 +36,8 @@ set(3d-mesh-unfolding_SRCS
     camera.cpp
     graph.h
     graph.cpp
+    edge.h
+    edge.cpp
 )
 
 # create the executeable from all source files

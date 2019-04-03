@@ -89,18 +89,8 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     _modelMatrix.setToIdentity();
 
     createGLModelContext();
-    createDualGraph();
-    kruskal();
-}
-
-void Model::createDualGraph()
-{
     _graph.calculateDual();
-}
-
-void Model::kruskal()
-{
-    // TODO: use kruskal to find minimum spanning tree
+    _graph.calculateMSP();
 }
 
 void Model::createGLModelContext()
