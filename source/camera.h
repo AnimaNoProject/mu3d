@@ -9,6 +9,7 @@ public:
     QMatrix4x4 getMatrix();
     void rotate(float angleX, float angleY);
     void zoom(float delta);
+    void reset();
 private:
     float _delta;
     float _angleX;

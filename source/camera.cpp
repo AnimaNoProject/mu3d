@@ -20,6 +20,13 @@ QMatrix4x4 Camera::getMatrix()
     return matrix;
 }
 
+void Camera::reset()
+{
+    _delta = -10;
+    _angleX = 0;
+    _angleY = 0;
+}
+
 void Camera::rotate(float angleX, float angleY)
 {
     _angleX += angleX;

@@ -23,6 +23,7 @@ void OGLWidget::importModel(const char* filename)
     // create the VBO/IBO/VAO in the context of this widget
     makeCurrent();
     _model = new Model(filename, _program); // create the new model
+    _camera->reset();
     doneCurrent();
     update(); // update calls paintGL to renew the rendering
 }

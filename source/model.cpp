@@ -53,10 +53,15 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
         filebuffer.close();
     }
 
+    QVector3D middle(0,0,0);
+
     // get all vertices
     for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
     {
         _vertices.push_back(QVector3D(float(v->point().x()), float(v->point().y()), float(v->point().z())));
+        middle += QVector3D(float(v->point().x())/_mesh.size_of_vertices(),
+                            float(v->point().y())/_mesh.size_of_vertices(),
+                            float(v->point().z())/_mesh.size_of_vertices());
     }
 
     // loop through all facets
@@ -87,6 +92,7 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     }
 
     _modelMatrix.setToIdentity();
+    _modelMatrix.translate(QVector3D(0,0,0) - middle);
 
     createGLModelContext();
     _graph.calculateDual();

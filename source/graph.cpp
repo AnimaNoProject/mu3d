@@ -55,7 +55,9 @@ void Graph::calculateDual()
 
 void Graph::calculateMSP()
 {
+    // clear the previous msp edges
     _mspEdges.clear();
+    _cutEdges.clear();
 
     // sort edges from biggest edgelength to smallest, prefer to cut small edges
     std::sort(_edges.begin(), _edges.end());
@@ -65,12 +67,11 @@ void Graph::calculateMSP()
     std::vector<std::vector<int>> adjacenceList;
     adjacenceList.resize(_facets.size());
 
-    // go through all the edges
+    // go through all possible edges
     for(Edge& edge : _edges)
     {
-        // add the edge to the MSP
+        // add edge to msp, add adjacent faces
         _mspEdges.push_back(edge);
-
         adjacenceList[ulong(edge._sFace)].push_back(edge._tFace);
         adjacenceList[ulong(edge._tFace)].push_back(edge._sFace);
 
@@ -80,20 +81,22 @@ void Graph::calculateMSP()
         // if the MSP is now cyclic, the added egde needs to be removed again
         for(ulong i = 0; i < _facets.size(); i++)
         {
-            // if the node is alone, or already discovered
+            // if the node is alone (no incident edges), or already discovered, no need to check
             if(adjacenceList[i].empty() || discovered[i])
                 continue;
 
             // if the graph is cyclic
-            if(!isAcyclic(i, adjacenceList, discovered))
+            if(!isAcyclic(adjacenceList, i, discovered, -1))
             {
-                // remove the edge from the spanning tree
                 _mspEdges.erase(remove(_mspEdges.begin(), _mspEdges.end(), edge), _mspEdges.end());
                 // add edge to the "to be cut" list
                 _cutEdges.push_back(edge);
                 // cleanup the adjacence list
                 adjacenceList[ulong(edge._sFace)].erase(remove(adjacenceList[ulong(edge._sFace)].begin(), adjacenceList[ulong(edge._sFace)].end(), edge._tFace), adjacenceList[ulong(edge._sFace)].end());
                 adjacenceList[ulong(edge._tFace)].erase(remove(adjacenceList[ulong(edge._tFace)].begin(), adjacenceList[ulong(edge._tFace)].end(), edge._sFace), adjacenceList[ulong(edge._tFace)].end());
+
+                // no need to continue checking
+                break;
             }
         }
     }
@@ -122,8 +125,9 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
     bool isSingleComponent = true;
 
     // check if it is acyclic from the first node
-    isSingleComponent = isAcyclic(0, adjacenceList, discovered);
+    isSingleComponent = isAcyclic(adjacenceList, 0, discovered, -1);
 
+    // if not all nodes have been discovered, the graph is not connected
     for (ulong i = 0; i < discovered.size(); i++)
     {
         if(!discovered[i])
@@ -137,12 +141,7 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
     return isSingleComponent;
 }
 
-bool Graph::isAcyclic(ulong start, std::vector<std::vector<int>>& adjacenceList, std::vector<bool>& discovered)
-{
-    return dfs(adjacenceList, start, discovered, -1);
-}
-
-bool Graph::dfs(std::vector<std::vector<int>> const &adjacenceList, ulong start, std::vector<bool> &discovered, int parent)
+bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong start, std::vector<bool> &discovered, int parent)
 {
     // mark current node as discovered
     discovered[start] = true;
@@ -153,10 +152,11 @@ bool Graph::dfs(std::vector<std::vector<int>> const &adjacenceList, ulong start,
         // if this node was not discovered
         if (!discovered[ulong(node)])
         {
-            if(!dfs(adjacenceList, ulong(node), discovered, int(start))) // start dfs from node
+            if(!isAcyclic(adjacenceList, ulong(node), discovered, int(start))) // start dfs from node
                 return false;
         }
-        else if (node != parent) // node is discovered but not a parent => back-edge (cycle)
+        // node is discovered but not a parent => back-edge (cycle)
+        else if (node != parent)
         {
             return false;
         }
@@ -184,9 +184,10 @@ int Graph::getFacetID(Facet facet)
 
 bool Graph::hasEdge(Edge edge)
 {
-    // go through all edges and check if the edge(parameter) is equal to one of them
+    // loop through all edges
     for(Edge &pedge : _edges)
     {
+        // return true if this edge was added to the graph
         if(pedge == edge)
         {
             return true;

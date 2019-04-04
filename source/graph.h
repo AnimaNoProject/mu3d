@@ -26,7 +26,6 @@ private:
 
     int getFacetID(Facet facet);
     bool hasEdge(Edge edge);
-    bool isAcyclic(ulong start, std::vector<std::vector<int>> &adjacenceList, std::vector<bool>& discovered);
     bool isSingleComponent(std::vector<std::vector<int>>& adjacenceList);
-    bool dfs(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool> &discovered, int parent);
+    bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool> &discovered, int parent);
 };
