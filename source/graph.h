@@ -10,8 +10,6 @@ typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
 
 typedef Polyhedron::Facet_handle Facet;
 
-#define DEBUG 1
-
 class Graph
 {
 public:
@@ -28,7 +26,7 @@ private:
 
     int getFacetID(Facet facet);
     bool hasEdge(Edge edge);
-    bool isAcyclic(ulong start, std::vector<std::vector<int>> &adjacenceList);
-    bool isSingleComponent();
+    bool isAcyclic(ulong start, std::vector<std::vector<int>> &adjacenceList, std::vector<bool>& discovered);
+    bool isSingleComponent(std::vector<std::vector<int>>& adjacenceList);
     bool dfs(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool> &discovered, int parent);
 };

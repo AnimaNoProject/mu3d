@@ -74,23 +74,31 @@ void Graph::calculateMSP()
         adjacenceList[ulong(edge._sFace)].push_back(edge._tFace);
         adjacenceList[ulong(edge._tFace)].push_back(edge._sFace);
 
+        // list storing discovered nodes
+        std::vector<bool> discovered(_facets.size());
+
         // if the MSP is now cyclic, the added egde needs to be removed again
         for(ulong i = 0; i < _facets.size(); i++)
         {
-            if(adjacenceList[i].empty())
+            // if the node is alone, or already discovered
+            if(adjacenceList[i].empty() || discovered[i])
                 continue;
 
-            if(!isAcyclic(i, adjacenceList))
+            // if the graph is cyclic
+            if(!isAcyclic(i, adjacenceList, discovered))
             {
+                // remove the edge from the spanning tree
                 _mspEdges.erase(remove(_mspEdges.begin(), _mspEdges.end(), edge), _mspEdges.end());
+                // add edge to the "to be cut" list
                 _cutEdges.push_back(edge);
+                // cleanup the adjacence list
                 adjacenceList[ulong(edge._sFace)].erase(remove(adjacenceList[ulong(edge._sFace)].begin(), adjacenceList[ulong(edge._sFace)].end(), edge._tFace), adjacenceList[ulong(edge._sFace)].end());
                 adjacenceList[ulong(edge._tFace)].erase(remove(adjacenceList[ulong(edge._tFace)].begin(), adjacenceList[ulong(edge._tFace)].end(), edge._sFace), adjacenceList[ulong(edge._tFace)].end());
             }
         }
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     std::cout << "number of faces: " << _facets.size() << std::endl;
     std::cout << "number of edges: " << _mspEdges.size() << std::endl;
 
@@ -99,40 +107,29 @@ void Graph::calculateMSP()
     for(Edge& edge : _mspEdges)
         std::cout << "Edge: " << edge._sFace << "<->" << edge._tFace << std::endl;
 
-    if(isSingleComponent())
+    if(isSingleComponent(adjacenceList))
         std::cout << "Graph is a single component!" << std::endl;
     else
         std::cout << "Graph is a NOT single component!" << std::endl;
 #endif
 }
 
-bool Graph::isSingleComponent()
+bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
 {
-    // create the adjacence list
-    std::vector<std::vector<int>> adjacenceList;
-    adjacenceList.resize(_facets.size());
-
-    for(Edge& edge : _mspEdges)
-    {
-        adjacenceList[ulong(edge._sFace)].push_back(edge._tFace);
-        adjacenceList[ulong(edge._tFace)].push_back(edge._sFace);
-    }
-
-
     // list storing discovered nodes
     std::vector<bool> discovered(_facets.size());
 
     bool isSingleComponent = true;
 
     // check if it is acyclic from the first node
-    isSingleComponent = dfs(adjacenceList, 0, discovered, -1);
+    isSingleComponent = isAcyclic(0, adjacenceList, discovered);
 
     for (ulong i = 0; i < discovered.size(); i++)
     {
         if(!discovered[i])
         {
             isSingleComponent = false;
-#ifdef DEBUG
+#ifndef NDEBUG
             std::cout << "not connected face: " << i << std::endl;
 #endif
         }
@@ -140,11 +137,8 @@ bool Graph::isSingleComponent()
     return isSingleComponent;
 }
 
-bool Graph::isAcyclic(ulong start, std::vector<std::vector<int>>& adjacenceList)
+bool Graph::isAcyclic(ulong start, std::vector<std::vector<int>>& adjacenceList, std::vector<bool>& discovered)
 {
-    // list storing discovered nodes
-    std::vector<bool> discovered(_facets.size());
-
     return dfs(adjacenceList, start, discovered, -1);
 }
 
