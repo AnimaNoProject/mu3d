@@ -61,21 +61,18 @@ void Graph::calculateMSP()
     std::sort(_edges.begin(), _edges.end());
     std::reverse(_edges.begin(), _edges.end());
 
+    // create the adjacence list
+    std::vector<std::vector<int>> adjacenceList;
+    adjacenceList.resize(_facets.size());
+
     // go through all the edges
     for(Edge& edge : _edges)
     {
         // add the edge to the MSP
         _mspEdges.push_back(edge);
 
-        // create the adjacence list
-        std::vector<std::vector<int>> adjacenceList;
-        adjacenceList.resize(_facets.size());
-
-        for(Edge& edge : _mspEdges)
-        {
-            adjacenceList[ulong(edge._sFace)].push_back(edge._tFace);
-            adjacenceList[ulong(edge._tFace)].push_back(edge._sFace);
-        }
+        adjacenceList[ulong(edge._sFace)].push_back(edge._tFace);
+        adjacenceList[ulong(edge._tFace)].push_back(edge._sFace);
 
         // if the MSP is now cyclic, the added egde needs to be removed again
         for(ulong i = 0; i < _facets.size(); i++)
@@ -87,6 +84,8 @@ void Graph::calculateMSP()
             {
                 _mspEdges.erase(remove(_mspEdges.begin(), _mspEdges.end(), edge), _mspEdges.end());
                 _cutEdges.push_back(edge);
+                adjacenceList[ulong(edge._sFace)].erase(remove(adjacenceList[ulong(edge._sFace)].begin(), adjacenceList[ulong(edge._sFace)].end(), edge._tFace), adjacenceList[ulong(edge._sFace)].end());
+                adjacenceList[ulong(edge._tFace)].erase(remove(adjacenceList[ulong(edge._tFace)].begin(), adjacenceList[ulong(edge._tFace)].end(), edge._sFace), adjacenceList[ulong(edge._tFace)].end());
             }
         }
     }
