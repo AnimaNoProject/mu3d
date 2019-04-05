@@ -191,7 +191,7 @@ void Graph::getMSPVertices(std::vector<QVector3D>& vertices)
 QVector3D Graph::faceCenter(Facet facet)
 {
     QVector3D middle(0,0,0);
-x
+
     Polyhedron::Halfedge_around_facet_circulator hfc = facet->facet_begin();
     do
     {
