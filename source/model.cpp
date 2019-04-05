@@ -94,9 +94,11 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(QVector3D(0,0,0) - middle);
 
-    createGLModelContext();
     _graph.calculateDual();
     _graph.calculateMSP();
+    _graph.getMSPVertices(_mspVertices);
+
+    createGLModelContext();
 }
 
 void Model::createGLModelContext()
@@ -131,6 +133,16 @@ void Model::createGLModelContext()
     vaoBinder.release();
     _ibo.release();
 
+    QOpenGLVertexArrayObject::Binder vaoDualBinder(&_vaoDual);
+    _vboMSP.create();
+    _vboMSP.bind();
+    _vboMSP.allocate(_mspVertices.data(), int(_mspVertices.size() * sizeof(QVector3D)));
+    _vboMSP.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    f->glEnableVertexAttribArray(0);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    _vboMSP.release();
+    vaoDualBinder.release();
+
     _program->release();
 }
 
@@ -164,6 +176,12 @@ void Model::draw()
         f->glLineWidth(10);
         f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
     }
+
+    QOpenGLVertexArrayObject::Binder vaoDualBinder(&_vaoDual);
+    _program->setUniformValue(_program->uniformLocation("color"), _mspColor);
+    f->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    f->glPolygonOffset(-1, -1);
+    f->glDrawArrays(GL_LINES, 0, GLsizei(_mspVertices.size()));
 }
 
 void Model::switchRenderMode()

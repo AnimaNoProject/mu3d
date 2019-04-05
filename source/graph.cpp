@@ -41,7 +41,14 @@ void Graph::calculateDual()
 
             // use distance as meassurement
             double distance = sqrt(CGAL::squared_distance(hfc->prev()->vertex()->point(), hfc->vertex()->point()));
-            Edge edge = Edge(faceId, oppositeFaceId, distance);
+
+
+            // middle of the edge
+            QVector3D middle = QVector3D(float((hfc->prev()->vertex()->point().x() + hfc->vertex()->point().x()))/2,
+                                         float((hfc->prev()->vertex()->point().y() + hfc->vertex()->point().y()))/2,
+                                         float((hfc->prev()->vertex()->point().z() + hfc->vertex()->point().z()))/2);
+
+            Edge edge = Edge(faceId, oppositeFaceId, distance, middle);
 
             // if this edge doesn't exist already, add it (don't consider direction)
             if(!hasEdge(edge))
@@ -59,9 +66,8 @@ void Graph::calculateMSP()
     _mspEdges.clear();
     _cutEdges.clear();
 
-    // sort edges from biggest edgelength to smallest, prefer to cut small edges
+    // sort edges from smallest to biggest, better cut big ones
     std::sort(_edges.begin(), _edges.end());
-    std::reverse(_edges.begin(), _edges.end());
 
     // create the adjacence list
     std::vector<std::vector<int>> adjacenceList;
@@ -166,6 +172,37 @@ bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong 
     return true;
 }
 
+void Graph::getMSPVertices(std::vector<QVector3D>& vertices)
+{
+    // loop through all edges
+    for(Edge edge : _mspEdges)
+    {
+        // source face (center)
+        vertices.push_back(faceCenter(_facets[edge._sFace]));
+        // to middle of the edge
+        vertices.push_back(edge._middle);
+        // middle of the edge
+        vertices.push_back(edge._middle);
+        // to target face (center)
+        vertices.push_back(faceCenter(_facets[edge._tFace]));
+    }
+}
+
+QVector3D Graph::faceCenter(Facet facet)
+{
+    QVector3D middle(0,0,0);
+x
+    Polyhedron::Halfedge_around_facet_circulator hfc = facet->facet_begin();
+    do
+    {
+        middle += QVector3D(float(hfc->vertex()->point().x()), float(hfc->vertex()->point().y()), float(hfc->vertex()->point().z()));
+    } while (++hfc != facet->facet_begin());
+
+    middle /= 3.0f;
+
+    return middle;
+}
+
 int Graph::getFacetID(Facet facet)
 {
     // loop through all facets
@@ -177,7 +214,6 @@ int Graph::getFacetID(Facet facet)
             return pfacet.first;
         }
     }
-
     // if this facet has no match return
     return -1;
 }

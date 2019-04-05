@@ -32,16 +32,21 @@ private:
     QMatrix4x4 _modelMatrix;
     std::vector<QVector3D> _vertices;
     std::vector<GLushort> _indices;
+    std::vector<QVector3D> _mspVertices;
 
     QOpenGLVertexArrayObject _vao;
     QOpenGLBuffer _vbo;
     QOpenGLBuffer _ibo;
+
+    QOpenGLVertexArrayObject _vaoDual;
+    QOpenGLBuffer _vboMSP;
 
     QOpenGLShaderProgram* _program;
     OGLWidget* _context;
 
     const QVector4D _lineColor = QVector4D(0.0, 0.0, 0.0, 1.0);
     const QVector4D _fillColor = QVector4D(1.0, 1.0, 1.0, 1.0);
+    const QVector4D _mspColor = QVector4D(0.0, 1.0, 0.0, 1.0);
 
     bool _wireframe = false;
 
