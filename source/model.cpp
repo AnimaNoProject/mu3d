@@ -62,6 +62,7 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
         middle += QVector3D(float(v->point().x())/_mesh.size_of_vertices(),
                             float(v->point().y())/_mesh.size_of_vertices(),
                             float(v->point().z())/_mesh.size_of_vertices());
+        _colors.push_back(QVector3D(1.0f, 1.0f, 1.0f));
     }
 
     // loop through all facets
@@ -96,7 +97,9 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
 
     _graph.calculateDual();
     _graph.calculateMSP();
-    _graph.lines(_mspVertices, _cutVertices, _stickVertices);
+
+    _graph.calculateGlueTags(_vertices, _indices, _colors);
+    _graph.lines(_lineVertices, _lineColors);
 
     createGLModelContext();
 }
@@ -104,7 +107,8 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
 void Model::createGLModelContext()
 {
     // delcare Vertex and Index buffer
-    _vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    _vbo[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    _vbo[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     _ibo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
     _program->bind();
 
@@ -115,14 +119,23 @@ void Model::createGLModelContext()
     // get openglfunctions from the current context (important OGLWidget needs to call makeCurrent)
     QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
 
-    // create VBO and allocate buffer
-    _vbo.create();
-    _vbo.bind();
-    _vbo.allocate(_vertices.data(), int(_vertices.size() * sizeof(QVector3D)));
-    _vbo.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    // create vbo for vertices
+    _vbo[0].create();
+    _vbo[0].bind();
+    _vbo[0].allocate(_vertices.data(), int(_vertices.size() * sizeof(QVector3D)));
+    _vbo[0].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vbo.release();
+    _vbo[0].release();
+
+    // create vbo for colors
+    _vbo[1].create();
+    _vbo[1].bind();
+    _vbo[1].allocate(_colors.data(), int(_colors.size() * sizeof(QVector3D)));
+    _vbo[1].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    f->glEnableVertexAttribArray(1);
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    _vbo[1].release();
 
     // create IBO and allocate buffer
     _ibo.create();
@@ -133,38 +146,28 @@ void Model::createGLModelContext()
     vaoBinder.release();
     _ibo.release();
 
-    // configure dual graph line VAO/VBO
-    QOpenGLVertexArrayObject::Binder vaoDualBinder(&_vaoDual);
-    _vboMSP.create();
-    _vboMSP.bind();
-    _vboMSP.allocate(_mspVertices.data(), int(_mspVertices.size() * sizeof(QVector3D)));
-    _vboMSP.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vboMSP.release();
-    vaoDualBinder.release();
+    _vboLines[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    _vboLines[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 
-    // configure cut edges VAO/VBO
-    QOpenGLVertexArrayObject::Binder vaoCutBinder(&_vaoCut);
-    _vboCut.create();
-    _vboCut.bind();
-    _vboCut.allocate(_cutVertices.data(), int(_cutVertices.size() * sizeof(QVector3D)));
-    _vboCut.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    QOpenGLVertexArrayObject::Binder vaoLinesBinder(&_vaoLines);
+    // create vbo for vertices
+    _vboLines[0].create();
+    _vboLines[0].bind();
+    _vboLines[0].allocate(_lineVertices.data(), int(_lineVertices.size() * sizeof(QVector3D)));
+    _vboLines[0].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vboCut.release();
-    vaoCutBinder.release();
+    _vboLines[0].release();
 
-    // configure not cut edges VAO/VBO
-    QOpenGLVertexArrayObject::Binder vaoStickBinder(&_vaoStick);
-    _vboStick.create();
-    _vboStick.bind();
-    _vboStick.allocate(_stickVertices.data(), int(_stickVertices.size() * sizeof(QVector3D)));
-    _vboStick.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vboStick.release();
-    _vaoStick.release();
+    // create vbo for colors
+    _vboLines[1].create();
+    _vboLines[1].bind();
+    _vboLines[1].allocate(_lineColors.data(), int(_lineColors.size() * sizeof(QVector3D)));
+    _vboLines[1].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    f->glEnableVertexAttribArray(1);
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    _vboLines[1].release();
+    vaoLinesBinder.release();
 
     _program->release();
 }
@@ -173,38 +176,31 @@ void Model::draw()
 {
     // get opengl functions
     QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
-    // bind the VAO
-    QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
+
     // set the model Matrix
     _program->setUniformValue(_program->uniformLocation("modelMatrix"), _modelMatrix);
 
     // draw all triangles
     if(!_wireframe)
     {
+        // bind the VAO
+        QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
         // draw the solids
-        _program->setUniformValue(_program->uniformLocation("color"), _fillColor);
+        //_program->setUniformValue(_program->uniformLocation("color"), _fillColor);
         f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         f->glPolygonOffset(1, 1);
         f->glEnable(GL_POLYGON_OFFSET_FILL);
         f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
         f->glDisable(GL_POLYGON_OFFSET_FILL);
+        vaoBinder.release();
     }
 
-    // draw dual graph
-    QOpenGLVertexArrayObject::Binder vaoDualBinder(&_vaoDual);
-    _program->setUniformValue(_program->uniformLocation("color"), _mspColor);
+    // bind the VAO
+    QOpenGLVertexArrayObject::Binder vaoLinesBinder(&_vaoLines);
+    // draw all lines
     f->glPolygonOffset(-1, -1);
-    f->glDrawArrays(GL_LINES, 0, GLsizei(_mspVertices.size()));
-
-    // draw cut edges
-    QOpenGLVertexArrayObject::Binder vaoCutBinder(&_vaoCut);
-    _program->setUniformValue(_program->uniformLocation("color"), _cutColor);
-    f->glDrawArrays(GL_LINES, 0, GLsizei(_cutVertices.size()));
-
-    // draw not-cut edges
-    QOpenGLVertexArrayObject::Binder vaoStickBinder(&_vaoStick);
-    _program->setUniformValue(_program->uniformLocation("color"), _lineColor);
-    f->glDrawArrays(GL_LINES, 0, GLsizei(_stickVertices.size()));
+    f->glDrawArrays(GL_LINES, 0, GLsizei(_lineVertices.size()));
+    vaoLinesBinder.release();
 }
 
 void Model::switchRenderMode()

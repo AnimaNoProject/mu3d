@@ -20,7 +20,8 @@ public:
     void addFace(Facet facet);
     void calculateDual();
     void calculateMSP();
-    void lines(std::vector<QVector3D>& vertices, std::vector<QVector3D>& cutVertices, std::vector<QVector3D>& stickVertices);
+    void calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
+    void lines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
 private:
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;
@@ -29,7 +30,7 @@ private:
 
     int getFacetID(Facet facet);
     QVector3D faceCenter(Facet facet);
-    bool hasEdge(Edge edge);
+    bool hasEdge(Edge& edge);
     bool isSingleComponent(std::vector<std::vector<int>>& adjacenceList);
     bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool> &discovered, int parent);
 };

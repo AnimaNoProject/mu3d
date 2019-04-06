@@ -31,32 +31,21 @@ private:
     Polyhedron _mesh;
     QMatrix4x4 _modelMatrix;
     std::vector<QVector3D> _vertices;
+    std::vector<QVector3D> _colors;
     std::vector<GLushort> _indices;
-    std::vector<QVector3D> _mspVertices;
-    std::vector<QVector3D> _cutVertices;
-    std::vector<QVector3D> _stickVertices;
+
+    std::vector<QVector3D> _lineVertices;
+    std::vector<QVector3D> _lineColors;
 
     QOpenGLVertexArrayObject _vao;
-    QOpenGLBuffer _vbo;
+    QOpenGLBuffer _vbo[2];
     QOpenGLBuffer _ibo;
 
-    QOpenGLVertexArrayObject _vaoDual;
-    QOpenGLBuffer _vboMSP;
-
-    QOpenGLVertexArrayObject _vaoCut;
-    QOpenGLBuffer _vboCut;
-
-
-    QOpenGLVertexArrayObject _vaoStick;
-    QOpenGLBuffer _vboStick;
+    QOpenGLVertexArrayObject _vaoLines;
+    QOpenGLBuffer _vboLines[2];
 
     QOpenGLShaderProgram* _program;
     OGLWidget* _context;
-
-    const QVector4D _lineColor = QVector4D(0.0, 0.0, 0.0, 1.0);
-    const QVector4D _fillColor = QVector4D(1.0, 1.0, 1.0, 1.0);
-    const QVector4D _mspColor = QVector4D(0.0, 1.0, 0.0, 1.0);
-    const QVector4D _cutColor = QVector4D(1.0, 0.0, 0.0, 1.0);
 
     bool _wireframe = false;
 

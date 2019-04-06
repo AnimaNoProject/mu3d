@@ -125,6 +125,51 @@ void Graph::calculateMSP()
 #endif
 }
 
+void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
+{
+    std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
+    std::cout << "Edges 'to be bent': " << _mspEdges.size() << std::endl;
+    int index = int(gtVertices.size())-1;
+
+    for(Edge& edge : _cutEdges)
+    {
+        QVector3D baseBL = QVector3D(float(edge._halfedge->vertex()->point().x()),
+                                     float(edge._halfedge->vertex()->point().y()),
+                                     float(edge._halfedge->vertex()->point().z()));
+
+        QVector3D baseBR = QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
+                                    float(edge._halfedge->prev()->vertex()->point().y()),
+                                    float(edge._halfedge->prev()->vertex()->point().z()));
+
+        QVector3D up = baseBR.normalized() / 4;
+        QVector3D side = (baseBL - baseBR).normalized() / 4;
+
+        QVector3D baseTL = baseBL + up - side;
+        QVector3D baseTR = baseBR + up + side;
+
+        gtVertices.push_back(baseBL); // bottom left = -3
+        gtVertices.push_back(baseBR); // bottom right = -2
+        gtVertices.push_back(baseTR); // top right = -1
+        gtVertices.push_back(baseTL); // top left = 0
+
+        index += 4;
+
+        gtIndices.push_back(GLushort(index-3));
+        gtIndices.push_back(GLushort(index-2));
+        gtIndices.push_back(GLushort(index-1));
+        gtIndices.push_back(GLushort(index-3));
+        gtIndices.push_back(GLushort(index-1));
+        gtIndices.push_back(GLushort(index));
+
+        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
+        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
+        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
+        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
+        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
+        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
+    }
+}
+
 bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
 {
     // list storing discovered nodes
@@ -174,43 +219,54 @@ bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong 
     return true;
 }
 
-void Graph::lines(std::vector<QVector3D>& vertices, std::vector<QVector3D>& cutVertices, std::vector<QVector3D>& stickVertices)
+void Graph::lines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors)
 {
     // loop through all edges
-    for(Edge edge : _mspEdges)
+    for(Edge& edge : _mspEdges)
     {
         // source face (center)
-        vertices.push_back(faceCenter(_facets[edge._sFace]));
+        lineVertices.push_back(faceCenter(_facets[edge._sFace]));
         // to middle of the edge
-        vertices.push_back(edge._middle);
+        lineVertices.push_back(edge._middle);
         // middle of the edge
-        vertices.push_back(edge._middle);
+        lineVertices.push_back(edge._middle);
         // to target face (center)
-        vertices.push_back(faceCenter(_facets[edge._tFace]));
+        lineVertices.push_back(faceCenter(_facets[edge._tFace]));
+
+        lineColors.push_back(QVector3D(0.2f, 0.8f, 0.2f));
+        lineColors.push_back(QVector3D(0.2f, 0.8f, 0.2f));
+        lineColors.push_back(QVector3D(0.2f, 0.8f, 0.2f));
+        lineColors.push_back(QVector3D(0.2f, 0.8f, 0.2f));
     }
 
     // add all cut edges
-    for(Edge edge : _cutEdges)
+    for(Edge& edge : _cutEdges)
     {
-        cutVertices.push_back(QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
+        lineVertices.push_back(QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
                                         float(edge._halfedge->prev()->vertex()->point().y()),
                                         float(edge._halfedge->prev()->vertex()->point().z())));
-        cutVertices.push_back(QVector3D(float(edge._halfedge->vertex()->point().x()),
+        lineVertices.push_back(QVector3D(float(edge._halfedge->vertex()->point().x()),
                                         float(edge._halfedge->vertex()->point().y()),
                                         float(edge._halfedge->vertex()->point().z())));
+
+        lineColors.push_back(QVector3D(0.8f, 0.2f, 0.2f));
+        lineColors.push_back(QVector3D(0.8f, 0.2f, 0.2f));
     }
 
     // add all edges that are not cut edges
-    for(Edge edge : _edges)
+    for(Edge& edge : _edges)
     {
         if(std::find(_cutEdges.begin(), _cutEdges.end(), edge) == _cutEdges.end())
         {
-            stickVertices.push_back(QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
+            lineVertices.push_back(QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
                                             float(edge._halfedge->prev()->vertex()->point().y()),
                                             float(edge._halfedge->prev()->vertex()->point().z())));
-            stickVertices.push_back(QVector3D(float(edge._halfedge->vertex()->point().x()),
+            lineVertices.push_back(QVector3D(float(edge._halfedge->vertex()->point().x()),
                                             float(edge._halfedge->vertex()->point().y()),
                                             float(edge._halfedge->vertex()->point().z())));
+
+            lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+            lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
         }
     }
 }
@@ -247,10 +303,10 @@ int Graph::getFacetID(Facet facet)
     return -1;
 }
 
-bool Graph::hasEdge(Edge edge)
+bool Graph::hasEdge(Edge& edge)
 {
     // loop through all edges
-    for(Edge &pedge : _edges)
+    for(Edge& pedge : _edges)
     {
         // return true if this edge was added to the graph
         if(pedge == edge)
