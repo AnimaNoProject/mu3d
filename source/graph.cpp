@@ -43,12 +43,12 @@ void Graph::calculateDual()
             double distance = sqrt(CGAL::squared_distance(hfc->prev()->vertex()->point(), hfc->vertex()->point()));
 
 
-            // middle of the edge
-            QVector3D middle = QVector3D(float((hfc->prev()->vertex()->point().x() + hfc->vertex()->point().x()))/2,
-                                         float((hfc->prev()->vertex()->point().y() + hfc->vertex()->point().y()))/2,
-                                         float((hfc->prev()->vertex()->point().z() + hfc->vertex()->point().z()))/2);
+            // center of the edge
+            QVector3D center = QVector3D(float((hfc->prev()->vertex()->point().x() + hfc->vertex()->point().x())),
+                                         float((hfc->prev()->vertex()->point().y() + hfc->vertex()->point().y())),
+                                         float((hfc->prev()->vertex()->point().z() + hfc->vertex()->point().z()))) / 2;
 
-            Edge edge = Edge(faceId, oppositeFaceId, distance, middle);
+            Edge edge = Edge(faceId, oppositeFaceId, distance, center, hfc);
 
             // if this edge doesn't exist already, add it (don't consider direction)
             if(!hasEdge(edge))
@@ -95,8 +95,10 @@ void Graph::calculateMSP()
             if(!isAcyclic(adjacenceList, i, discovered, -1))
             {
                 _mspEdges.erase(remove(_mspEdges.begin(), _mspEdges.end(), edge), _mspEdges.end());
+
                 // add edge to the "to be cut" list
                 _cutEdges.push_back(edge);
+
                 // cleanup the adjacence list
                 adjacenceList[ulong(edge._sFace)].erase(remove(adjacenceList[ulong(edge._sFace)].begin(), adjacenceList[ulong(edge._sFace)].end(), edge._tFace), adjacenceList[ulong(edge._sFace)].end());
                 adjacenceList[ulong(edge._tFace)].erase(remove(adjacenceList[ulong(edge._tFace)].begin(), adjacenceList[ulong(edge._tFace)].end(), edge._sFace), adjacenceList[ulong(edge._tFace)].end());
@@ -172,7 +174,7 @@ bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong 
     return true;
 }
 
-void Graph::getMSPVertices(std::vector<QVector3D>& vertices)
+void Graph::lines(std::vector<QVector3D>& vertices, std::vector<QVector3D>& cutVertices, std::vector<QVector3D>& stickVertices)
 {
     // loop through all edges
     for(Edge edge : _mspEdges)
@@ -186,18 +188,45 @@ void Graph::getMSPVertices(std::vector<QVector3D>& vertices)
         // to target face (center)
         vertices.push_back(faceCenter(_facets[edge._tFace]));
     }
+
+    // add all cut edges
+    for(Edge edge : _cutEdges)
+    {
+        cutVertices.push_back(QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
+                                        float(edge._halfedge->prev()->vertex()->point().y()),
+                                        float(edge._halfedge->prev()->vertex()->point().z())));
+        cutVertices.push_back(QVector3D(float(edge._halfedge->vertex()->point().x()),
+                                        float(edge._halfedge->vertex()->point().y()),
+                                        float(edge._halfedge->vertex()->point().z())));
+    }
+
+    // add all edges that are not cut edges
+    for(Edge edge : _edges)
+    {
+        if(std::find(_cutEdges.begin(), _cutEdges.end(), edge) == _cutEdges.end())
+        {
+            stickVertices.push_back(QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
+                                            float(edge._halfedge->prev()->vertex()->point().y()),
+                                            float(edge._halfedge->prev()->vertex()->point().z())));
+            stickVertices.push_back(QVector3D(float(edge._halfedge->vertex()->point().x()),
+                                            float(edge._halfedge->vertex()->point().y()),
+                                            float(edge._halfedge->vertex()->point().z())));
+        }
+    }
 }
 
 QVector3D Graph::faceCenter(Facet facet)
 {
     QVector3D middle(0,0,0);
 
+    // add all vertices of the face
     Polyhedron::Halfedge_around_facet_circulator hfc = facet->facet_begin();
     do
     {
         middle += QVector3D(float(hfc->vertex()->point().x()), float(hfc->vertex()->point().y()), float(hfc->vertex()->point().z()));
     } while (++hfc != facet->facet_begin());
 
+    // divide by 3 to get the center
     middle /= 3.0f;
 
     return middle;

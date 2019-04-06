@@ -42,5 +42,4 @@ set(3d-mesh-unfolding_SRCS
 
 # create the executeable from all source files
 add_executable(${PROJECT_NAME} ${3d-mesh-unfolding_SRCS})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} )
-target_link_libraries(${PROJECT_NAME} CGAL::CGAL Qt5::Widgets ${OPENGL_gl_LIBRARY})
+target_link_libraries(${PROJECT_NAME} CGAL::CGAL Qt5::Widgets ${OPENGL_gl_LIBRARY} ${Boost_LIBRARIES})

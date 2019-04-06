@@ -10,7 +10,6 @@
 
 typedef CGAL::Simple_cartesian<double> Kernel;
 typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
-
 typedef Polyhedron::Facet_handle Facet;
 
 class Graph
@@ -21,7 +20,7 @@ public:
     void addFace(Facet facet);
     void calculateDual();
     void calculateMSP();
-    void getMSPVertices(std::vector<QVector3D>& vertices);
+    void lines(std::vector<QVector3D>& vertices, std::vector<QVector3D>& cutVertices, std::vector<QVector3D>& stickVertices);
 private:
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;

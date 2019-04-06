@@ -1,11 +1,12 @@
 #include "edge.h"
 
-Edge::Edge(int sFace, int tFace, double distance, QVector3D middle)
+Edge::Edge(int sFace, int tFace, double distance, QVector3D middle, Halfedge halfedge)
 {
     _sFace = sFace;
     _tFace = tFace;
     _distance = distance;
     _middle = middle;
+    _halfedge = halfedge;
 }
 
 bool Edge::operator==(const Edge& other) const
