@@ -146,6 +146,7 @@ void Model::createGLModelContext()
     vaoBinder.release();
     _ibo.release();
 
+    // delcare Vertex
     _vboLines[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     _vboLines[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 
@@ -186,7 +187,6 @@ void Model::draw()
         // bind the VAO
         QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
         // draw the solids
-        //_program->setUniformValue(_program->uniformLocation("color"), _fillColor);
         f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         f->glPolygonOffset(1, 1);
         f->glEnable(GL_POLYGON_OFFSET_FILL);

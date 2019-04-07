@@ -9,6 +9,11 @@ Edge::Edge(int sFace, int tFace, double distance, QVector3D middle, Halfedge hal
     _halfedge = halfedge;
 }
 
+Edge::Edge()
+{
+
+}
+
 bool Edge::operator==(const Edge& other) const
 {
     if((_sFace == other._sFace && _tFace == other._tFace) ||

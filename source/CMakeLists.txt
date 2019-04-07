@@ -38,6 +38,8 @@ set(3d-mesh-unfolding_SRCS
     graph.cpp
     edge.h
     edge.cpp
+    gluetag.h
+    gluetag.cpp
 )
 
 # create the executeable from all source files

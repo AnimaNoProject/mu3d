@@ -42,7 +42,6 @@ void Graph::calculateDual()
             // use distance as meassurement
             double distance = sqrt(CGAL::squared_distance(hfc->prev()->vertex()->point(), hfc->vertex()->point()));
 
-
             // center of the edge
             QVector3D center = QVector3D(float((hfc->prev()->vertex()->point().x() + hfc->vertex()->point().x())),
                                          float((hfc->prev()->vertex()->point().y() + hfc->vertex()->point().y())),
@@ -127,46 +126,18 @@ void Graph::calculateMSP()
 
 void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {
+    // clear old gluetags
+    _gluetags.clear();
+
+#ifndef NDEBUG
     std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
     std::cout << "Edges 'to be bent': " << _mspEdges.size() << std::endl;
-    int index = int(gtVertices.size())-1;
-
+#endif
     for(Edge& edge : _cutEdges)
     {
-        QVector3D baseBL = QVector3D(float(edge._halfedge->vertex()->point().x()),
-                                     float(edge._halfedge->vertex()->point().y()),
-                                     float(edge._halfedge->vertex()->point().z()));
-
-        QVector3D baseBR = QVector3D(float(edge._halfedge->prev()->vertex()->point().x()),
-                                    float(edge._halfedge->prev()->vertex()->point().y()),
-                                    float(edge._halfedge->prev()->vertex()->point().z()));
-
-        QVector3D up = baseBR.normalized() / 4;
-        QVector3D side = (baseBL - baseBR).normalized() / 4;
-
-        QVector3D baseTL = baseBL + up - side;
-        QVector3D baseTR = baseBR + up + side;
-
-        gtVertices.push_back(baseBL); // bottom left = -3
-        gtVertices.push_back(baseBR); // bottom right = -2
-        gtVertices.push_back(baseTR); // top right = -1
-        gtVertices.push_back(baseTL); // top left = 0
-
-        index += 4;
-
-        gtIndices.push_back(GLushort(index-3));
-        gtIndices.push_back(GLushort(index-2));
-        gtIndices.push_back(GLushort(index-1));
-        gtIndices.push_back(GLushort(index-3));
-        gtIndices.push_back(GLushort(index-1));
-        gtIndices.push_back(GLushort(index));
-
-        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
-        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
-        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
-        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
-        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
-        gtColors.push_back(QVector3D(0.2f, 0.2f, 0.8f));
+        Gluetag gt = Gluetag(edge);
+        gt.addVertices(gtVertices, gtIndices, gtColors);
+        _gluetags.push_back(gt);
     }
 }
 

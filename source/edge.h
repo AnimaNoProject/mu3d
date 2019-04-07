@@ -1,3 +1,4 @@
+#pragma once
 #include <QVector3D>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
@@ -16,6 +17,7 @@ public:
     QVector3D _middle;
 
     Edge(int sFace, int tFace, double distance, QVector3D middle, Halfedge halfedge);
+    Edge();
 
     bool operator==(const Edge& other) const;
     bool operator<(const Edge& other) const;

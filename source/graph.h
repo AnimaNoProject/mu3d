@@ -7,6 +7,7 @@
 #include <QVector3D>
 
 #include "edge.h"
+#include "gluetag.h"
 
 typedef CGAL::Simple_cartesian<double> Kernel;
 typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
@@ -27,6 +28,7 @@ private:
     std::vector<Edge> _edges;
     std::vector<Edge> _mspEdges;
     std::vector<Edge> _cutEdges;
+    std::vector<Gluetag> _gluetags;
 
     int getFacetID(Facet facet);
     QVector3D faceCenter(Facet facet);
