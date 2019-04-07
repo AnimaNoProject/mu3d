@@ -96,13 +96,15 @@ void OGLWidget::keyPressEvent(QKeyEvent *event)
         case Qt::Key_F1:
             _model->switchRenderMode();
             break;
+        case Qt::Key_F2:
+            _model->showGluetags();
+            break;
     }
     update();
 }
 
 void OGLWidget::wheelEvent(QWheelEvent *event)
 {
-
     float steps = (event->angleDelta().y() / 8) / 15;
     _camera->zoom(steps * 0.5f);
     update();

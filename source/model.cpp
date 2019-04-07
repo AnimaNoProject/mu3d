@@ -98,6 +98,8 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     _graph.calculateDual();
     _graph.calculateMSP();
 
+    _modelPolygons = _indices.size();
+
     _graph.calculateGlueTags(_vertices, _indices, _colors);
     _graph.lines(_lineVertices, _lineColors);
 
@@ -190,7 +192,10 @@ void Model::draw()
         f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         f->glPolygonOffset(1, 1);
         f->glEnable(GL_POLYGON_OFFSET_FILL);
-        f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
+        if(_showgluetags)
+            f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
+        else
+            f->glDrawElements(GL_TRIANGLES, GLsizei(_modelPolygons), GL_UNSIGNED_SHORT, nullptr);
         f->glDisable(GL_POLYGON_OFFSET_FILL);
         vaoBinder.release();
     }
@@ -201,6 +206,11 @@ void Model::draw()
     f->glPolygonOffset(-1, -1);
     f->glDrawArrays(GL_LINES, 0, GLsizei(_lineVertices.size()));
     vaoLinesBinder.release();
+}
+
+void Model::showGluetags()
+{
+    _showgluetags = !_showgluetags;
 }
 
 void Model::switchRenderMode()

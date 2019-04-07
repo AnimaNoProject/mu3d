@@ -26,6 +26,7 @@ public:
     ~Model();
     void draw();
     void switchRenderMode();
+    void showGluetags();
 private:
     Graph _graph;
     Polyhedron _mesh;
@@ -47,7 +48,9 @@ private:
     QOpenGLShaderProgram* _program;
     OGLWidget* _context;
 
+    GLushort _modelPolygons;
     bool _wireframe = false;
+    bool _showgluetags = true;
 
     void createGLModelContext();
 };
