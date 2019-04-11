@@ -1,44 +1,5 @@
 #include "model.h"
 
-// default cube size
-const float width = 4;
-const float height = 4;
-const float depth = 4;
-
-// default cube vertices
-const std::vector<QVector3D> defaultCubeVertices = {
-    // front
-    QVector3D(-width / 2.0f, -height / 2.0f,  depth / 2.0f),
-    QVector3D(width / 2.0f, -height / 2.0f,  depth / 2.0f),
-    QVector3D(width / 2.0f,  height / 2.0f,  depth / 2.0f),
-    QVector3D(-width / 2.0f,  height / 2.0f,  depth / 2.0f),
-    // back
-    QVector3D(-width / 2.0f, -height / 2.0f, -depth / 2.0f),
-    QVector3D(width / 2.0f, -height / 2.0f, -depth / 2.0f),
-    QVector3D(width / 2.0f,  height / 2.0f, -depth / 2.0f),
-    QVector3D(-width / 2.0f,  height / 2.0f, -depth / 2.0f)
-};
-
-// default cube indices
-const std::vector<GLushort> defaultCubeIndices = {// front
-                                0, 1, 2,
-                                2, 3, 0,
-                                // top
-                                1, 5, 6,
-                                6, 2, 1,
-                                // back
-                                7, 6, 5,
-                                5, 4, 7,
-                                // bottom
-                                4, 0, 3,
-                                3, 7, 4,
-                                // left
-                                4, 5, 1,
-                                1, 0, 4,
-                                // right
-                                3, 2, 6,
-                                6, 7, 3};
-
 Model::Model(const char* filename, QOpenGLShaderProgram* program)
 {
     _program = program;
@@ -196,44 +157,50 @@ void Model::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], st
 
 void Model::draw()
 {
-    // get opengl functions
-    QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
-
     // set the model Matrix
     _program->setUniformValue(_program->uniformLocation("modelMatrix"), _modelMatrix);
 
-    // draw all triangles
+    // draw faces only if wireframe mode is not activated
     if(!_wireframe)
     {
-        // bind the VAO
-        QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
-        // draw the solids
-        f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        f->glPolygonOffset(1, 1);
-        f->glEnable(GL_POLYGON_OFFSET_FILL);
-        f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
-        f->glDisable(GL_POLYGON_OFFSET_FILL);
-        vaoBinder.release();
+        draw(_vao, _indices.size());
     }
 
     if(_showgluetags)
     {
-        QOpenGLVertexArrayObject::Binder vaoBinderGT(&_vaoGT);
-        // draw the solids
-        f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        f->glPolygonOffset(1, 1);
-        f->glEnable(GL_POLYGON_OFFSET_FILL);
-        f->glDrawElements(GL_TRIANGLES, GLsizei(_indicesGT.size()), GL_UNSIGNED_SHORT, nullptr);
-        f->glDisable(GL_POLYGON_OFFSET_FILL);
-        vaoBinderGT.release();
+        draw(_vaoGT, _indices.size());
     }
 
+    draw(_vaoLines);
+}
+
+void Model::draw(QOpenGLVertexArrayObject& vao)
+{
+    // get opengl functions
+    QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
+
     // bind the VAO
-    QOpenGLVertexArrayObject::Binder vaoLinesBinder(&_vaoLines);
+    QOpenGLVertexArrayObject::Binder vaoLinesBinder(&vao);
     // draw all lines
     f->glPolygonOffset(-1, -1);
     f->glDrawArrays(GL_LINES, 0, GLsizei(_lineVertices.size()));
     vaoLinesBinder.release();
+}
+
+void Model::draw(QOpenGLVertexArrayObject& vao, unsigned long triangles)
+{
+    // get opengl functions
+    QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
+
+    // bind the VAO
+    QOpenGLVertexArrayObject::Binder vaoBinder(&vao);
+    // draw the solids
+    f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    f->glPolygonOffset(1, 1);
+    f->glEnable(GL_POLYGON_OFFSET_FILL);
+    f->glDrawElements(GL_TRIANGLES, GLsizei(triangles), GL_UNSIGNED_SHORT, nullptr);
+    f->glDisable(GL_POLYGON_OFFSET_FILL);
+    vaoBinder.release();
 }
 
 void Model::showGluetags()
@@ -249,15 +216,8 @@ void Model::switchRenderMode()
 Model::Model(QOpenGLShaderProgram* program)
 {
     _program = program;
-
-    // if no .off file is specified use standard cube to draw
-    _vertices = defaultCubeVertices;
-    _indices = defaultCubeIndices;
-    _modelMatrix.setToIdentity();
-
     createGLModelContext();
 }
-
 
 Model::~Model()
 {

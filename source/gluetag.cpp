@@ -41,12 +41,12 @@ Gluetag::Gluetag(Edge& edge)
     QVector3D side = (_br - _bl) / 4;
 
     // adjust size of base of gluetag
-    _bl = _bl + side;
-    _br = _br - side;
+    _bl = _bl + side * 0.5;
+    _br = _br - side * 0.5;
 
     // top right and top left calculation, top edge of the gluetag is at 1/4 of the height of the targeted face
-    _tr = _br + (target - _br) / 4 - side;
-    _tl = _bl + (target - _bl) / 4 + side;
+    _tr = _br + (target - _br) / 4 - side * 2;
+    _tl = _bl + (target - _bl) / 4 + side * 2;
 }
 
 void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors)

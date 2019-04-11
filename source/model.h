@@ -63,4 +63,7 @@ private:
     void createGLModelContext();
     void createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo, std::vector<QVector3D> vertices, std::vector<GLushort> _indices, std::vector<QVector3D> colors);
     void createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], std::vector<QVector3D> vertices, std::vector<QVector3D> colors);
+
+    void draw(QOpenGLVertexArrayObject& vao, unsigned long triangles);
+    void draw(QOpenGLVertexArrayObject& vao);
 };
