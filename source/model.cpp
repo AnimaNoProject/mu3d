@@ -98,9 +98,7 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     _graph.calculateDual();
     _graph.calculateMSP();
 
-    _modelPolygons = _indices.size();
-
-    _graph.calculateGlueTags(_vertices, _indices, _colors);
+    _graph.calculateGlueTags(_verticesGT, _indicesGT, _colorsGT);
     _graph.lines(_lineVertices, _lineColors);
 
     createGLModelContext();
@@ -108,71 +106,92 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
 
 void Model::createGLModelContext()
 {
-    // delcare Vertex and Index buffer
-    _vbo[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    _vbo[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    _ibo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+
     _program->bind();
 
+    createBuffers(_vao, _vbo, _ibo, _vertices, _indices, _colors);
+    createBuffers(_vaoGT, _vboGT, _iboGT, _verticesGT, _indicesGT, _colorsGT);
+    createBuffers(_vaoLines, _vboLines, _lineVertices, _lineColors);
+
+    _program->release();
+}
+
+void Model::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo, std::vector<QVector3D> vertices, std::vector<GLushort> indices, std::vector<QVector3D> colors)
+{
+    // delcare Vertex and Index buffer
+    vbo[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    vbo[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    ibo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+
     // create and bind VAO
-    _vao.create();
-    QOpenGLVertexArrayObject::Binder vaoBinder(&_vao);
+    vao.create();
+    QOpenGLVertexArrayObject::Binder vaoBinder(&vao);
 
     // get openglfunctions from the current context (important OGLWidget needs to call makeCurrent)
     QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
 
     // create vbo for vertices
-    _vbo[0].create();
-    _vbo[0].bind();
-    _vbo[0].allocate(_vertices.data(), int(_vertices.size() * sizeof(QVector3D)));
-    _vbo[0].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    vbo[0].create();
+    vbo[0].bind();
+    vbo[0].allocate(vertices.data(), int(vertices.size() * sizeof(QVector3D)));
+    vbo[0].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vbo[0].release();
+    vbo[0].release();
 
     // create vbo for colors
-    _vbo[1].create();
-    _vbo[1].bind();
-    _vbo[1].allocate(_colors.data(), int(_colors.size() * sizeof(QVector3D)));
-    _vbo[1].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    vbo[1].create();
+    vbo[1].bind();
+    vbo[1].allocate(colors.data(), int(colors.size() * sizeof(QVector3D)));
+    vbo[1].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
     f->glEnableVertexAttribArray(1);
     f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vbo[1].release();
+    vbo[1].release();
 
     // create IBO and allocate buffer
-    _ibo.create();
-    _ibo.bind();
-    _ibo.allocate(_indices.data(), int(_indices.size() * sizeof(GLushort)));
-    _ibo.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    ibo.create();
+    ibo.bind();
+    ibo.allocate(indices.data(), int(indices.size() * sizeof(GLushort)));
+    ibo.setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
 
     vaoBinder.release();
-    _ibo.release();
+    ibo.release();
 
+    vbo[0].destroy();
+    vbo[1].destroy();
+    ibo.destroy();
+}
+
+void Model::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], std::vector<QVector3D> vertices, std::vector<QVector3D> colors)
+{
     // delcare Vertex
-    _vboLines[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    _vboLines[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    vbo[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    vbo[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 
-    QOpenGLVertexArrayObject::Binder vaoLinesBinder(&_vaoLines);
+    // get openglfunctions from the current context (important OGLWidget needs to call makeCurrent)
+    QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
+
+    vao.create();
+    QOpenGLVertexArrayObject::Binder vaoLinesBinder(&vao);
+
     // create vbo for vertices
-    _vboLines[0].create();
-    _vboLines[0].bind();
-    _vboLines[0].allocate(_lineVertices.data(), int(_lineVertices.size() * sizeof(QVector3D)));
-    _vboLines[0].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    vbo[0].create();
+    vbo[0].bind();
+    vbo[0].allocate(vertices.data(), int(vertices.size() * sizeof(QVector3D)));
+    vbo[0].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vboLines[0].release();
+    vbo[0].release();
 
     // create vbo for colors
-    _vboLines[1].create();
-    _vboLines[1].bind();
-    _vboLines[1].allocate(_lineColors.data(), int(_lineColors.size() * sizeof(QVector3D)));
-    _vboLines[1].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
+    vbo[1].create();
+    vbo[1].bind();
+    vbo[1].allocate(colors.data(), int(colors.size() * sizeof(QVector3D)));
+    vbo[1].setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
     f->glEnableVertexAttribArray(1);
     f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _vboLines[1].release();
+    vbo[1].release();
     vaoLinesBinder.release();
-
-    _program->release();
 }
 
 void Model::draw()
@@ -192,12 +211,21 @@ void Model::draw()
         f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         f->glPolygonOffset(1, 1);
         f->glEnable(GL_POLYGON_OFFSET_FILL);
-        if(_showgluetags)
-            f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
-        else
-            f->glDrawElements(GL_TRIANGLES, GLsizei(_modelPolygons), GL_UNSIGNED_SHORT, nullptr);
+        f->glDrawElements(GL_TRIANGLES, GLsizei(_indices.size()), GL_UNSIGNED_SHORT, nullptr);
         f->glDisable(GL_POLYGON_OFFSET_FILL);
         vaoBinder.release();
+    }
+
+    if(_showgluetags)
+    {
+        QOpenGLVertexArrayObject::Binder vaoBinderGT(&_vaoGT);
+        // draw the solids
+        f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        f->glPolygonOffset(1, 1);
+        f->glEnable(GL_POLYGON_OFFSET_FILL);
+        f->glDrawElements(GL_TRIANGLES, GLsizei(_indicesGT.size()), GL_UNSIGNED_SHORT, nullptr);
+        f->glDisable(GL_POLYGON_OFFSET_FILL);
+        vaoBinderGT.release();
     }
 
     // bind the VAO

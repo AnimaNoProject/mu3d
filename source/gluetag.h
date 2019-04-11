@@ -7,8 +7,14 @@ class Gluetag
 {
 public:
     Gluetag(Edge& edge);
-    void addVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors);
+    void getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors);
 private:
     Edge _edge;
     int _placedFace;
+    int _targetFace;
+
+    QVector3D _bl;
+    QVector3D _br;
+    QVector3D _tl;
+    QVector3D _tr;
 };

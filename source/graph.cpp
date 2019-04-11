@@ -47,7 +47,7 @@ void Graph::calculateDual()
                                          float((hfc->prev()->vertex()->point().y() + hfc->vertex()->point().y())),
                                          float((hfc->prev()->vertex()->point().z() + hfc->vertex()->point().z()))) / 2;
 
-            Edge edge = Edge(faceId, oppositeFaceId, distance, center, hfc);
+            Edge edge = Edge(faceId, oppositeFaceId, distance, center, hfc, _facets[faceId], _facets[oppositeFaceId]);
 
             // if this edge doesn't exist already, add it (don't consider direction)
             if(!hasEdge(edge))
@@ -109,14 +109,16 @@ void Graph::calculateMSP()
     }
 
 #ifndef NDEBUG
+    // show the number of faces and edges
     std::cout << "number of faces: " << _facets.size() << std::endl;
     std::cout << "number of edges: " << _mspEdges.size() << std::endl;
 
-    // debugging purpose: show all edges of the MSP
+    // show all edges of the MSP
     std::cout << "MSP over the edges" << std::endl;
     for(Edge& edge : _mspEdges)
         std::cout << "Edge: " << edge._sFace << "<->" << edge._tFace << std::endl;
 
+    // check if the graph is a single component
     if(isSingleComponent(adjacenceList))
         std::cout << "Graph is a single component!" << std::endl;
     else
@@ -133,10 +135,12 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
     std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
     std::cout << "Edges 'to be bent': " << _mspEdges.size() << std::endl;
 #endif
+
+    // go through all cut edges and add a gluetag for each
     for(Edge& edge : _cutEdges)
     {
         Gluetag gt = Gluetag(edge);
-        gt.addVertices(gtVertices, gtIndices, gtColors);
+        gt.getVertices(gtVertices, gtIndices, gtColors);
         _gluetags.push_back(gt);
     }
 }
@@ -154,6 +158,8 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
     // if not all nodes have been discovered, the graph is not connected
     for (ulong i = 0; i < discovered.size(); i++)
     {
+
+        // if node at index i was not discovered the graph is not connected
         if(!discovered[i])
         {
             isSingleComponent = false;

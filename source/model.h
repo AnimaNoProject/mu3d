@@ -35,12 +35,20 @@ private:
     std::vector<QVector3D> _colors;
     std::vector<GLushort> _indices;
 
+    std::vector<QVector3D> _verticesGT;
+    std::vector<QVector3D> _colorsGT;
+    std::vector<GLushort> _indicesGT;
+
     std::vector<QVector3D> _lineVertices;
     std::vector<QVector3D> _lineColors;
 
     QOpenGLVertexArrayObject _vao;
     QOpenGLBuffer _vbo[2];
     QOpenGLBuffer _ibo;
+
+    QOpenGLVertexArrayObject _vaoGT;
+    QOpenGLBuffer _vboGT[2];
+    QOpenGLBuffer _iboGT;
 
     QOpenGLVertexArrayObject _vaoLines;
     QOpenGLBuffer _vboLines[2];
@@ -53,4 +61,6 @@ private:
     bool _showgluetags = true;
 
     void createGLModelContext();
+    void createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo, std::vector<QVector3D> vertices, std::vector<GLushort> _indices, std::vector<QVector3D> colors);
+    void createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], std::vector<QVector3D> vertices, std::vector<QVector3D> colors);
 };

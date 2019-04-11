@@ -9,10 +9,6 @@
 #include "edge.h"
 #include "gluetag.h"
 
-typedef CGAL::Simple_cartesian<double> Kernel;
-typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
-typedef Polyhedron::Facet_handle Facet;
-
 class Graph
 {
 public:
