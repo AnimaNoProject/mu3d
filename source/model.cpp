@@ -163,12 +163,12 @@ void Model::draw()
     // draw faces only if wireframe mode is not activated
     if(!_wireframe)
     {
-        draw(_vao, _indices.size());
+        draw(_vao, _indices.size(), 1);
     }
 
     if(_showgluetags)
     {
-        draw(_vaoGT, _indices.size());
+        draw(_vaoGT, _indices.size(), -1);
     }
 
     draw(_vaoLines);
@@ -187,7 +187,7 @@ void Model::draw(QOpenGLVertexArrayObject& vao)
     vaoLinesBinder.release();
 }
 
-void Model::draw(QOpenGLVertexArrayObject& vao, unsigned long triangles)
+void Model::draw(QOpenGLVertexArrayObject& vao, unsigned long triangles, float factor)
 {
     // get opengl functions
     QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
@@ -196,7 +196,7 @@ void Model::draw(QOpenGLVertexArrayObject& vao, unsigned long triangles)
     QOpenGLVertexArrayObject::Binder vaoBinder(&vao);
     // draw the solids
     f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    f->glPolygonOffset(1, 1);
+    f->glPolygonOffset(factor, factor);
     f->glEnable(GL_POLYGON_OFFSET_FILL);
     f->glDrawElements(GL_TRIANGLES, GLsizei(triangles), GL_UNSIGNED_SHORT, nullptr);
     f->glDisable(GL_POLYGON_OFFSET_FILL);
