@@ -168,7 +168,7 @@ void Model::draw()
 
     if(_showgluetags)
     {
-        draw(_vaoGT, _indices.size(), -1);
+        draw(_vaoGT, _indicesGT.size(), -1);
     }
 
     draw(_vaoLines);
