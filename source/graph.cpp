@@ -291,6 +291,5 @@ bool Graph::hasEdge(Edge& edge)
             return true;
         }
     }
-
     return false;
 }

@@ -17,4 +17,9 @@ private:
     QVector3D _br;
     QVector3D _tl;
     QVector3D _tr;
+    QVector3D _color;
+
+    QVector3D hex2rgb(std::string hex);
+
+    static size_t id;
 };
