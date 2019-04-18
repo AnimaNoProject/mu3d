@@ -62,12 +62,13 @@ Model::Model(const char* filename, QOpenGLShaderProgram* program)
     _graph.calculateGlueTags(_verticesGT, _indicesGT, _colorsGT);
     _graph.lines(_lineVertices, _lineColors);
 
+    _graph.unfoldGraph();
+
     createGLModelContext();
 }
 
 void Model::createGLModelContext()
 {
-
     _program->bind();
 
     createBuffers(_vao, _vbo, _ibo, _vertices, _indices, _colors);

@@ -10,6 +10,59 @@ Graph::~Graph()
 
 }
 
+void Graph::unfoldGraph()
+{
+    _tree.resize(_facets.size());
+    for(int i = 0; i < int(_facets.size()); ++i)
+    {
+        for(Edge& edge : _mspEdges)
+        {
+            if(edge._sFace != i)
+                continue;
+
+            _tree[ulong(i)].push_back(edge._tFace);
+            _tree[ulong(edge._tFace)].push_back(edge._sFace);
+        }
+    }
+
+    std::vector<bool> discovered;
+    discovered.resize(_facets.size());
+    treeify(_tree, 0, 0, discovered);
+}
+
+void Graph::treeify(std::vector<std::vector<int>> edges, ulong index, ulong depth, std::vector<bool> discovered)
+{
+    bool tag = false;
+    std::cout << std::string(depth, '-') << "*" << index;
+
+    // go thrrough all the gluetags
+    for(Gluetag& gluetag : _necessaryGluetags)
+    {
+        // if the placed face is the current face and the current face has not been tagged yet
+        if(gluetag._placedFace == int(index))
+        {
+            std::cout << " ] Tag to " << gluetag._targetFace << std::endl;
+            tag = true;
+        }
+    }
+
+    // if there was no gluetag, newline here
+    if(!tag)
+    {
+        std::cout << std::endl;
+    }
+
+    // go through all adjacent edges
+    discovered[index] = true;
+    for(ulong i = 0; i < edges[index].size(); ++i)
+    {
+        if(!discovered[ulong(edges[index][i])])
+        {
+            treeify(edges, ulong(edges[index][i]), depth+1, discovered);
+        }
+    }
+}
+
 void Graph::addFace(Facet facet)
 {
     if(_facets.empty())
@@ -136,13 +189,37 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
     std::cout << "Edges 'to be bent': " << _mspEdges.size() << std::endl;
 #endif
 
+
+    std::vector<bool> tagged;
+    bool tag = false;
+    tagged.resize(_facets.size());
+
     // go through all cut edges and add a gluetag for each
     for(Edge& edge : _cutEdges)
     {
+
+        if(tagged[ulong(edge._sFace)] || tagged[ulong(edge._tFace)])
+        {
+            tag = true;
+        }
+
         Gluetag gt = Gluetag(edge);
-        gt.getVertices(gtVertices, gtIndices, gtColors);
         _gluetags.push_back(gt);
+
+        if(!tag)
+        {
+            _necessaryGluetags.push_back(gt);
+            gt.getVertices(gtVertices, gtIndices, gtColors);
+            tagged[ulong(gt._placedFace)] = true;
+            tagged[ulong(gt._targetFace)] = true;
+        }
+
+        tag = false;
     }
+
+#ifndef NDEBUG
+    std::cout << "Necessary Gluetags: " << _necessaryGluetags.size() << std::endl;
+#endif
 }
 
 bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
