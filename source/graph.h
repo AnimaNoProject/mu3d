@@ -11,7 +11,7 @@
 
 #include "utility.h"
 
-struct DimensionMapper
+struct WorldToPlane
 {
     QVector3D A;
     QVector3D B;
@@ -20,7 +20,46 @@ struct DimensionMapper
     QVector2D a;
     QVector2D b;
     QVector2D c;
+public:
+    QVector2D const& get(QVector3D const &vec)
+    {
+        if(vec == A)
+            return a;
+        if(vec == B)
+            return b;
+        if(vec == C)
+            return c;
+        else
+            throw std::invalid_argument("something went wrong trying to retrieve 2D representation");
+    }
+
+    QVector3D const& get(QVector2D const &vec)
+    {
+        if(vec == a)
+            return A;
+        if(vec == b)
+            return B;
+        if(vec == c)
+            return C;
+        else
+            throw std::invalid_argument("something went wrong trying to retrieve 3D representation");
+    }
+
+    QVector3D const& get(QVector3D const &one, QVector3D const &two)
+    {
+        if(one != A && two != A)
+            return A;
+        if(one != B && two != B)
+            return B;
+        if(one != C && two != C)
+            return C;
+        else
+            throw std::invalid_argument("something went wrong");
+
+    }
 };
+
+class Gluetag;
 
 class Graph
 {
@@ -31,7 +70,7 @@ public:
     void calculateDual();
     void calculateMSP();
     void calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
-    void unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines);
+    void unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
     void lines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
 private:
     std::map<int, Facet> _facets;
@@ -48,5 +87,8 @@ private:
     bool hasEdge(Edge& edge);
     bool isSingleComponent(std::vector<std::vector<int>>& adjacenceList);
     bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool> &discovered, int parent);
-    void treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<DimensionMapper>& faceMap);
+    void treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<WorldToPlane>& faceMap);
+
+    void planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c);
+    void planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu);
 };

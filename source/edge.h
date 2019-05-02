@@ -14,17 +14,17 @@ class Edge
 public:
     int _sFace;
     int _tFace;
-    double _distance;
+    Facet _sFacetHandle;
+    Facet _tFacetHandle;
+    double _length;
     Halfedge _halfedge;
     QVector3D _middle;
 
-    Edge(int sFace, int tFace, double distance, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
+    Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
+    Edge(int sFace, int tFace);
     Edge();
 
     bool operator==(const Edge& other) const;
     bool operator<(const Edge& other) const;
     Facet operator[] (int i) const;
-private:
-    Facet _sFacetHandle;
-    Facet _tFacetHandle;
 };

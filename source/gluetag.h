@@ -1,5 +1,7 @@
 #pragma once
 #include "edge.h"
+#include "utility.h"
+#include "QVector2D"
 
 #include <QOpenGLFunctions_4_5_Core>
 

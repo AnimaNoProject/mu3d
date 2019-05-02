@@ -69,7 +69,7 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
 
 void Model::unfold(QOpenGLShaderProgram* program)
 {
-    _graph.unfoldGraph(_planarVertices, _planarColors, _planarLines, _planarLinesColors);
+    _graph.unfoldGraph(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
 
     program->bind();
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);
@@ -128,7 +128,7 @@ void Model::drawPolygons(QOpenGLVertexArrayObject& vao, unsigned long triangles,
 void Model::drawPlanarPatch(QOpenGLShaderProgram* program)
 {
     // set the model Matrix
-    program->setUniformValue(program->uniformLocation("modelMatrix"), _modelMatrix);
+    program->setUniformValue(program->uniformLocation("modelMatrix"), _modelMatrixPlanar);
 
     // get opengl functions
     QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();

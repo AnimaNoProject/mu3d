@@ -10,7 +10,7 @@ Graph::~Graph()
 
 }
 
-void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines)
+void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center)
 {
     _tree.resize(_facets.size());
     for(int i = 0; i < int(_facets.size()); ++i)
@@ -28,16 +28,22 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
     std::vector<bool> discovered;
     discovered.resize(_facets.size());
 
-    std::vector<DimensionMapper> faceMap;
+    std::vector<WorldToPlane> faceMap;
     faceMap.resize(_facets.size());
+
+    std::vector<WorldToPlane> gtMap;
 
     treeify(_tree, 0, discovered, 0, faceMap);
 
-    for(DimensionMapper& mapper : faceMap)
+    QVector2D planarCenter(0,0);
+
+    for(WorldToPlane& mapper : faceMap)
     {
         vertices.push_back(QVector3D(mapper.a.x(), mapper.a.y(), 0));
         vertices.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
         vertices.push_back(QVector3D(mapper.c.x(), mapper.c.y(), 0));
+
+        planarCenter += (((mapper.a + mapper.b + mapper.c) / 3) / faceMap.size());
 
         verticesLines.push_back(QVector3D(mapper.a.x(), mapper.a.y(), 0));
         verticesLines.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
@@ -57,9 +63,50 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
         colorsLines.push_back(QVector3D(0,0,0));
         colorsLines.push_back(QVector3D(0,0,0));
     }
+
+    center.translate(QVector3D(0,0,0) - QVector3D(planarCenter.x(), planarCenter.y(), 0));
 }
 
-void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<DimensionMapper>& faceMap)
+void Graph::planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c)
+{
+    float lengthAB = (A - B).length();
+
+    a = QVector2D(0, 0);
+    b = QVector2D(lengthAB, 0);
+
+    float s = QVector3D::crossProduct(B - A, C - A).length() / float(std::pow(lengthAB, 2));
+    float cl = QVector3D::dotProduct(B - A, C - A) / float(std::pow(lengthAB, 2));
+
+    c = QVector2D(a.x() + cl * (b.x() - a.x()) - s * (b.y() - a.y()),
+                   a.y() + cl * (b.y() - a.y()) + s * (b.x() - a.x()));
+}
+
+void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu)
+{
+    float length = (p1 - p2).length();
+
+    float s = QVector3D::crossProduct((P2 - P1), (Pu - P1)).length() / float(std::pow(length, 2));
+    float unkown = QVector3D::dotProduct((P2 - P1), (Pu - P1)) / float(std::pow(length, 2));
+
+    QVector2D pu1 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) + s * (p2.y() - p1.y()),
+                              p1.y() + unkown * (p2.y() - p1.y()) - s * (p2.x() - p1.x()));
+
+    QVector2D pu2 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) - s * (p2.y() - p1.y()),
+                              p1.y() + unkown * (p2.y() - p1.y()) + s * (p2.x() - p1.x()));
+
+    // the points that are not shared by the triangles need to be on opposite sites
+    if (((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) < 0)
+     && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
+    {
+        pu = pu1;
+    }
+    else
+    {
+        pu = pu2;
+    }
+}
+
+void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<WorldToPlane>& faceMap)
 {
     // only the case for the first triangle
     if(index == parent)
@@ -70,137 +117,35 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
         faceMap[index].B = Utility::pointToVector(facet->facet_begin()->next()->vertex()->point());
         faceMap[index].C = Utility::pointToVector(facet->facet_begin()->next()->next()->vertex()->point());
 
-        float lengthAB = (faceMap[index].A - faceMap[index].B).length();
-
-        faceMap[index].a = QVector2D(0, 0);
-        faceMap[index].b = QVector2D(lengthAB, 0);
-
-        float s = QVector3D::crossProduct((faceMap[index].B - faceMap[index].A), (faceMap[index].C - faceMap[index].A)).length() / float(std::pow(lengthAB, 2));
-        float c = QVector3D::dotProduct((faceMap[index].B - faceMap[index].A), (faceMap[index].C - faceMap[index].A)) / float(std::pow(lengthAB, 2));
-
-        float c1x = faceMap[index].a.x()
-                + c * (faceMap[index].b.x() - faceMap[index].a.x())
-                - s * (faceMap[index].b.y() - faceMap[index].a.y());
-        float c1y = faceMap[index].a.y()
-                + c * (faceMap[index].b.y() - faceMap[index].a.y())
-                + s * (faceMap[index].b.x() - faceMap[index].a.x());
-
-        faceMap[index].c = QVector2D(c1x, c1y);
+        planar(faceMap[index].A, faceMap[index].B, faceMap[index].C, faceMap[index].a, faceMap[index].b, faceMap[index].c);
     }
     else
-    {
-        DimensionMapper* previous = &faceMap[parent];
-        DimensionMapper* next = &faceMap[index];
-        bool foundA, foundB, foundC;
-        foundA = foundB = foundC = false;
-
-        QVector3D unkown3D;
-        QVector2D prev2D;
-
+    {  
         // determine which Vertices are known
         Polyhedron::Halfedge_around_facet_circulator hfc = _facets[int(index)]->facet_begin();
         do
         {
-            QVector3D vector = Utility::pointToVector(hfc->vertex()->point());
-            if(vector == previous->A)
+            QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
+            // if this vertex is not shared it is the unkown one
+            if(Pu != faceMap[parent].A && Pu != faceMap[parent].B && Pu != faceMap[parent].C)
             {
-                next->A = vector;
-                next->a = previous->a;
-                foundA = true;
-            }
-            else if (vector == previous->B)
-            {
-                next->B = vector;
-                next->b = previous->b;
-                foundB = true;
-            }
-            else if (vector == previous->C)
-            {
-                next->C = vector;
-                next->c = previous->c;
-                foundC = true;
-            }
-            else
-            {
-                unkown3D = vector;
+                QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point());
+                QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point());
+
+                QVector2D p1 = faceMap[parent].get(P1);
+                QVector2D p2 = faceMap[parent].get(P2);
+                QVector2D p3prev = faceMap[parent].get(faceMap[parent].get(P1, P2));
+
+                faceMap[index].A = P1;
+                faceMap[index].B = P2;
+                faceMap[index].C = Pu;
+                faceMap[index].a = p1;
+                faceMap[index].b = p2;
+
+                planar(P1, P2, Pu, p1, p2, p3prev, faceMap[index].c);
+                break;
             }
         } while (++hfc != _facets[int(index)]->facet_begin());
-
-        QVector2D p1, p2;
-        QVector3D p13D, p23D;
-
-        if(!foundA)
-        {
-            p1 = next->b;
-            p2 = next->c;
-            p13D = next->B;
-            p23D = next->C;
-            prev2D = previous->a;
-
-            next->A = unkown3D;
-        }
-        else if (!foundB)
-        {
-            p1 = next->a;
-            p2 = next->c;
-            p13D = next->A;
-            p23D = next->C;
-            prev2D = previous->b;
-            next->B = unkown3D;
-        }
-        else if (!foundC)
-        {
-            p1 = next->a;
-            p2 = next->b;
-            p13D = next->A;
-            p23D = next->B;
-            prev2D = previous->c;
-            next->C = unkown3D;
-        }
-
-        float length = (p1 - p2).length();
-
-        float s = QVector3D::crossProduct((p23D - p13D), (unkown3D - p13D)).length() / float(std::pow(length, 2));
-        float unkown = QVector3D::dotProduct((p23D - p13D), (unkown3D - p13D)) / float(std::pow(length, 2));
-
-        float unkown1x = p1.x()
-                + unkown * (p2.x() - p1.x())
-                - s * (p2.y() - p1.y());
-        float unkown1y = p1.y()
-                + unkown * (p2.y() - p1.y())
-                + s * (p2.x() - p1.x());
-
-        float unkown2x = p1.x()
-                + unkown * (p2.x() - p1.x())
-                + s * (p2.y() - p1.y());
-        float unkown2y = p1.y()
-                + unkown * (p2.y() - p1.y())
-                - s * (p2.x() - p1.x());
-
-        QVector2D unknownposs(unkown1x, unkown1y);
-
-        float d = (prev2D.x() - p1.x()) * (p2.y() - p1.y()) - (prev2D.y() - p1.y()) * (p2.x() - p1.x());
-        float newd = (unknownposs.x() - p1.x()) * (p2.y() - p1.y()) - (unknownposs.y() - p1.y()) * (p2.x() - p1.x());
-
-        // if c1 is on the same side as previous c -> unfold to c2
-        if (d < 0 && newd < 0)
-        {
-            if(!foundA)
-                faceMap[index].a = QVector2D(unkown2x, unkown2y);
-            else if(!foundB)
-                faceMap[index].b = QVector2D(unkown2x, unkown2y);
-            else if(!foundC)
-                faceMap[index].c = QVector2D(unkown2x, unkown2y);
-        }
-        else
-        {
-            if(!foundA)
-                faceMap[index].a = QVector2D(unkown1x, unkown1y);
-            else if(!foundB)
-                faceMap[index].b = QVector2D(unkown1x, unkown1y);
-            else if(!foundC)
-                faceMap[index].c = QVector2D(unkown1x, unkown1y);
-        }
     }
 
     // go through all adjacent edges
@@ -377,7 +322,7 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
 
     bool isSingleComponent = true;
 
-    // check if it is acyclic from the first node
+    // check if it is acyclic from the first nodeedges
     isSingleComponent = isAcyclic(adjacenceList, 0, discovered, -1);
 
     // if not all nodes have been discovered, the graph is not connected

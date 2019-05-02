@@ -122,7 +122,6 @@ Gluetag::Gluetag(Edge& edge)
     _tl = _bl + (target - _bl) / 4 + side * 2;
 
     _color = hex2rgb(colors[id++ % colors.size()]);
-
 }
 
 void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors)

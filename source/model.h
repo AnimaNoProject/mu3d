@@ -36,6 +36,8 @@ public:
 private:
     Polyhedron _mesh;
     QMatrix4x4 _modelMatrix;
+    QMatrix4x4 _modelMatrixPlanar;
+
     std::vector<QVector3D> _vertices;
     std::vector<QVector3D> _colors;
     std::vector<GLushort> _indices;
