@@ -15,6 +15,7 @@ OGLWidget::OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWid
     this->setFormat(surfaceFormat);
     this->create();
     this->setFocusPolicy(Qt::ClickFocus); // focus for key events can be gained by clicking or tabbing
+    _initialized = false;
 }
 
 void OGLWidget::importModel(const char* filename)
@@ -22,9 +23,11 @@ void OGLWidget::importModel(const char* filename)
     // makeCurrent is important, if this is not called, the model cannot
     // create the VBO/IBO/VAO in the context of this widget
     makeCurrent();
-    _model = new Model(filename, _program); // create the new model
+    _model = new Model(filename); // create the new model
+    _model->createGLModelContext(_program);
     _camera->reset();
     doneCurrent();
+    _initialized = true;
     update(); // update calls paintGL to renew the rendering
 }
 
@@ -49,7 +52,6 @@ void OGLWidget::initializeGL()
     _program->bindAttributeLocation("position", 0);
     _program->link();
 
-    _model = new Model(_program); // use default model until something is imported
     _camera = new Camera();
 }
 
@@ -76,7 +78,11 @@ void OGLWidget::paintGL()
     // bind shaderprogram and set variables
     _program->bind();
     _program->setUniformValue(_program->uniformLocation("viewProjMatrix"), _projMatrix * _camera->getMatrix());
-    _model->draw();
+
+    if(_initialized)
+    {
+        _model->draw(_program);
+    }
 
     _program->release();
 }

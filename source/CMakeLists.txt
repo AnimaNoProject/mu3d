@@ -30,6 +30,10 @@ set(3d-mesh-unfolding_SRCS
     mainwindow.cpp
     oglwidget.h
     oglwidget.cpp
+    oglplanarwidget.h
+    oglplanarwidget.cpp
+    utility.h
+    utility.cpp
     model.h
     model.cpp
     camera.h

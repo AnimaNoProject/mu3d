@@ -15,20 +15,25 @@
 
 #include "oglwidget.h"
 #include "graph.h"
+#include "utility.h"
 
 class OGLWidget;
 
 class Model
 {
 public:
-    Model(const char* filename, QOpenGLShaderProgram* program);
-    Model(QOpenGLShaderProgram* program);
+    Model(const char* filename);
+    Model();
     ~Model();
-    void draw();
+    void draw(QOpenGLShaderProgram* program);
+    void drawPlanarPatch(QOpenGLShaderProgram* program);
     void switchRenderMode();
     void showGluetags();
-private:
+    void unfold(QOpenGLShaderProgram* program);
+    void createGLModelContext(QOpenGLShaderProgram* program);
+
     Graph _graph;
+private:
     Polyhedron _mesh;
     QMatrix4x4 _modelMatrix;
     std::vector<QVector3D> _vertices;
@@ -42,6 +47,9 @@ private:
     std::vector<QVector3D> _lineVertices;
     std::vector<QVector3D> _lineColors;
 
+    std::vector<QVector3D> _planarVertices;
+    std::vector<QVector3D> _planarColors;
+
     QOpenGLVertexArrayObject _vao;
     QOpenGLBuffer _vbo[2];
     QOpenGLBuffer _ibo;
@@ -53,17 +61,18 @@ private:
     QOpenGLVertexArrayObject _vaoLines;
     QOpenGLBuffer _vboLines[2];
 
-    QOpenGLShaderProgram* _program;
+    QOpenGLVertexArrayObject _vaoPlanar;
+    QOpenGLBuffer _vboPlanar[2];
+
+    QOpenGLVertexArrayObject _vaoPlanarLines;
+    QOpenGLBuffer _vboPlanarLines[2];
+
     OGLWidget* _context;
 
     GLushort _modelPolygons;
     bool _wireframe = false;
     bool _showgluetags = true;
 
-    void createGLModelContext();
-    void createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo, std::vector<QVector3D> vertices, std::vector<GLushort> _indices, std::vector<QVector3D> colors);
-    void createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], std::vector<QVector3D> vertices, std::vector<QVector3D> colors);
-
-    void drawPolygons(QOpenGLVertexArrayObject& vao, unsigned long triangles, float factor);
+    void drawPolygons(QOpenGLVertexArrayObject& vao, unsigned long triangles, float offset);
     void drawLines(QOpenGLVertexArrayObject& vao);
 };

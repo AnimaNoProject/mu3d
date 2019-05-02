@@ -5,6 +5,7 @@
 #include <QMenuBar>
 #include <QAction>
 #include "oglwidget.h"
+#include "oglplanarwidget.h"
 #include "model.h"
 
 class MainWindow : public QMainWindow
@@ -15,7 +16,9 @@ public:
     explicit MainWindow(int height, int width, QString title);
     ~MainWindow();
     void loadModel();
+    void unfoldModel();
 private:
     OGLWidget* _modelWidget;
-    OGLWidget* _planarWidget;
+    OGLPlanarWidget* _planarWidget;
+    QAction* _unfold;
 };
