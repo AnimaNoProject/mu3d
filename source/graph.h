@@ -31,7 +31,7 @@ public:
     void calculateDual();
     void calculateMSP();
     void calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
-    void unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors);
+    void unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines);
     void lines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
 private:
     std::map<int, Facet> _facets;

@@ -10,7 +10,7 @@ Graph::~Graph()
 
 }
 
-void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors)
+void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines)
 {
     _tree.resize(_facets.size());
     for(int i = 0; i < int(_facets.size()); ++i)
@@ -39,13 +39,23 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
         vertices.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
         vertices.push_back(QVector3D(mapper.c.x(), mapper.c.y(), 0));
 
-        std::cout << mapper.a.x() << ", " << mapper.a.y() << std::endl;
-        std::cout << mapper.b.x() << ", " << mapper.b.y() << std::endl;
-        std::cout << mapper.c.x() << ", " << mapper.c.y() << std::endl;
+        verticesLines.push_back(QVector3D(mapper.a.x(), mapper.a.y(), 0));
+        verticesLines.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
+        verticesLines.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
+        verticesLines.push_back(QVector3D(mapper.c.x(), mapper.c.y(), 0));
+        verticesLines.push_back(QVector3D(mapper.a.x(), mapper.a.y(), 0));
+        verticesLines.push_back(QVector3D(mapper.c.x(), mapper.c.y(), 0));
 
         colors.push_back(QVector3D(1,1,1));
         colors.push_back(QVector3D(1,1,1));
         colors.push_back(QVector3D(1,1,1));
+
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
     }
 }
 
@@ -332,7 +342,6 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
     std::vector<bool> tagged;
     bool tag = false;
     tagged.resize(_facets.size());
-
     // go through all cut edges and add a gluetag for each
     for(Edge& edge : _cutEdges)
     {

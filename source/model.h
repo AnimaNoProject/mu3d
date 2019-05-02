@@ -50,6 +50,9 @@ private:
     std::vector<QVector3D> _planarVertices;
     std::vector<QVector3D> _planarColors;
 
+    std::vector<QVector3D> _planarLines;
+    std::vector<QVector3D> _planarLinesColors;
+
     QOpenGLVertexArrayObject _vao;
     QOpenGLBuffer _vbo[2];
     QOpenGLBuffer _ibo;

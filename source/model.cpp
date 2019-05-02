@@ -1,20 +1,5 @@
 #include "model.h"
 
-// default cube size
-const float width = 4;
-const float height = 4;
-
-// default plane
-const std::vector<QVector3D> defaultCubeVertices = {
-    // front
-    QVector3D(-width / 2.0f, -height / 2.0f,  0),
-    QVector3D(width / 2.0f, -height / 2.0f,  0),
-    QVector3D(width / 2.0f,  height / 2.0f,  0),
-    QVector3D(width / 2.0f,  height / 2.0f,  0),
-    QVector3D(-width / 2.0f,  height / 2.0f, 0),
-    QVector3D(-width / 2.0f, -height / 2.0f,  0),
-};
-
 Model::Model(const char* filename)
 {
 
@@ -84,11 +69,11 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
 
 void Model::unfold(QOpenGLShaderProgram* program)
 {
-    _graph.unfoldGraph(_planarVertices, _planarColors);
+    _graph.unfoldGraph(_planarVertices, _planarColors, _planarLines, _planarLinesColors);
 
     program->bind();
-    //Utility::createBuffers(_vaoPlanar, _vboPlanar, defaultCubeVertices, _planarColors);
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);
+    Utility::createBuffers(_vaoPlanarLines, _vboPlanarLines, _planarLines, _planarLinesColors);
     program->release();
 }
 
@@ -152,11 +137,17 @@ void Model::drawPlanarPatch(QOpenGLShaderProgram* program)
     QOpenGLVertexArrayObject::Binder vaoBinder(&_vaoPlanar);
     // draw the solids
     f->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    f->glPolygonOffset(-1, -1);
-    f->glDrawArrays(GL_TRIANGLES, 0, GLsizei(_planarVertices.size()));
     f->glPolygonOffset(1, 1);
-    f->glDrawArrays(GL_LINES, 0, GLsizei(_planarVertices.size()));
+    f->glEnable(GL_POLYGON_OFFSET_FILL);
+    f->glDrawArrays(GL_TRIANGLES, 0, GLsizei(_planarVertices.size()));
+    f->glDisable(GL_POLYGON_OFFSET_FILL);
     vaoBinder.release();
+
+    QOpenGLVertexArrayObject::Binder vaoLinesBinder(&_vaoPlanarLines);
+    // draw all lines
+    f->glPolygonOffset(-1, -1);
+    f->glDrawArrays(GL_LINES, 0, GLsizei(_planarLines.size()));
+    vaoLinesBinder.release();
 }
 
 void Model::showGluetags()
