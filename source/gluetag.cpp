@@ -114,8 +114,8 @@ Gluetag::Gluetag(Edge& edge)
     QVector3D side = (_br - _bl) / 4;
 
     // adjust size of base of gluetag
-    //_bl = _bl + side * 0.5;
-    //_br = _br - side * 0.5;
+    _bl = _bl + side * 0.5;
+    _br = _br - side * 0.5;
 
     // top right and top left calculation, top edge of the gluetag is at 1/4 of the height of the targeted face
     _tr = _br + (target - _br) / 4 - side * 2;

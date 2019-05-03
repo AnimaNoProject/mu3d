@@ -57,15 +57,6 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
         colors.push_back(QVector3D(1,1,1));
         colors.push_back(QVector3D(1,1,1));
         colors.push_back(QVector3D(1,1,1));
-
-        colorsLines.push_back(QVector3D(0,0,0));
-        colorsLines.push_back(QVector3D(0,0,0));
-
-        colorsLines.push_back(QVector3D(0,0,0));
-        colorsLines.push_back(QVector3D(0,0,0));
-
-        colorsLines.push_back(QVector3D(0,0,0));
-        colorsLines.push_back(QVector3D(0,0,0));
     }
 
     for(GluetagToPlane& mapper : gtMap)
@@ -94,17 +85,9 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
         colors.push_back(mapper._gluetag._color);
         colors.push_back(mapper._gluetag._color);
         colors.push_back(mapper._gluetag._color);
-
-        colorsLines.push_back(QVector3D(0,0,0));
-        colorsLines.push_back(QVector3D(0,0,0));
-
-        colorsLines.push_back(QVector3D(0,0,0));
-        colorsLines.push_back(QVector3D(0,0,0));
-
-        colorsLines.push_back(QVector3D(0,0,0));
-        colorsLines.push_back(QVector3D(0,0,0));
     }
 
+    colorsLines.resize(verticesLines.size());
     center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
 }
 
@@ -194,7 +177,7 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
         } while (++hfc != _facets[int(index)]->facet_begin());
     }
 
-    for(Gluetag& gluetag : _gluetags)
+    for(Gluetag& gluetag : _necessaryGluetags)
     {
         if(gluetag._placedFace == int(index))
         {
@@ -216,15 +199,19 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 
                     GluetagToPlane tmp(gluetag);
 
+                    // top edge of the gluetag is 1/4 of the size of the base edge
+                    QVector2D side = (p2 - p1) / 4;
+
+                    // adjust size of base of gluetag
                     if(P1 == gluetag._bl)
                     {
-                        tmp.a = p1;
-                        tmp.b = p2;
+                        tmp.a = p1 + side * 0.5;
+                        tmp.b = p2 - side * 0.5;
                     }
                     else
                     {
-                        tmp.a = p2;
-                        tmp.b = p1;
+                        tmp.b = p1 + side * 0.5;
+                        tmp.a = p2 - side * 0.5;
                     }
 
                     planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
@@ -375,29 +362,48 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
 
 
     std::vector<bool> tagged;
-    bool tag = false;
     tagged.resize(_facets.size());
     // go through all cut edges and add a gluetag for each
     for(Edge& edge : _cutEdges)
     {
-
-        if(tagged[ulong(edge._sFace)] || tagged[ulong(edge._tFace)])
-        {
-            tag = true;
-        }
-
         Gluetag gt = Gluetag(edge);
         _gluetags.push_back(gt);
-gt.getVertices(gtVertices, gtIndices, gtColors);
-        if(!tag)
-        {
-            _necessaryGluetags.push_back(gt);
+    }
 
-            tagged[ulong(gt._placedFace)] = true;
-            tagged[ulong(gt._targetFace)] = true;
+    for(Gluetag& gluetag : _gluetags)
+    {
+        int neighbours = 0;
+
+        for(Edge& edge : _cutEdges)
+        {
+            if(gluetag._edge._halfedge->vertex() == edge._halfedge->vertex()
+              || gluetag._edge._halfedge->prev()->vertex() == edge._halfedge->vertex()
+              || gluetag._edge._halfedge->vertex() == edge._halfedge->prev()->vertex()
+              || gluetag._edge._halfedge->prev()->vertex() == edge._halfedge->prev()->vertex())
+            {
+                neighbours++;
+            }
         }
 
-        tag = false;
+        for(Gluetag& gluneighbours : _necessaryGluetags)
+        {
+            if(gluetag._edge._halfedge->vertex() == gluneighbours._edge._halfedge->vertex()
+              || gluetag._edge._halfedge->prev()->vertex() == gluneighbours._edge._halfedge->vertex()
+              || gluetag._edge._halfedge->vertex() == gluneighbours._edge._halfedge->prev()->vertex()
+              || gluetag._edge._halfedge->prev()->vertex() == gluneighbours._edge._halfedge->prev()->vertex())
+            {
+                neighbours--;
+            }
+        }
+
+        if(!tagged[ulong(gluetag._placedFace)] || !tagged[ulong(gluetag._targetFace)] || neighbours > 1)
+        {
+            tagged[ulong(gluetag._placedFace)] = true;
+            tagged[ulong(gluetag._targetFace)] = true;
+            _necessaryGluetags.push_back(gluetag);
+            gluetag.getVertices(gtVertices, gtIndices, gtColors);
+        }
+
     }
 
 #ifndef NDEBUG
