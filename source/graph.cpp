@@ -28,29 +28,31 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
     std::vector<bool> discovered;
     discovered.resize(_facets.size());
 
-    std::vector<WorldToPlane> faceMap;
+    std::vector<FaceToPlane> faceMap;
     faceMap.resize(_facets.size());
 
-    std::vector<WorldToPlane> gtMap;
+    std::vector<GluetagToPlane> gtMap;
 
-    treeify(_tree, 0, discovered, 0, faceMap);
+    treeify(_tree, 0, discovered, 0, faceMap, gtMap);
 
     QVector2D planarCenter(0,0);
 
-    for(WorldToPlane& mapper : faceMap)
+    for(FaceToPlane& mapper : faceMap)
     {
-        vertices.push_back(QVector3D(mapper.a.x(), mapper.a.y(), 0));
-        vertices.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
-        vertices.push_back(QVector3D(mapper.c.x(), mapper.c.y(), 0));
+        vertices.push_back(QVector3D(mapper.a, 0));
+        vertices.push_back(QVector3D(mapper.b, 0));
+        vertices.push_back(QVector3D(mapper.c, 0));
 
-        planarCenter += (((mapper.a + mapper.b + mapper.c) / 3) / faceMap.size());
+        planarCenter += ((mapper.a + mapper.b + mapper.c) / 3) / faceMap.size();
 
-        verticesLines.push_back(QVector3D(mapper.a.x(), mapper.a.y(), 0));
-        verticesLines.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
-        verticesLines.push_back(QVector3D(mapper.b.x(), mapper.b.y(), 0));
-        verticesLines.push_back(QVector3D(mapper.c.x(), mapper.c.y(), 0));
-        verticesLines.push_back(QVector3D(mapper.a.x(), mapper.a.y(), 0));
-        verticesLines.push_back(QVector3D(mapper.c.x(), mapper.c.y(), 0));
+        verticesLines.push_back(QVector3D(mapper.a, 0));
+        verticesLines.push_back(QVector3D(mapper.b, 0));
+
+        verticesLines.push_back(QVector3D(mapper.b, 0));
+        verticesLines.push_back(QVector3D(mapper.c, 0));
+
+        verticesLines.push_back(QVector3D(mapper.a, 0));
+        verticesLines.push_back(QVector3D(mapper.c, 0));
 
         colors.push_back(QVector3D(1,1,1));
         colors.push_back(QVector3D(1,1,1));
@@ -58,13 +60,52 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
 
         colorsLines.push_back(QVector3D(0,0,0));
         colorsLines.push_back(QVector3D(0,0,0));
+
         colorsLines.push_back(QVector3D(0,0,0));
         colorsLines.push_back(QVector3D(0,0,0));
+
         colorsLines.push_back(QVector3D(0,0,0));
         colorsLines.push_back(QVector3D(0,0,0));
     }
 
-    center.translate(QVector3D(0,0,0) - QVector3D(planarCenter.x(), planarCenter.y(), 0));
+    for(GluetagToPlane& mapper : gtMap)
+    {
+        vertices.push_back(QVector3D(mapper.a, 0));
+        vertices.push_back(QVector3D(mapper.d, 0));
+        vertices.push_back(QVector3D(mapper.c, 0));
+
+        vertices.push_back(QVector3D(mapper.a, 0));
+        vertices.push_back(QVector3D(mapper.b, 0));
+        vertices.push_back(QVector3D(mapper.c, 0));
+
+        verticesLines.push_back(QVector3D(mapper.a, 0));
+        verticesLines.push_back(QVector3D(mapper.d, 0));
+
+        verticesLines.push_back(QVector3D(mapper.c, 0));
+        verticesLines.push_back(QVector3D(mapper.d, 0));
+
+        verticesLines.push_back(QVector3D(mapper.b, 0));
+        verticesLines.push_back(QVector3D(mapper.c, 0));
+
+        colors.push_back(mapper._gluetag._color);
+        colors.push_back(mapper._gluetag._color);
+        colors.push_back(mapper._gluetag._color);
+
+        colors.push_back(mapper._gluetag._color);
+        colors.push_back(mapper._gluetag._color);
+        colors.push_back(mapper._gluetag._color);
+
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
+
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
+
+        colorsLines.push_back(QVector3D(0,0,0));
+        colorsLines.push_back(QVector3D(0,0,0));
+    }
+
+    center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
 }
 
 void Graph::planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c)
@@ -95,8 +136,13 @@ void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu
                               p1.y() + unkown * (p2.y() - p1.y()) + s * (p2.x() - p1.x()));
 
     // the points that are not shared by the triangles need to be on opposite sites
-    if (((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) < 0)
-     && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
+    if (((((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) < 0)
+     && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) > 0)))
+    ||
+    (
+    (((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) > 0)
+         && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
+    ))
     {
         pu = pu1;
     }
@@ -106,7 +152,7 @@ void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu
     }
 }
 
-void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<WorldToPlane>& faceMap)
+void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap)
 {
     // only the case for the first triangle
     if(index == parent)
@@ -128,7 +174,7 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
             QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
             // if this vertex is not shared it is the unkown one
             if(Pu != faceMap[parent].A && Pu != faceMap[parent].B && Pu != faceMap[parent].C)
-            {
+            { // bottom right
                 QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point());
                 QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point());
 
@@ -148,13 +194,57 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
         } while (++hfc != _facets[int(index)]->facet_begin());
     }
 
+    for(Gluetag& gluetag : _gluetags)
+    {
+        if(gluetag._placedFace == int(index))
+        {
+            Polyhedron::Halfedge_around_facet_circulator hfc = _facets[int(index)]->facet_begin();
+            do
+            {
+                QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
+
+                // if this vertex is not shared it is the unkown one
+                if(Pu != Utility::pointToVector(gluetag._edge._halfedge->vertex()->point())
+                && Pu != Utility::pointToVector(gluetag._edge._halfedge->prev()->vertex()->point()))
+                {
+                    QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point()); // bottom left
+                    QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point()); // bottom right
+
+                    QVector2D p1 = faceMap[index].get(P1);
+                    QVector2D p2 = faceMap[index].get(P2);
+                    QVector2D p3prev = faceMap[index].get(Pu);
+
+                    GluetagToPlane tmp(gluetag);
+
+                    if(P1 == gluetag._bl)
+                    {
+                        tmp.a = p1;
+                        tmp.b = p2;
+                    }
+                    else
+                    {
+                        tmp.a = p2;
+                        tmp.b = p1;
+                    }
+
+                    planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
+
+                    planar(gluetag._bl, gluetag._tl, gluetag._tr, tmp.a, tmp.c, tmp.a, tmp.d);
+
+                    gtMap.push_back(tmp);
+                    break;
+                }
+            } while (++hfc != _facets[int(index)]->facet_begin());
+        }
+    }
+
     // go through all adjacent edges
     discovered[index] = true;
     for(ulong i = 0; i < edges[index].size(); ++i)
     {
         if(!discovered[ulong(edges[index][i])])
         {
-            treeify(edges, ulong(edges[index][i]), discovered, index, faceMap);
+            treeify(edges, ulong(edges[index][i]), discovered, index, faceMap, gtMap);
         }
     }
 }
@@ -298,11 +388,11 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
 
         Gluetag gt = Gluetag(edge);
         _gluetags.push_back(gt);
-
+gt.getVertices(gtVertices, gtIndices, gtColors);
         if(!tag)
         {
             _necessaryGluetags.push_back(gt);
-            gt.getVertices(gtVertices, gtIndices, gtColors);
+
             tagged[ulong(gt._placedFace)] = true;
             tagged[ulong(gt._targetFace)] = true;
         }

@@ -14,10 +14,11 @@ MainWindow::MainWindow(int height, int width, QString title)
     layout->addWidget(_planarWidget);
 
     // Add action to load a model
-    QAction *loadFile = this->menuBar()->addMenu("File")->addAction("Load Model");
+    _loadModel = this->menuBar()->addAction("Load Model");
     _unfold = this->menuBar()->addAction("Unfold");
+
     _unfold->setDisabled(true);
-    QObject::connect(loadFile, &QAction::triggered, this, &MainWindow::loadModel);
+    QObject::connect(_loadModel, &QAction::triggered, this, &MainWindow::loadModel);
     QObject::connect(_unfold, &QAction::triggered, this, &MainWindow::unfoldModel);
 
     // setup window
@@ -45,4 +46,6 @@ void MainWindow::unfoldModel()
 {
     _planarWidget->add(_modelWidget->_model);
     _planarWidget->unfold();
+
+    _unfold->setDisabled(true);
 }

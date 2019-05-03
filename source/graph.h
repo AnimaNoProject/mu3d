@@ -8,58 +8,14 @@
 
 #include "edge.h"
 #include "gluetag.h"
+#include "gluetagtoplane.h"
+#include "facetoplane.h"
 
 #include "utility.h"
 
-struct WorldToPlane
-{
-    QVector3D A;
-    QVector3D B;
-    QVector3D C;
-
-    QVector2D a;
-    QVector2D b;
-    QVector2D c;
-public:
-    QVector2D const& get(QVector3D const &vec)
-    {
-        if(vec == A)
-            return a;
-        if(vec == B)
-            return b;
-        if(vec == C)
-            return c;
-        else
-            throw std::invalid_argument("something went wrong trying to retrieve 2D representation");
-    }
-
-    QVector3D const& get(QVector2D const &vec)
-    {
-        if(vec == a)
-            return A;
-        if(vec == b)
-            return B;
-        if(vec == c)
-            return C;
-        else
-            throw std::invalid_argument("something went wrong trying to retrieve 3D representation");
-    }
-
-    QVector3D const& get(QVector3D const &one, QVector3D const &two)
-    {
-        if(one != A && two != A)
-            return A;
-        if(one != B && two != B)
-            return B;
-        if(one != C && two != C)
-            return C;
-        else
-            throw std::invalid_argument("something went wrong");
-
-    }
-};
-
 class Gluetag;
+class FaceToPlane;
+class GluetagToPlane;
 
 class Graph
 {
@@ -87,7 +43,7 @@ private:
     bool hasEdge(Edge& edge);
     bool isSingleComponent(std::vector<std::vector<int>>& adjacenceList);
     bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool> &discovered, int parent);
-    void treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<WorldToPlane>& faceMap);
+    void treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap);
 
     void planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c);
     void planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu);

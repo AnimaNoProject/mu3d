@@ -44,6 +44,10 @@ set(3d-mesh-unfolding_SRCS
     edge.cpp
     gluetag.h
     gluetag.cpp
+    facetoplane.h
+    facetoplane.cpp
+    gluetagtoplane.h
+    gluetagtoplane.cpp
 )
 
 # create the executeable from all source files

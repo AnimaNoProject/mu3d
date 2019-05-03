@@ -14,13 +14,12 @@ public:
     int _placedFace;
     int _targetFace;
     Edge _edge;
-private:
     QVector3D _bl;
     QVector3D _br;
     QVector3D _tl;
     QVector3D _tr;
     QVector3D _color;
-
+private:
     QVector3D hex2rgb(std::string hex);
 
     static size_t id;

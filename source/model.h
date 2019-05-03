@@ -33,10 +33,11 @@ public:
     void createGLModelContext(QOpenGLShaderProgram* program);
 
     Graph _graph;
+    QMatrix4x4 _modelMatrixPlanar;
+
 private:
     Polyhedron _mesh;
     QMatrix4x4 _modelMatrix;
-    QMatrix4x4 _modelMatrixPlanar;
 
     std::vector<QVector3D> _vertices;
     std::vector<QVector3D> _colors;

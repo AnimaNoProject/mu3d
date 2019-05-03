@@ -16,7 +16,6 @@ QMatrix4x4 Camera::getMatrix()
     matrix.translate(0, 0, _delta);
     matrix.rotate(_angleX, 0, 1, 0);
     matrix.rotate(_angleY, 1, 0, 0);
-    matrix.translate(0, 0, 0);
     return matrix;
 }
 

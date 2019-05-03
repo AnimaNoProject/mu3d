@@ -21,4 +21,5 @@ private:
     OGLWidget* _modelWidget;
     OGLPlanarWidget* _planarWidget;
     QAction* _unfold;
+    QAction* _loadModel;
 };

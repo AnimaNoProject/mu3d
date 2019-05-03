@@ -80,8 +80,29 @@ void OGLPlanarWidget::resizeGL(int w, int h)
     _projMatrix.perspective(45.f, float(w) / h, 0.01f, 1000.0f);
 }
 
+void OGLPlanarWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if(!_initialized)
+        return;
+
+    float dx = (event->x() - _lastPos.x()) * 0.045f;
+    float dy = (event->y() - _lastPos.y()) * 0.045f;
+
+    if(event->buttons() == Qt::LeftButton)
+    {
+        //_camera->translate(-dx, -dy);
+        _model->_modelMatrixPlanar.translate(dx, -dy, 0);
+        update();
+    }
+
+    _lastPos = event->pos();
+}
+
 void OGLPlanarWidget::keyPressEvent(QKeyEvent *event)
 {
+    if(!_initialized)
+        return;
+
     switch(event->key())
     {
         case Qt::Key_F1:
