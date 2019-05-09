@@ -97,10 +97,12 @@ bool Utility::intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2)
 
     if(o1 != o2 && o3 != o4)
     {
+#ifndef NDEBUG
         std::cout << "p1 = [" << p1.x() << "," << p1.y() << "]"
                   << "q1 = [" << q1.x() << "," << q1.y() << "]" << std::endl
                   << "p2 = [" << p2.x() << "," << p2.y() << "]"
                   << "q2 = [" << q2.x() << "," << q2.y() << "]" << std::endl << std::endl;
+#endif
         return true;
     }
 
@@ -109,7 +111,9 @@ bool Utility::intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2)
         || (o3 == 0 && onSegment(p2, p1, q2))
         || (o4 == 0 && onSegment(p2, q1, q2)))
     {
+#ifndef NDEBUG
         std::cout << "onSegment && o1/4 = 0" << std::endl;
+#endif
         return true;
     }
 

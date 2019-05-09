@@ -235,7 +235,6 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 
                     tmp.overlapping = false;
                     // check if any overlaps occured with other faces
-                    std::cout << "new gluetag" << std::endl;
 
                     for(ulong i = 0; i < discovered.size(); i++)
                     {
@@ -246,7 +245,9 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 
                         if(tmp.overlaps(faceMap[i]))
                         {
+#ifndef NDEBUG
                             std::cout << "gt overlaps with face " << i << std::endl;
+#endif
                             // handle overlap? increases temperature??
                             tmp.overlapping = true;
                         }
@@ -257,7 +258,9 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
                     {
                         if(gtp.overlaps(tmp))
                         {
+#ifndef NDEBUG
                             std::cout << "gt overlaps with other gluetag " << std::endl;
+#endif
                             // handle overlap? increases temperature??
                             //tmp.overlapping = true;
                         }
