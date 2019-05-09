@@ -82,3 +82,66 @@ void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], 
     vbo[1].release();
     vaoLinesBinder.release();
 }
+
+bool Utility::intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2)
+{
+    if(p1 == p2 || p1 == q2 || q1 == p2 || q1 == q2)
+    {
+        return false;
+    }
+
+    int o1 = orientation(p1, q1, p2);
+    int o2 = orientation(p1, q1, q2);
+    int o3 = orientation(p2, q2, p1);
+    int o4 = orientation(p2, q2, q1);
+
+    if(o1 != o2 && o3 != o4)
+    {
+        std::cout << "p1 = [" << p1.x() << "," << p1.y() << "]"
+                  << "q1 = [" << q1.x() << "," << q1.y() << "]" << std::endl
+                  << "p2 = [" << p2.x() << "," << p2.y() << "]"
+                  << "q2 = [" << q2.x() << "," << q2.y() << "]" << std::endl << std::endl;
+        return true;
+    }
+
+    if    ((o1 == 0 && onSegment(p1, p2, q1))
+        || (o2 == 0 && onSegment(p1, q2, q1))
+        || (o3 == 0 && onSegment(p2, p1, q2))
+        || (o4 == 0 && onSegment(p2, q1, q2)))
+    {
+        std::cout << "onSegment && o1/4 = 0" << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
+int Utility::orientation(QVector2D p, QVector2D q, QVector2D r)
+{
+    float val = (q.y() - p.y()) * (r.x() - q.x()) -
+                (q.x() - p.x()) * (r.y() - q.y());
+
+    if(val == 0)
+    {
+        return 0;
+    }
+    else if (val > 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 2;
+    }
+}
+
+bool Utility::onSegment(QVector2D p, QVector2D q, QVector2D r)
+{
+    if(q.x() <= std::max(p.x(), r.x()) && q.x() >= std::min(p.x(), r.x()) &&
+       q.y() <= std::max(p.y(), r.y()) && q.y() >= std::min(p.y(), r.y()))
+    {
+        return true;
+    }
+
+    return false;
+}

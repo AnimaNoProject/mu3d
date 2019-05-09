@@ -1,20 +1,16 @@
 #include "edge.h"
 
 Edge::Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle)
+    :  _sFace(sFace), _tFace(tFace),
+      _sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle),
+      _length(length),  _halfedge(halfedge),
+      _middle(middle),  _heat(0)
 {
-    _sFace = sFace;
-    _tFace = tFace;
-    _length = length;
-    _middle = middle;
-    _halfedge = halfedge;
-    _sFacetHandle = sFacetHandle;
-    _tFacetHandle = tFacetHandle;
 }
 
 Edge::Edge(int sFace, int tFace)
+    : _sFace(sFace), _tFace(tFace)
 {
-    _sFace = sFace;
-    _tFace = tFace;
 }
 
 Edge::Edge()
@@ -43,5 +39,5 @@ Facet Edge::operator[] (int i) const
     else if (i == _tFace)
         return _tFacetHandle;
     else
-        throw std::invalid_argument("received value matching neither source face id, nor target face id");
+        throw std::invalid_argument("parameter value matches neither source face id, nor target face id");
 }

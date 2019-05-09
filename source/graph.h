@@ -14,8 +14,8 @@
 #include "utility.h"
 
 class Gluetag;
-class FaceToPlane;
 class GluetagToPlane;
+class FaceToPlane;
 
 class Graph
 {

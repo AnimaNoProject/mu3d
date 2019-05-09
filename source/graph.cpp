@@ -54,9 +54,9 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
         verticesLines.push_back(QVector3D(mapper.a, 0));
         verticesLines.push_back(QVector3D(mapper.c, 0));
 
-        colors.push_back(QVector3D(1,1,1));
-        colors.push_back(QVector3D(1,1,1));
-        colors.push_back(QVector3D(1,1,1));
+        colors.push_back(mapper.color);
+        colors.push_back(mapper.color);
+        colors.push_back(mapper.color);
     }
 
     for(GluetagToPlane& mapper : gtMap)
@@ -78,13 +78,28 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
         verticesLines.push_back(QVector3D(mapper.b, 0));
         verticesLines.push_back(QVector3D(mapper.c, 0));
 
-        colors.push_back(mapper._gluetag._color);
-        colors.push_back(mapper._gluetag._color);
-        colors.push_back(mapper._gluetag._color);
+        if(!mapper.overlapping)
+        {
+            colors.push_back(mapper._gluetag._color);
+            colors.push_back(mapper._gluetag._color);
+            colors.push_back(mapper._gluetag._color);
 
-        colors.push_back(mapper._gluetag._color);
-        colors.push_back(mapper._gluetag._color);
-        colors.push_back(mapper._gluetag._color);
+            colors.push_back(mapper._gluetag._color);
+            colors.push_back(mapper._gluetag._color);
+            colors.push_back(mapper._gluetag._color);
+        }
+        else
+        {
+            colors.push_back(QVector3D(1,0,0));
+            colors.push_back(QVector3D(1,0,0));
+            colors.push_back(QVector3D(1,0,0));
+
+            colors.push_back(QVector3D(1,0,0));
+            colors.push_back(QVector3D(1,0,0));
+            colors.push_back(QVector3D(1,0,0));
+        }
+
+
     }
 
     colorsLines.resize(verticesLines.size());
@@ -218,15 +233,78 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 
                     planar(gluetag._bl, gluetag._tl, gluetag._tr, tmp.a, tmp.c, tmp.a, tmp.d);
 
+                    tmp.overlapping = false;
+                    // check if any overlaps occured with other faces
+                    std::cout << "new gluetag" << std::endl;
+
+                    for(ulong i = 0; i < discovered.size(); i++)
+                    {
+                        if(tmp._gluetag._placedFace == int(i))
+                        {
+                            continue;
+                        }
+
+                        if(tmp.overlaps(faceMap[i]))
+                        {
+                            std::cout << "gt overlaps with face " << i << std::endl;
+                            // handle overlap? increases temperature??
+                            tmp.overlapping = true;
+                        }
+                    }
+
+                    // or overlaps with any existing gluetags
+                    for(GluetagToPlane& gtp : gtMap)
+                    {
+                        if(gtp.overlaps(tmp))
+                        {
+                            std::cout << "gt overlaps with other gluetag " << std::endl;
+                            // handle overlap? increases temperature??
+                            //tmp.overlapping = true;
+                        }
+                    }
+
                     gtMap.push_back(tmp);
-                    break;
                 }
             } while (++hfc != _facets[int(index)]->facet_begin());
         }
     }
 
-    // go through all adjacent edges
+    faceMap[index].color = QVector3D(1,1,1);
+
+    // check if any overlaps occured with other faces
+    for(ulong i = 0; i < discovered.size(); i++)
+    {
+        if(!discovered[i] || i == index || i == parent)
+        {
+            continue;
+        }
+
+        if(faceMap[index].overlaps(faceMap[i]))
+        {
+            // handle overlap? increases temperature??
+            faceMap[index].color = QVector3D(1,0,0);
+        }
+    }
+
+    // or overlaps with any existing gluetags
+    for(GluetagToPlane& gtp : gtMap)
+    {
+        if(gtp._gluetag._placedFace == int(index))
+        {
+            continue;
+        }
+
+        if(gtp.overlaps(faceMap[index]))
+        {
+            //std::cout << "face overlaps other gluetag" << std::endl;
+            faceMap[index].color = QVector3D(1,0,0);
+            break;
+        }
+    }
+
+
     discovered[index] = true;
+    // go through all adjacent edges
     for(ulong i = 0; i < edges[index].size(); ++i)
     {
         if(!discovered[ulong(edges[index][i])])

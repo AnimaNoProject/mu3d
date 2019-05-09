@@ -1,5 +1,18 @@
 #include "facetoplane.h"
 
+bool FaceToPlane::overlaps(FaceToPlane& other)
+{
+    return Utility::intersects(a, b, other.a, other.b)
+           || Utility::intersects(a, b, other.b, other.c)
+           || Utility::intersects(a, b, other.c, other.a)
+           || Utility::intersects(b, c, other.a, other.b)
+           || Utility::intersects(b, c, other.b, other.c)
+           || Utility::intersects(b, c, other.c, other.a)
+           || Utility::intersects(c, a, other.a, other.b)
+           || Utility::intersects(c, a, other.b, other.c)
+           || Utility::intersects(c, a, other.c, other.a);
+}
+
 QVector2D const& FaceToPlane::get(QVector3D const &vec)
 {
     if(vec == A)

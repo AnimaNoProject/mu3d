@@ -9,6 +9,36 @@ GluetagToPlane::~GluetagToPlane()
 
 }
 
+bool GluetagToPlane::overlaps(GluetagToPlane& other)
+{
+    return Utility::intersects(a, d, other.a, other.d)
+        || Utility::intersects(a, d, other.c, other.d)
+        || Utility::intersects(a, d, other.b, other.c)
+
+        || Utility::intersects(c, d, other.a, other.d)
+        || Utility::intersects(c, d, other.c, other.d)
+        || Utility::intersects(c, d, other.b, other.c)
+
+        || Utility::intersects(b, c, other.a, other.c)
+        || Utility::intersects(b, c, other.c, other.d)
+        || Utility::intersects(b, c, other.b, other.c);
+}
+
+bool GluetagToPlane::overlaps(FaceToPlane& other)
+{
+    return Utility::intersects(a, d, other.a, other.b)
+        || Utility::intersects(a, d, other.b, other.c)
+        || Utility::intersects(a, d, other.c, other.a)
+
+        || Utility::intersects(c, d, other.a, other.b)
+        || Utility::intersects(c, d, other.b, other.c)
+        || Utility::intersects(c, d, other.c, other.a)
+
+        || Utility::intersects(b, c, other.a, other.b)
+        || Utility::intersects(b, c, other.b, other.c)
+        || Utility::intersects(b, c, other.c, other.a);
+}
+
 QVector2D const& GluetagToPlane::get(QVector3D const &vec)
 {
     if(vec == _gluetag._bl)
