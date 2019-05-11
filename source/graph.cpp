@@ -33,7 +33,9 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
 
     std::vector<GluetagToPlane> gtMap;
 
-    treeify(_tree, 0, discovered, 0, faceMap, gtMap);
+    int overlaps = treeify(_tree, 0, discovered, 0, faceMap, gtMap);
+
+    std::cout << "overlaps: " << overlaps << std::endl;
 
     QVector2D planarCenter(0,0);
 
@@ -150,8 +152,10 @@ void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu
     }
 }
 
-void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap)
+int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap)
 {
+    int overlaps = 0;
+
     // only the case for the first triangle
     if(index == parent)
     {
@@ -248,8 +252,8 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 #ifndef NDEBUG
                             std::cout << "gt overlaps with face " << i << std::endl;
 #endif
-                            // handle overlap? increases temperature??
                             tmp.overlapping = true;
+                            overlaps++;
                         }
                     }
 
@@ -261,8 +265,8 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 #ifndef NDEBUG
                             std::cout << "gt overlaps with other gluetag " << std::endl;
 #endif
-                            // handle overlap? increases temperature??
-                            //tmp.overlapping = true;
+                            tmp.overlapping = true;
+                            overlaps++;
                         }
                     }
 
@@ -284,8 +288,9 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 
         if(faceMap[index].overlaps(faceMap[i]))
         {
-            // handle overlap? increases temperature??
             faceMap[index].color = QVector3D(1,0,0);
+            overlaps++;
+            increaseHeat(int(index), int(parent));
         }
     }
 
@@ -299,9 +304,9 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
 
         if(gtp.overlaps(faceMap[index]))
         {
-            //std::cout << "face overlaps other gluetag" << std::endl;
             faceMap[index].color = QVector3D(1,0,0);
-            break;
+            overlaps++;
+            increaseHeat(int(index), int(parent));
         }
     }
 
@@ -312,7 +317,21 @@ void Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std
     {
         if(!discovered[ulong(edges[index][i])])
         {
-            treeify(edges, ulong(edges[index][i]), discovered, index, faceMap, gtMap);
+            overlaps += treeify(edges, ulong(edges[index][i]), discovered, index, faceMap, gtMap);
+        }
+    }
+
+    return overlaps;
+}
+
+void Graph::increaseHeat(int faceA, int faceB)
+{
+    for(Edge& edge : _edges)
+    {
+        if(edge == Edge(faceA, faceB))
+        {
+            edge._heat += 1;
+            break;
         }
     }
 }

@@ -29,7 +29,14 @@ bool Edge::operator==(const Edge& other) const
 
 bool Edge::operator<(const Edge& other) const
 {
-    return _length < other._length;
+    if(_heat == 0 && other._heat == 0)
+    {
+        return _length < other._length;
+    }
+    else
+    {
+        return _heat < other._heat;
+    }
 }
 
 Facet Edge::operator[] (int i) const
