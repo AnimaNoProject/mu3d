@@ -23,8 +23,6 @@ find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OpenGL_INCLUDE_DIRS})
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-
 # all source files
 set(3d-mesh-unfolding_SRCS
     main.cpp

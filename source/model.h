@@ -29,9 +29,11 @@ public:
     void drawPlanarPatch(QOpenGLShaderProgram* program);
     void switchRenderMode();
     void showGluetags();
-    bool unfold();
-    void createGLModelContext(QOpenGLShaderProgram* program);
+    void unfold();
 
+    bool finishedAnnealing();
+
+    void createGLModelContext(QOpenGLShaderProgram* program);
     void recalculate(QOpenGLShaderProgram* program);
 
     Graph _graph;
@@ -81,6 +83,7 @@ private:
     bool _wireframe = false;
     bool _showgluetags = true;
 
+    void clearOGL();
     void drawPolygons(QOpenGLVertexArrayObject& vao, unsigned long triangles, float offset);
     void drawLines(QOpenGLVertexArrayObject& vao);
 };

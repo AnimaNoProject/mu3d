@@ -8,9 +8,6 @@
 
 #include <QWheelEvent>
 
-#include <thread>
-#include <chrono>
-
 #include "camera.h"
 #include "model.h"
 #include "oglwidget.h"
@@ -25,7 +22,7 @@ public:
     OGLPlanarWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = nullptr);
     virtual ~OGLPlanarWidget() override;
     void add(Model* model);
-    bool unfold();
+    void unfold();
 public slots:
     void cleanup();
 protected:

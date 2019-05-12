@@ -14,15 +14,13 @@ void OGLPlanarWidget::add(Model* model)
     _model = model;
 }
 
-bool OGLPlanarWidget::unfold()
+void OGLPlanarWidget::unfold()
 {
-    bool unfolded = false;
     makeCurrent();
-    unfolded = _model->unfold();
+    _model->unfold();
     doneCurrent();
     _initialized = true;
     update();
-    return unfolded;
 }
 
 void OGLPlanarWidget::initializeGL()

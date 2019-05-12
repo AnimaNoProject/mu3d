@@ -48,30 +48,37 @@ void MainWindow::loadModel()
 
 void MainWindow::unfoldModel()
 {
-    if(!unfolding)
-    {
-        _planarWidget->add(_modelWidget->_model);
-        _unfold->setText("Stop Unfolding");
-        unfolding = true;
-        timer->start(50);
-    }
+    if(unfolding)
+        stop();
     else
-    {
-        timer->stop();
-        _unfold->setText("Unfolding");
-        unfolding = false;
-    }
+        start();
+}
+
+void MainWindow::start()
+{
+    _planarWidget->add(_modelWidget->_model);
+    _unfold->setText("Stop Unfolding");
+    unfolding = true;
+    timer->start(25);
+}
+
+void MainWindow::stop()
+{
+    timer->stop();
+    _unfold->setText("Unfolding");
+    unfolding = false;
 }
 
 void MainWindow::unfoldLoop()
 {
     _modelWidget->recalculateModel();
-    bool result = _planarWidget->unfold();
-    if(result)
-    {
-        timer->stop();
-        unfoldModel();
-    }
+    _planarWidget->unfold();
+
     _modelWidget->update();
     _planarWidget->update();
+
+    if(_planarWidget->_model->finishedAnnealing())
+    {
+        stop();
+    }
 }

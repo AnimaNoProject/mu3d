@@ -19,7 +19,8 @@ public:
     double _length;
     Halfedge _halfedge;
     QVector3D _middle;
-    double _cost;
+
+    double _probability;
 
     Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
     Edge(int sFace, int tFace);

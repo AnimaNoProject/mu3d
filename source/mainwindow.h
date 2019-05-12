@@ -4,13 +4,11 @@
 #include <QHBoxLayout>
 #include <QMenuBar>
 #include <QAction>
+#include <QTimer>
+
 #include "oglwidget.h"
 #include "oglplanarwidget.h"
 #include "model.h"
-#include <thread>
-#include <QTimer>
-
-#define NDEBUG 1
 
 class MainWindow : public QMainWindow
 {
@@ -21,7 +19,6 @@ public:
     ~MainWindow();
     void loadModel();
     void unfoldModel();
-
 public slots:
     void unfoldLoop();
 
@@ -34,4 +31,7 @@ private:
     QTimer* timer;
     bool unfolding;
     bool unfoldSuccess;
+
+    void start();
+    void stop();
 };

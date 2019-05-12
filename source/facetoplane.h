@@ -17,10 +17,7 @@ public:
 
     QVector3D color;
 
-    int faceId;
-    int parentId;
-
-    int overlapping;
+    ulong faceId;
 
     QVector2D const& get(QVector3D const &vec);
     QVector3D const& get(QVector2D const &vec);
