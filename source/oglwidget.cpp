@@ -39,7 +39,6 @@ void OGLWidget::recalculateModel()
 {
     makeCurrent();
     _model->recalculate(_program);
-    _camera->reset();
     doneCurrent();
     update();
 }

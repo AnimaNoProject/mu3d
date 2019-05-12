@@ -32,7 +32,6 @@ private:
     QAction* _loadModel;
 
     QTimer* timer;
-
-
+    bool unfolding;
     bool unfoldSuccess;
 };

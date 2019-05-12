@@ -200,13 +200,10 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
 
                         if(tmp.overlaps(faceMap[i]))
                         {
-#ifndef NDEBUG
-                            std::cout << "gt overlaps with face " << i << std::endl;
-#endif
-                            tmp._gluetag._cost += 2;
+                            tmp._gluetag._cost++;
                             tmp.overlapping = true;
                             overlaps++;
-                            //adjustHeat(faceMap[i], faceMap);
+                            faceMap[index].overlapping++;
                         }
                     }
 
@@ -215,12 +212,10 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
                     {
                         if(gtp.overlaps(tmp))
                         {
-#ifndef NDEBUG
-                            std::cout << "gt overlaps with other gluetag " << std::endl;
-#endif
-                            tmp._gluetag._cost += 1;
+                            tmp._gluetag._cost++;
                             tmp.overlapping = true;
                             overlaps++;
+                            faceMap[index].overlapping++;
                         }
                     }
 
@@ -244,7 +239,7 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
         {
             faceMap[index].color = QVector3D(1,0,0);
             overlaps++;
-            adjustEdgeCost(faceMap[index], faceMap);
+            faceMap[index].overlapping++;
         }
     }
 
@@ -260,10 +255,11 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
         {
             faceMap[index].color = QVector3D(1,0,0);
             overlaps++;
-            adjustEdgeCost(faceMap[index], faceMap);
+            faceMap[index].overlapping++;
         }
     }
 
+    adjustEdgeCost(faceMap[index], faceMap, faceMap[index].overlapping);
 
     discovered[index] = true;
     // go through all adjacent edges
@@ -278,20 +274,19 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
     return overlaps;
 }
 
-void Graph::adjustEdgeCost(FaceToPlane& mapper, std::vector<FaceToPlane>& faceMap)
+void Graph::adjustEdgeCost(FaceToPlane& mapper, std::vector<FaceToPlane>& faceMap, double cost)
 {
-    if(mapper.faceId != mapper.parentId)
+    if(mapper.faceId == mapper.parentId)
     {
-        for(Edge& edge : _edges)
+        return;
+    }
+
+    for(Edge& edge : _edges)
+    {
+        if(edge == Edge(mapper.faceId, mapper.parentId))
         {
-            if(edge == Edge(mapper.faceId, mapper.parentId))
-            {
-                if(edge._cost >= 2)
-                {
-                    adjustEdgeCost(faceMap[ulong(mapper.parentId)], faceMap);
-                }
-                edge._cost += 1;
-            }
+            edge._cost += cost;
+            adjustEdgeCost(faceMap[ulong(mapper.parentId)], faceMap, faceMap[ulong(mapper.parentId)].overlapping - edge._cost);
         }
     }
 }
@@ -430,10 +425,10 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
     std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
     std::cout << "Edges 'to be bent': " << _mspEdges.size() << std::endl;
 #endif
-    std::cout << _cutEdges.size() << std::endl;
+
     std::vector<bool> tagged;
     tagged.resize(_facets.size());
-    std::cout << "Gluetags" << std::endl;
+
     for(Gluetag& gluetag : _gluetags)
     {
         int neighbours = 0;

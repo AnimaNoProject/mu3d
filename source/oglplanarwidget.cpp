@@ -17,10 +17,8 @@ void OGLPlanarWidget::add(Model* model)
 bool OGLPlanarWidget::unfold()
 {
     bool unfolded = false;
-
     makeCurrent();
     unfolded = _model->unfold();
-    _camera->reset();
     doneCurrent();
     _initialized = true;
     update();
@@ -109,12 +107,9 @@ void OGLPlanarWidget::keyPressEvent(QKeyEvent *event)
     switch(event->key())
     {
         case Qt::Key_F1:
-
             break;
         case Qt::Key_F2:
-
             break;
     }
-    update();
 }
 
