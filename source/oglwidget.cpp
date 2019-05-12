@@ -21,7 +21,6 @@ OGLWidget::OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWid
 void OGLWidget::importModel(const char* filename)
 {
     // makeCurrent is important, if this is not called, the model cannot
-    // create the VBO/IBO/VAO in the context of this widget
     makeCurrent();
     _model = new Model(filename); // create the new model
     _model->createGLModelContext(_program);
@@ -34,6 +33,15 @@ void OGLWidget::importModel(const char* filename)
 OGLWidget::~OGLWidget()
 {
     cleanup();
+}
+
+void OGLWidget::recalculateModel()
+{
+    makeCurrent();
+    _model->recalculate(_program);
+    _camera->reset();
+    doneCurrent();
+    update();
 }
 
 void OGLWidget::initializeGL()

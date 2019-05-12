@@ -14,21 +14,17 @@ void OGLPlanarWidget::add(Model* model)
     _model = model;
 }
 
-void OGLPlanarWidget::unfold()
+bool OGLPlanarWidget::unfold()
 {
     bool unfolded = false;
-    int counter = 0;
-    while(!unfolded && counter++ <= 1200)
-    {
-        makeCurrent();
-        _model->recalculate();
-        unfolded = _model->unfold(_program);
-        _camera->reset();
-        doneCurrent();
-        _initialized = true;
-        update();
-        //std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+
+    makeCurrent();
+    unfolded = _model->unfold();
+    _camera->reset();
+    doneCurrent();
+    _initialized = true;
+    update();
+    return unfolded;
 }
 
 void OGLPlanarWidget::initializeGL()
@@ -81,7 +77,7 @@ void OGLPlanarWidget::paintGL()
 }
 
 void OGLPlanarWidget::resizeGL(int w, int h)
-{
+{    update();
     // on resize the projection matrix needs to be updated
     _projMatrix.setToIdentity();
     _projMatrix.perspective(45.f, float(w) / h, 0.01f, 1000.0f);

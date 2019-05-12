@@ -45,8 +45,6 @@ void MainWindow::loadModel()
 void MainWindow::unfoldModel()
 {
     _planarWidget->add(_modelWidget->_model);
-    _unfold->setDisabled(true);
-
-    //std::thread t1(&OGLPlanarWidget::unfold, _planarWidget);
+    _modelWidget->recalculateModel();
     _planarWidget->unfold();
 }

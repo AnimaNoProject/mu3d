@@ -21,6 +21,7 @@ public:
     OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = nullptr);
     virtual ~OGLWidget() override;
     void importModel(const char* filename);
+    void recalculateModel();
     Model* _model;
 public slots:
     void cleanup();

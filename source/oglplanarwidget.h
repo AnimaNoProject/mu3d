@@ -25,7 +25,7 @@ public:
     OGLPlanarWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = nullptr);
     virtual ~OGLPlanarWidget() override;
     void add(Model* model);
-    void unfold();
+    bool unfold();
 public slots:
     void cleanup();
 protected:

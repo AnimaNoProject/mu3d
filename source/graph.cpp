@@ -204,7 +204,8 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
 #endif
                             tmp._gluetag._heat += 1;
                             tmp.overlapping = true;
-                            //overlaps++;
+                            overlaps++;
+                            adjustHeat(faceMap[i], faceMap);
                         }
                     }
 
@@ -218,7 +219,7 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
 #endif
                             tmp._gluetag._heat += 1;
                             tmp.overlapping = true;
-                            //overlaps++;
+                            overlaps++;
                         }
                     }
 
@@ -242,7 +243,6 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
         {
             faceMap[index].color = QVector3D(1,0,0);
             overlaps++;
-
             adjustHeat(faceMap[index], faceMap);
         }
     }
@@ -258,8 +258,7 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
         if(gtp.overlaps(faceMap[index]))
         {
             faceMap[index].color = QVector3D(1,0,0);
-            //overlaps++;
-
+            overlaps++;
             adjustHeat(faceMap[index], faceMap);
         }
     }
@@ -286,15 +285,11 @@ void Graph::adjustHeat(FaceToPlane& mapper, std::vector<FaceToPlane>& faceMap)
         {
             if(edge == Edge(mapper.faceId, mapper.parentId))
             {
-                if(edge._heat > 2)
+                if(edge._heat >= 2)
                 {
                     adjustHeat(faceMap[ulong(mapper.parentId)], faceMap);
-                    edge._heat -= 1;
                 }
-                else
-                {
-                    edge._heat += 1;
-                }
+                edge._heat += 1;
             }
         }
     }
@@ -434,10 +429,10 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
     std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
     std::cout << "Edges 'to be bent': " << _mspEdges.size() << std::endl;
 #endif
-
+    std::cout << _cutEdges.size() << std::endl;
     std::vector<bool> tagged;
     tagged.resize(_facets.size());
-
+    std::cout << "Gluetags" << std::endl;
     for(Gluetag& gluetag : _gluetags)
     {
         int neighbours = 0;
@@ -474,8 +469,6 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
             continue;
         }
 
-
-
         for(Edge& edge : _cutEdges)
         {
             if(gluetag._edge._halfedge->vertex() == edge._halfedge->vertex()
@@ -502,11 +495,11 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
         {
             tagged[ulong(gluetag._placedFace)] = true;
             tagged[ulong(gluetag._targetFace)] = true;
-            _necessaryGluetags.push_back(gluetag);
             gluetag.getVertices(gtVertices, gtIndices, gtColors);
+            _necessaryGluetags.push_back(gluetag);
         }
     }
-
+    std::cout << std::endl;
 #ifndef NDEBUG
     std::cout << "Necessary Gluetags: " << _necessaryGluetags.size() << std::endl;
 #endif
@@ -590,8 +583,8 @@ void Graph::lines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& 
         lineVertices.push_back(Utility::pointToVector(edge._halfedge->prev()->vertex()->point()));
         lineVertices.push_back(Utility::pointToVector(edge._halfedge->vertex()->point()));
 
-        lineColors.push_back(QVector3D(0.8f, 0.2f, 0.2f));
-        lineColors.push_back(QVector3D(0.8f, 0.2f, 0.2f));
+        lineColors.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+        lineColors.push_back(QVector3D(1.0f, 0.0f, 0.0f));
     }
 
     // add all edges that are not cut edges
@@ -621,7 +614,6 @@ QVector3D Graph::faceCenter(Facet facet)
 
     // divide by 3 to get the center
     middle /= 3.0f;
-
     return middle;
 }
 

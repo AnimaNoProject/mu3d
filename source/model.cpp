@@ -57,10 +57,38 @@ Model::Model(const char* filename)
     _graph.lines(_lineVertices, _lineColors);
 }
 
-void Model::recalculate()
+void Model::recalculate(QOpenGLShaderProgram* program)
 {
+    _vaoGT.destroy();
+    _vboGT[0].destroy();
+    _vboGT[1].destroy();
+    _iboGT.destroy();
+
+    _verticesGT.clear();
+    _indicesGT.clear();
+    _colorsGT.clear();
+
+    _vaoLines.destroy();
+    _vboLines[0].destroy();
+    _vboLines[1].destroy();
+
+    _lineVertices.clear();
+    _lineColors.clear();
+
     _graph.calculateMSP();
     _graph.calculateGlueTags(_verticesGT, _indicesGT, _colorsGT);
+    _graph.lines(_lineVertices, _lineColors);
+
+    _vao.destroy();
+    _vbo[0].destroy();
+    _vbo[1].destroy();
+    _ibo.destroy();
+
+    program->bind();
+    Utility::createBuffers(_vaoGT, _vboGT, _iboGT, _verticesGT, _indicesGT, _colorsGT);
+    Utility::createBuffers(_vaoLines, _vboLines, _lineVertices, _lineColors);
+    Utility::createBuffers(_vao, _vbo, _ibo, _vertices, _indices, _colors);
+    program->release();
 }
 
 void Model::createGLModelContext(QOpenGLShaderProgram* program)
@@ -72,7 +100,7 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
     program->release();
 }
 
-bool Model::unfold(QOpenGLShaderProgram* program)
+bool Model::unfold()
 {
     _planarVertices.clear();
     _planarColors.clear();
@@ -89,10 +117,8 @@ bool Model::unfold(QOpenGLShaderProgram* program)
 
     bool unfolded = _graph.unfoldGraph(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
 
-    program->bind();
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);
     Utility::createBuffers(_vaoPlanarLines, _vboPlanarLines, _planarLines, _planarLinesColors);
-    program->release();
 
     return unfolded;
 }
