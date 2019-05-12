@@ -73,7 +73,7 @@ static std::vector<std::string> colors = {
 
 size_t Gluetag::id = 0;
 
-Gluetag::Gluetag(Edge& edge, bool flag) : _heat(0)
+Gluetag::Gluetag(Edge& edge, bool flag) : _cost(0)
 {
     _edge = edge;
     if(flag)
@@ -161,7 +161,7 @@ void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort
 
 bool Gluetag::operator<(const Gluetag& other) const
 {
-    return _heat < other._heat;
+    return _cost < other._cost;
 }
 
 QVector3D Gluetag::hex2rgb(std::string hex)

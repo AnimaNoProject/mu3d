@@ -18,7 +18,7 @@ public:
     QVector3D _tr;
     QVector3D _color;
 
-    int _heat;
+    int _cost;
 
     void getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors);
     bool operator<(const Gluetag& other) const;

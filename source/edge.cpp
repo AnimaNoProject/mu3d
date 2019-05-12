@@ -4,7 +4,7 @@ Edge::Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfe
     :  _sFace(sFace), _tFace(tFace),
       _sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle),
       _length(length),  _halfedge(halfedge),
-      _middle(middle),  _heat(0)
+      _middle(middle),  _cost(0)
 {
 }
 
@@ -29,13 +29,13 @@ bool Edge::operator==(const Edge& other) const
 
 bool Edge::operator<(const Edge& other) const
 {
-    if(_heat == 0 && other._heat == 0)
+    if(_cost == 0 && other._cost == 0)
     {
         return _length < other._length;
     }
     else
     {
-        return _heat < other._heat;
+        return _cost < other._cost;
     }
 }
 
