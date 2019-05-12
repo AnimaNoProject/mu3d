@@ -8,6 +8,7 @@
 #include "oglplanarwidget.h"
 #include "model.h"
 #include <thread>
+#include <QTimer>
 
 #define NDEBUG 1
 
@@ -20,9 +21,18 @@ public:
     ~MainWindow();
     void loadModel();
     void unfoldModel();
+
+public slots:
+    void unfoldLoop();
+
 private:
     OGLWidget* _modelWidget;
     OGLPlanarWidget* _planarWidget;
     QAction* _unfold;
     QAction* _loadModel;
+
+    QTimer* timer;
+
+
+    bool unfoldSuccess;
 };

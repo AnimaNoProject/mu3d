@@ -26,6 +26,9 @@ MainWindow::MainWindow(int height, int width, QString title)
     this->centralWidget()->setLayout(layout);
     this->setWindowTitle(title);
     this->setWindowModality(Qt::ApplicationModal);
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(unfoldLoop()));
 }
 
 MainWindow::~MainWindow()
@@ -45,6 +48,17 @@ void MainWindow::loadModel()
 void MainWindow::unfoldModel()
 {
     _planarWidget->add(_modelWidget->_model);
+    timer->start(50);
+}
+
+void MainWindow::unfoldLoop()
+{
     _modelWidget->recalculateModel();
-    _planarWidget->unfold();
+    bool result = _planarWidget->unfold();
+    if(result)
+    {
+        timer->stop();
+    }
+    _modelWidget->update();
+    _planarWidget->update();
 }
