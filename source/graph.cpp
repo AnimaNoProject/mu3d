@@ -10,7 +10,7 @@ Graph::~Graph()
 
 }
 
-void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center)
+bool Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center)
 {
     _tree.resize(_facets.size());
     for(int i = 0; i < int(_facets.size()); ++i)
@@ -35,77 +35,24 @@ void Graph::unfoldGraph(std::vector<QVector3D>& vertices, std::vector<QVector3D>
 
     int overlaps = treeify(_tree, 0, discovered, 0, faceMap, gtMap);
 
-    std::cout << "overlaps: " << overlaps << std::endl;
-
     QVector2D planarCenter(0,0);
 
     for(FaceToPlane& mapper : faceMap)
     {
-        vertices.push_back(QVector3D(mapper.a, 0));
-        vertices.push_back(QVector3D(mapper.b, 0));
-        vertices.push_back(QVector3D(mapper.c, 0));
-
-        planarCenter += ((mapper.a + mapper.b + mapper.c) / 3) / faceMap.size();
-
-        verticesLines.push_back(QVector3D(mapper.a, 0));
-        verticesLines.push_back(QVector3D(mapper.b, 0));
-
-        verticesLines.push_back(QVector3D(mapper.b, 0));
-        verticesLines.push_back(QVector3D(mapper.c, 0));
-
-        verticesLines.push_back(QVector3D(mapper.a, 0));
-        verticesLines.push_back(QVector3D(mapper.c, 0));
-
-        colors.push_back(mapper.color);
-        colors.push_back(mapper.color);
-        colors.push_back(mapper.color);
+        mapper.drawproperties(vertices, verticesLines, colors);
     }
 
     for(GluetagToPlane& mapper : gtMap)
     {
-        vertices.push_back(QVector3D(mapper.a, 0));
-        vertices.push_back(QVector3D(mapper.d, 0));
-        vertices.push_back(QVector3D(mapper.c, 0));
-
-        vertices.push_back(QVector3D(mapper.a, 0));
-        vertices.push_back(QVector3D(mapper.b, 0));
-        vertices.push_back(QVector3D(mapper.c, 0));
-
-        verticesLines.push_back(QVector3D(mapper.a, 0));
-        verticesLines.push_back(QVector3D(mapper.d, 0));
-
-        verticesLines.push_back(QVector3D(mapper.c, 0));
-        verticesLines.push_back(QVector3D(mapper.d, 0));
-
-        verticesLines.push_back(QVector3D(mapper.b, 0));
-        verticesLines.push_back(QVector3D(mapper.c, 0));
-
-        if(!mapper.overlapping)
-        {
-            colors.push_back(mapper._gluetag._color);
-            colors.push_back(mapper._gluetag._color);
-            colors.push_back(mapper._gluetag._color);
-
-            colors.push_back(mapper._gluetag._color);
-            colors.push_back(mapper._gluetag._color);
-            colors.push_back(mapper._gluetag._color);
-        }
-        else
-        {
-            colors.push_back(QVector3D(1,0,0));
-            colors.push_back(QVector3D(1,0,0));
-            colors.push_back(QVector3D(1,0,0));
-
-            colors.push_back(QVector3D(1,0,0));
-            colors.push_back(QVector3D(1,0,0));
-            colors.push_back(QVector3D(1,0,0));
-        }
-
-
+        mapper.drawproperties(vertices, verticesLines, colors);
     }
 
     colorsLines.resize(verticesLines.size());
     center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
+
+    std::cout << "Overlaps:" << overlaps << std::endl;
+
+    return overlaps == 0;
 }
 
 void Graph::planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c)
@@ -196,6 +143,9 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
         } while (++hfc != _facets[int(index)]->facet_begin());
     }
 
+    faceMap[index].parentId = parent;
+    faceMap[index].faceId = index;
+
     for(Gluetag& gluetag : _necessaryGluetags)
     {
         if(gluetag._placedFace == int(index))
@@ -252,8 +202,9 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
 #ifndef NDEBUG
                             std::cout << "gt overlaps with face " << i << std::endl;
 #endif
+                            tmp._gluetag._heat += 1;
                             tmp.overlapping = true;
-                            overlaps++;
+                            //overlaps++;
                         }
                     }
 
@@ -265,8 +216,9 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
 #ifndef NDEBUG
                             std::cout << "gt overlaps with other gluetag " << std::endl;
 #endif
+                            tmp._gluetag._heat += 1;
                             tmp.overlapping = true;
-                            overlaps++;
+                            //overlaps++;
                         }
                     }
 
@@ -290,7 +242,8 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
         {
             faceMap[index].color = QVector3D(1,0,0);
             overlaps++;
-            increaseHeat(int(index), int(parent));
+
+            adjustHeat(faceMap[index], faceMap);
         }
     }
 
@@ -305,8 +258,9 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
         if(gtp.overlaps(faceMap[index]))
         {
             faceMap[index].color = QVector3D(1,0,0);
-            overlaps++;
-            increaseHeat(int(index), int(parent));
+            //overlaps++;
+
+            adjustHeat(faceMap[index], faceMap);
         }
     }
 
@@ -324,14 +278,24 @@ int Graph::treeify(std::vector<std::vector<int>> const &edges, ulong index, std:
     return overlaps;
 }
 
-void Graph::increaseHeat(int faceA, int faceB)
+void Graph::adjustHeat(FaceToPlane& mapper, std::vector<FaceToPlane>& faceMap)
 {
-    for(Edge& edge : _edges)
+    if(mapper.faceId != mapper.parentId)
     {
-        if(edge == Edge(faceA, faceB))
+        for(Edge& edge : _edges)
         {
-            edge._heat += 1;
-            break;
+            if(edge == Edge(mapper.faceId, mapper.parentId))
+            {
+                if(edge._heat > 2)
+                {
+                    adjustHeat(faceMap[ulong(mapper.parentId)], faceMap);
+                    edge._heat -= 1;
+                }
+                else
+                {
+                    edge._heat += 1;
+                }
+            }
         }
     }
 }
@@ -380,6 +344,15 @@ void Graph::calculateDual()
             }
 
         } while (++hfc != facet.second->facet_begin());
+    }
+
+    // calculate all possible gluetags
+    for (Edge& edge : _edges)
+    {
+        Gluetag gt = Gluetag(edge, true);
+        _gluetags.push_back(gt);
+        gt = Gluetag(edge, false);
+        _gluetags.push_back(gt);
     }
 }
 
@@ -453,26 +426,55 @@ void Graph::calculateMSP()
 void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {
     // clear old gluetags
-    _gluetags.clear();
+    _necessaryGluetags.clear();
+
+    std::sort(_gluetags.begin(), _gluetags.end());
 
 #ifndef NDEBUG
     std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
     std::cout << "Edges 'to be bent': " << _mspEdges.size() << std::endl;
 #endif
 
-
     std::vector<bool> tagged;
     tagged.resize(_facets.size());
-    // go through all cut edges and add a gluetag for each
-    for(Edge& edge : _cutEdges)
-    {
-        Gluetag gt = Gluetag(edge);
-        _gluetags.push_back(gt);
-    }
 
     for(Gluetag& gluetag : _gluetags)
     {
         int neighbours = 0;
+        bool found = false;
+
+        for(Edge& pedge : _cutEdges)
+        {
+            // return true if this edge was added to the graph
+            if(pedge == gluetag._edge)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if(!found)
+        {
+            continue;
+        }
+
+        found = false;
+
+        for(Gluetag& other : _necessaryGluetags)
+        {
+            if(gluetag._edge == other._edge)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if(found)
+        {
+            continue;
+        }
+
+
 
         for(Edge& edge : _cutEdges)
         {
@@ -496,14 +498,13 @@ void Graph::calculateGlueTags(std::vector<QVector3D>& gtVertices, std::vector<GL
             }
         }
 
-        if(!tagged[ulong(gluetag._placedFace)] || !tagged[ulong(gluetag._targetFace)] || neighbours > 1)
+        if((!tagged[ulong(gluetag._placedFace)] && !tagged[ulong(gluetag._targetFace)]) || neighbours > 1)
         {
             tagged[ulong(gluetag._placedFace)] = true;
             tagged[ulong(gluetag._targetFace)] = true;
             _necessaryGluetags.push_back(gluetag);
             gluetag.getVertices(gtVertices, gtIndices, gtColors);
         }
-
     }
 
 #ifndef NDEBUG

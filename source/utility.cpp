@@ -54,6 +54,10 @@ void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], 
 void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], std::vector<QVector3D> vertices, std::vector<QVector3D> colors)
 {
     // delcare Vertex
+    vbo[0].destroy();
+    vbo[1].destroy();
+    vao.destroy();
+
     vbo[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     vbo[1] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 

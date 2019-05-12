@@ -8,6 +8,9 @@
 
 #include <QWheelEvent>
 
+#include <thread>
+#include <chrono>
+
 #include "camera.h"
 #include "model.h"
 #include "oglwidget.h"

@@ -8,10 +8,7 @@
 class Gluetag
 {
 public:
-    Gluetag(Edge& edge);
-
-    void getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors);
-
+    Gluetag(Edge& edge, bool flag);
     int _placedFace;
     int _targetFace;
     Edge _edge;
@@ -20,6 +17,11 @@ public:
     QVector3D _tl;
     QVector3D _tr;
     QVector3D _color;
+
+    int _heat;
+
+    void getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors);
+    bool operator<(const Gluetag& other) const;
 private:
     QVector3D hex2rgb(std::string hex);
 

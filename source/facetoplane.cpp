@@ -13,6 +13,26 @@ bool FaceToPlane::overlaps(FaceToPlane& other)
            || Utility::intersects(c, a, other.c, other.a);
 }
 
+void FaceToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colors)
+{
+    vertices.push_back(QVector3D(a, 0));
+    vertices.push_back(QVector3D(b, 0));
+    vertices.push_back(QVector3D(c, 0));
+
+    verticesLines.push_back(QVector3D(a, 0));
+    verticesLines.push_back(QVector3D(b, 0));
+
+    verticesLines.push_back(QVector3D(b, 0));
+    verticesLines.push_back(QVector3D(c, 0));
+
+    verticesLines.push_back(QVector3D(a, 0));
+    verticesLines.push_back(QVector3D(c, 0));
+
+    colors.push_back(color);
+    colors.push_back(color);
+    colors.push_back(color);
+}
+
 QVector2D const& FaceToPlane::get(QVector3D const &vec)
 {
     if(vec == A)

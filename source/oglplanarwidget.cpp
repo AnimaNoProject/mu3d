@@ -16,12 +16,19 @@ void OGLPlanarWidget::add(Model* model)
 
 void OGLPlanarWidget::unfold()
 {
-    makeCurrent();
-    _model->unfold(_program);
-    _camera->reset();
-    doneCurrent();
-    _initialized = true;
-    update();
+    bool unfolded = false;
+    int counter = 0;
+    while(!unfolded && counter++ <= 1200)
+    {
+        makeCurrent();
+        _model->recalculate();
+        unfolded = _model->unfold(_program);
+        _camera->reset();
+        doneCurrent();
+        _initialized = true;
+        update();
+        //std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
 
 void OGLPlanarWidget::initializeGL()

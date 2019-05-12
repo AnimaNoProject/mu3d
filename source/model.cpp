@@ -2,7 +2,6 @@
 
 Model::Model(const char* filename)
 {
-
     // open file buffer
     std::filebuf filebuffer;
     if(filebuffer.open(filename, std::ios::in))
@@ -58,8 +57,14 @@ Model::Model(const char* filename)
     _graph.lines(_lineVertices, _lineColors);
 }
 
-void Model::createGLModelContext(QOpenGLShaderProgram* program)
+void Model::recalculate()
 {
+    _graph.calculateMSP();
+    _graph.calculateGlueTags(_verticesGT, _indicesGT, _colorsGT);
+}
+
+void Model::createGLModelContext(QOpenGLShaderProgram* program)
+{    
     program->bind();
     Utility::createBuffers(_vao, _vbo, _ibo, _vertices, _indices, _colors);
     Utility::createBuffers(_vaoGT, _vboGT, _iboGT, _verticesGT, _indicesGT, _colorsGT);
@@ -67,14 +72,29 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
     program->release();
 }
 
-void Model::unfold(QOpenGLShaderProgram* program)
+bool Model::unfold(QOpenGLShaderProgram* program)
 {
-    _graph.unfoldGraph(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
+    _planarVertices.clear();
+    _planarColors.clear();
+    _planarLines.clear();
+    _planarLinesColors.clear();
+
+    _vaoPlanar.destroy();
+    _vboPlanar[0].destroy();
+    _vboPlanar[1].destroy();
+
+    _vaoPlanarLines.destroy();
+    _vboPlanarLines[0].destroy();
+    _vboPlanarLines[1].destroy();
+
+    bool unfolded = _graph.unfoldGraph(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
 
     program->bind();
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);
     Utility::createBuffers(_vaoPlanarLines, _vboPlanarLines, _planarLines, _planarLinesColors);
     program->release();
+
+    return unfolded;
 }
 
 void Model::draw(QOpenGLShaderProgram* program)
@@ -162,7 +182,6 @@ void Model::switchRenderMode()
 
 Model::Model()
 {
-    //createGLModelContext();
 }
 
 Model::~Model()

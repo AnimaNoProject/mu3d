@@ -7,6 +7,9 @@
 #include "oglwidget.h"
 #include "oglplanarwidget.h"
 #include "model.h"
+#include <thread>
+
+#define NDEBUG 1
 
 class MainWindow : public QMainWindow
 {

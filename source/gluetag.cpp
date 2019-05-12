@@ -73,12 +73,19 @@ static std::vector<std::string> colors = {
 
 size_t Gluetag::id = 0;
 
-Gluetag::Gluetag(Edge& edge)
+Gluetag::Gluetag(Edge& edge, bool flag) : _heat(0)
 {
     _edge = edge;
-    _placedFace = edge._sFace;
-    _targetFace = edge._tFace;
-
+    if(flag)
+    {
+        _placedFace = edge._sFace;
+        _targetFace = edge._tFace;
+    }
+    else
+    {
+        _placedFace = edge._tFace;
+        _targetFace = edge._sFace;
+    }
 
     // get the bottom left corner of the base
     _bl = QVector3D(float(_edge._halfedge->vertex()->point().x()),
@@ -150,6 +157,11 @@ void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort
     colors.push_back(_color);
     colors.push_back(_color);
     colors.push_back(_color);
+}
+
+bool Gluetag::operator<(const Gluetag& other) const
+{
+    return _heat < other._heat;
 }
 
 QVector3D Gluetag::hex2rgb(std::string hex)

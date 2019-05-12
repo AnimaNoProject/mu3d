@@ -18,10 +18,12 @@ public:
     QVector3D color;
 
     int faceId;
+    int parentId;
 
     QVector2D const& get(QVector3D const &vec);
     QVector3D const& get(QVector2D const &vec);
     QVector3D const& get(QVector3D const &one, QVector3D const &two);
 
     bool overlaps(FaceToPlane& other);
+    void drawproperties(std::vector<QVector3D>& vertices, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colors);
 };

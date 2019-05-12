@@ -29,8 +29,10 @@ public:
     void drawPlanarPatch(QOpenGLShaderProgram* program);
     void switchRenderMode();
     void showGluetags();
-    void unfold(QOpenGLShaderProgram* program);
+    bool unfold(QOpenGLShaderProgram* program);
     void createGLModelContext(QOpenGLShaderProgram* program);
+
+    void recalculate();
 
     Graph _graph;
     QMatrix4x4 _modelMatrixPlanar;
