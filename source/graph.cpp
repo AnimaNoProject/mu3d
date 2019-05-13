@@ -2,7 +2,6 @@
 
 Graph::Graph()
 {
-
 }
 
 Graph::~Graph()
@@ -12,8 +11,10 @@ Graph::~Graph()
 
 void Graph::nextC()
 {
+    // make a move (change cut edges and gluetags)
     move();
 
+    // calculate a new spanning tree and gluetags
     calculateMSP();
     calculateGlueTags();
     resetTree();
@@ -25,35 +26,41 @@ void Graph::nextC()
     discovered.resize(_facets.size());
     faceMap.resize(_facets.size());
 
+    // unfold and check for overlaps
     double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap);
     double newEnergy = overlaps;
 
-    double energyDelta = newEnergy - _Cenergy;
+    double chance = (newEnergy - _Cenergy) / (TEMP_MAX - temperature); //std::exp(-energyDelta/(TEMP_MAX - temperature));
+    double random = (double(std::rand()) / RAND_MAX);
 
-    if(energyDelta < 0)
+    if(newEnergy < _Cenergy) // if it got better we take the new graph
     {
-        _Cgt = _necessaryGluetags;
+        _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
     }
-    else if (std::exp(energyDelta/temperature) > (double(std::rand()) / RAND_MAX))
+    // by a small chance we even make a bad move
+    else if (chance > random) // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
     {
-        _Cgt = _necessaryGluetags;
+        _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
+        std::cout << "escape local minimum i hope" << std::endl;
     }
 
+    // continue working with the best
     _edges = _C;
-    _necessaryGluetags = _Cgt;
-
+    _gluetags = _Cgt;
     calculateMSP();
     calculateGlueTags();
 
+    // end epoch
     temperature -= EPOCH;
 }
 
 void Graph::initC()
 {
+    // calculate the dualgraph and an initial MSP and Gluetags
     calculateDual();
     calculateMSP();
     calculateGlueTags();
@@ -61,8 +68,10 @@ void Graph::initC()
     resetTree();
 
     temperature = TEMP_MAX;
+    resetCounter = 0;
 
-    _Cgt = _necessaryGluetags;
+    // it is the best we have
+    _Cgt = _gluetags;
     _C = _edges;
 
     std::vector<GluetagToPlane> gtMap;
@@ -72,24 +81,32 @@ void Graph::initC()
     discovered.resize(_facets.size());
     faceMap.resize(_facets.size());
 
+    // initialize the energy with this unfolding
     double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap);
     _Cenergy = overlaps;
 }
 
 void Graph::move()
 {
-    // assign a probability of every edge to be chose
-    _edges = _C;
-    _necessaryGluetags = _Cgt;
+    changeFaces();
+    changeGluetags();
+}
 
+void Graph::changeFaces()
+{
+    // assign a probability of every edge to be chose
     for(Edge& edge : _edges)
     {
-        edge._probability = (double(std::rand()) / RAND_MAX);
+        edge._probability = 1 - (double(std::rand()) / RAND_MAX);
     }
 
+}
+
+void Graph::changeGluetags()
+{
     for(Gluetag& gluetag : _gluetags)
     {
-        gluetag._probability = (double(std::rand()) / RAND_MAX);
+        gluetag._probability = 1 - (double(std::rand()) / RAND_MAX);
     }
 }
 
@@ -260,7 +277,7 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
                     QVector2D p2 = faceMap[index].get(P2);
                     QVector2D p3prev = faceMap[index].get(Pu);
 
-                    GluetagToPlane tmp(gluetag);
+                    GluetagToPlane tmp(&gluetag);
 
                     // top edge of the gluetag is 1/4 of the size of the base edge
                     QVector2D side = (p2 - p1) / 4;
@@ -286,7 +303,7 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
 
                     for(ulong i = 0; i < discovered.size(); i++)
                     {
-                        if(tmp._gluetag._placedFace == int(i))
+                        if(tmp._gluetag->_placedFace == int(i))
                         {
                             continue;
                         }
@@ -334,7 +351,7 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
     // or overlaps with any existing gluetags
     for(GluetagToPlane& gtp : gtMap)
     {
-        if(gtp._gluetag._placedFace == int(index))
+        if(gtp._gluetag->_placedFace == int(index))
         {
             continue;
         }
@@ -484,7 +501,7 @@ void Graph::calculateMSP()
 
 void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {
-    for(Gluetag& gluetag : _Cgt)
+    for(Gluetag& gluetag : _necessaryGluetags)
     {
         gluetag.getVertices(gtVertices, gtIndices, gtColors);
     }
@@ -570,6 +587,7 @@ void Graph::calculateGlueTags()
             _necessaryGluetags.push_back(gluetag);
         }
     }
+
 #ifndef NDEBUG
     std::cout << "Necessary Gluetags: " << _necessaryGluetags.size() << std::endl;
 #endif
@@ -681,7 +699,7 @@ QVector3D Graph::faceCenter(Facet facet)
     {
         middle += Utility::pointToVector(hfc->vertex()->point());
     } while (++hfc != facet->facet_begin());
-
+    bool testGluetag(Gluetag& gluetag);
     // divide by 3 to get the center
     middle /= 3.0f;
     return middle;

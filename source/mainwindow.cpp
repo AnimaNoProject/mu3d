@@ -59,7 +59,7 @@ void MainWindow::start()
     _planarWidget->add(_modelWidget->_model);
     _unfold->setText("Stop Unfolding");
     unfolding = true;
-    timer->start(25);
+    timer->start(10);
 }
 
 void MainWindow::stop()

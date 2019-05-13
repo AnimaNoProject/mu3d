@@ -15,9 +15,11 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 4000.0
+#define TEMP_MAX 7000.0
 #define EPOCH 3.0
 #define TEMP_MIN 1.0
+#define RESET 50.0
+#define BOLTZMANC 0.000013806403
 
 class Gluetag;
 class GluetagToPlane;
@@ -58,6 +60,7 @@ private:
     double _Cenergy;
 
     double temperature;
+    int resetCounter;
 
     void calculateDual();
     void calculateMSP();
@@ -65,6 +68,9 @@ private:
 
     int unfold(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap);
     void move();
+
+    void changeFaces();
+    void changeGluetags();
 
     void resetTree();
     void planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c);

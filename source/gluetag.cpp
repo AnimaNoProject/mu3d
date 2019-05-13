@@ -73,7 +73,7 @@ static std::vector<std::string> colors = {
 
 size_t Gluetag::id = 0;
 
-Gluetag::Gluetag(Edge& edge, bool flag) : _probability(0)
+Gluetag::Gluetag(Edge& edge, bool flag) : _probability(0), overlaps(false)
 {
     _edge = edge;
     if(flag)
@@ -141,7 +141,7 @@ void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort
     vertices.push_back(_tr); // top right = -1
     vertices.push_back(_tl); // top left = 0
 
-    // index + 4 because, 4 vertices added
+    // index + 4 because, 4 vertices added2
     index += 4;
 
     // indices for the two triangles
@@ -161,7 +161,7 @@ void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort
 
 bool Gluetag::operator<(const Gluetag& other) const
 {
-    return _probability < other._probability;
+    return 1 - _probability < 1 - other._probability;
 }
 
 QVector3D Gluetag::hex2rgb(std::string hex)

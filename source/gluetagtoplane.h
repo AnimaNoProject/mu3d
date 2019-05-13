@@ -12,7 +12,7 @@ class FaceToPlane;
 class GluetagToPlane
 {
 public:
-    GluetagToPlane(Gluetag& gluetag);
+    GluetagToPlane(Gluetag* gluetag);
     ~GluetagToPlane();
 
     bool overlaps(GluetagToPlane& other);
@@ -25,7 +25,7 @@ public:
 
     bool overlapping;
 
-    Gluetag& _gluetag;
+    Gluetag* _gluetag;
 
     QVector2D const& get(QVector3D const &vec);
     QVector3D const& get(QVector2D const &vec);

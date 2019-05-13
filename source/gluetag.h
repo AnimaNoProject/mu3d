@@ -20,6 +20,8 @@ public:
 
     double _probability;
 
+    bool overlaps;
+
     void getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors);
     bool operator<(const Gluetag& other) const;
 private:
