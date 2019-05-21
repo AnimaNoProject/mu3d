@@ -59,7 +59,8 @@ void MainWindow::start()
     _planarWidget->add(_modelWidget->_model);
     _unfold->setText("Stop Unfolding");
     unfolding = true;
-    timer->start(10);
+    _modelWidget->_model->_graph.initC();
+    timer->start(1);
 }
 
 void MainWindow::stop()
@@ -68,6 +69,7 @@ void MainWindow::stop()
     _unfold->setText("Unfolding");
     unfolding = false;
 }
+
 
 void MainWindow::unfoldLoop()
 {

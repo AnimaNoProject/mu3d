@@ -21,7 +21,6 @@ public:
     void unfoldModel();
 public slots:
     void unfoldLoop();
-
 private:
     OGLWidget* _modelWidget;
     OGLPlanarWidget* _planarWidget;
@@ -29,6 +28,7 @@ private:
     QAction* _loadModel;
 
     QTimer* timer;
+
     bool unfolding;
     bool unfoldSuccess;
 

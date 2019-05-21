@@ -15,15 +15,20 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 7000.0
-#define EPOCH 3.0
-#define TEMP_MIN 1.0
-#define RESET 50.0
-#define BOLTZMANC 0.000013806403
+#define TEMP_MAX 10000.0
+#define EPOCH 4.0
+#define TEMP_MIN 10.0
 
 class Gluetag;
 class GluetagToPlane;
 class FaceToPlane;
+
+struct Unfolding
+{
+    std::vector<Edge> _edges;
+    std::vector<Gluetag> _gluetags;
+    int _overlaps;
+};
 
 class Graph
 {
@@ -40,9 +45,13 @@ public:
 
     void addFace(Facet facet);
 
+    int minOverlaps;
+
     double energy();
     bool over();
 private:
+    std::vector<Unfolding> unfoldings;
+
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;
@@ -53,6 +62,7 @@ private:
     std::vector<Edge> _cutEdges;
     std::vector<Gluetag> _necessaryGluetags;
     std::vector<std::vector<int>> _tree;
+
 
     /** Best calculated Solution **/
     std::vector<Edge> _C;
@@ -66,7 +76,7 @@ private:
     void calculateMSP();
     void calculateGlueTags();
 
-    int unfold(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap);
+    int unfold(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap, int& gtOverlaps);
     void move();
 
     void changeFaces();

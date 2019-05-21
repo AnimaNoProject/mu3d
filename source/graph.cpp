@@ -26,9 +26,21 @@ void Graph::nextC()
     discovered.resize(_facets.size());
     faceMap.resize(_facets.size());
 
+    int gtOverlaps;
+
     // unfold and check for overlaps
-    double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap);
-    double newEnergy = overlaps;
+    double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap, gtOverlaps);
+    double newEnergy = overlaps + gtOverlaps;
+
+    if(overlaps <= 0)
+    {
+        Unfolding unfolding;
+        unfolding._edges = _edges;
+        unfolding._gluetags = _gluetags;
+        unfolding._overlaps = gtOverlaps;
+
+        unfoldings.push_back(unfolding);
+    }
 
     double chance = (newEnergy - _Cenergy) / (TEMP_MAX - temperature); //std::exp(-energyDelta/(TEMP_MAX - temperature));
     double random = (double(std::rand()) / RAND_MAX);
@@ -37,22 +49,85 @@ void Graph::nextC()
     {
         _Cgt = _gluetags;
         _C = _edges;
-        _Cenergy = newEnergy;
+        _Cenergy = newEnergy + gtOverlaps;
     }
     // by a small chance we even make a bad move
-    else if (chance > random) // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
+    //else if (chance > random) // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
+    //{
+    //    _Cgt = _gluetags;
+    //    _C = _edges;
+    //    _Cenergy = newEnergy + gtOverlaps;
+    //}
+
+    bool gtForced = false;
+    int i = 0;
+    int j = 0;
+
+    if(overlaps <= 0 && gtOverlaps > 0)
     {
-        _Cgt = _gluetags;
-        _C = _edges;
-        _Cenergy = newEnergy;
-        std::cout << "escape local minimum i hope" << std::endl;
+        //std::cout << "tries needed: " << std::pow(_necessaryGluetags.size(), 2) << std::endl;
+
+        for(Gluetag& gt : _necessaryGluetags)
+        {
+            gt.swapFace();
+
+            for(Gluetag& gtInner : _necessaryGluetags)
+            {
+                if(&gt == &gtInner)
+                {
+                    j++;
+                    continue;
+                }
+
+                gtInner.swapFace();
+
+                i++;
+                std::vector<GluetagToPlane> newgtMap;
+                std::vector<FaceToPlane> newfaceMap;
+                std::vector<bool> newdiscovered;
+
+                newdiscovered.resize(_facets.size());
+                newfaceMap.resize(_facets.size());
+
+                int newOverlaps = 0;
+                unfold(_tree, 0, newdiscovered, 0, newfaceMap, newgtMap, newOverlaps);
+                //std::cout << i << ": " << newOverlaps << std::endl;
+                if(newOverlaps <= 0)
+                {
+                    //std::cout << "there should be no gluetag overlaps" << std::endl;
+                    gtForced = true;
+                    _Cenergy = 0;
+                    break;
+                }
+                else if (newOverlaps < minOverlaps)
+                {
+                    minOverlaps = newOverlaps;
+                }
+            }
+
+            if(gtForced)
+            {
+                break;
+            }
+
+            for(Gluetag& endTag : _necessaryGluetags)
+            {
+                endTag.swapFace();
+            }
+        }
+
+        //std::cout << "tries done: " << i + j << std::endl;
     }
 
-    // continue working with the best
-    _edges = _C;
-    _gluetags = _Cgt;
-    calculateMSP();
-    calculateGlueTags();
+
+    if(!gtForced)
+    {
+        // continue working with the best
+        _edges = _C;
+        _gluetags = _Cgt;
+        calculateMSP();
+        calculateGlueTags();
+    }
 
     // end epoch
     temperature -= EPOCH;
@@ -81,9 +156,14 @@ void Graph::initC()
     discovered.resize(_facets.size());
     faceMap.resize(_facets.size());
 
+    int gtOverlaps = 0;
+
     // initialize the energy with this unfolding
-    double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap);
-    _Cenergy = overlaps;
+    double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap, gtOverlaps);
+
+    _Cenergy = overlaps + gtOverlaps;
+
+    minOverlaps = gtOverlaps;
 }
 
 void Graph::move()
@@ -146,8 +226,10 @@ void Graph::oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& 
     discovered.resize(_facets.size());
     faceMap.resize(_facets.size());
 
+    int gtOverlaps;
+
     resetTree();
-    unfold(_tree, 0, discovered, 0, faceMap, gtMap);
+    unfold(_tree, 0, discovered, 0, faceMap, gtMap, gtOverlaps);
 
     QVector2D planarCenter(0,0);
     center.setToIdentity();
@@ -211,7 +293,7 @@ void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu
     }
 }
 
-int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap)
+int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::vector<bool>& discovered, ulong parent, std::vector<FaceToPlane>& faceMap, std::vector<GluetagToPlane>& gtMap, int& gtOverlaps)
 {
     int overlaps = 0;
 
@@ -225,6 +307,8 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
         faceMap[index].C = Utility::pointToVector(facet->facet_begin()->next()->next()->vertex()->point());
 
         planar(faceMap[index].A, faceMap[index].B, faceMap[index].C, faceMap[index].a, faceMap[index].b, faceMap[index].c);
+
+        gtOverlaps = 0;
     }
     else
     {  
@@ -311,7 +395,8 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
                         if(tmp.overlaps(faceMap[i]))
                         {
                             tmp.overlapping = true;
-                            overlaps++;
+                            gtOverlaps++;
+                            break;
                         }
                     }
 
@@ -321,7 +406,8 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
                         if(gtp.overlaps(tmp))
                         {
                             tmp.overlapping = true;
-                            overlaps++;
+                            gtOverlaps++;
+                            break;
                         }
                     }
 
@@ -345,6 +431,7 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
         {
             faceMap[index].color = QVector3D(1,0,0);
             overlaps++;
+            break;
         }
     }
 
@@ -358,8 +445,9 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
 
         if(gtp.overlaps(faceMap[index]))
         {
-            faceMap[index].color = QVector3D(1,0,0);
-            overlaps++;
+            gtp.overlapping = true;
+            gtOverlaps++;
+            break;
         }
     }
 
@@ -369,7 +457,7 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
     {
         if(!discovered[ulong(edges[index][i])])
         {
-            overlaps += unfold(edges, ulong(edges[index][i]), discovered, index, faceMap, gtMap);
+            overlaps += unfold(edges, ulong(edges[index][i]), discovered, index, faceMap, gtMap, gtOverlaps);
         }
     }
 
