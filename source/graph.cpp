@@ -32,16 +32,6 @@ void Graph::nextC()
     double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap, gtOverlaps);
     double newEnergy = overlaps + gtOverlaps;
 
-    if(overlaps <= 0)
-    {
-        Unfolding unfolding;
-        unfolding._edges = _edges;
-        unfolding._gluetags = _gluetags;
-        unfolding._overlaps = gtOverlaps;
-
-        unfoldings.push_back(unfolding);
-    }
-
     double chance = (newEnergy - _Cenergy) / (TEMP_MAX - temperature); //std::exp(-energyDelta/(TEMP_MAX - temperature));
     double random = (double(std::rand()) / RAND_MAX);
 
@@ -52,12 +42,12 @@ void Graph::nextC()
         _Cenergy = newEnergy + gtOverlaps;
     }
     // by a small chance we even make a bad move
-    //else if (chance > random) // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
-    //{
-    //    _Cgt = _gluetags;
-    //    _C = _edges;
-    //    _Cenergy = newEnergy + gtOverlaps;
-    //}
+    else if (chance > random) // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
+    {
+        _Cgt = _gluetags;
+        _C = _edges;
+        _Cenergy = newEnergy + gtOverlaps;
+    }
 
     bool gtForced = false;
     int i = 0;
@@ -143,7 +133,6 @@ void Graph::initC()
     resetTree();
 
     temperature = TEMP_MAX;
-    resetCounter = 0;
 
     // it is the best we have
     _Cgt = _gluetags;
@@ -169,17 +158,19 @@ void Graph::initC()
 void Graph::move()
 {
     changeFaces();
-    changeGluetags();
+    //changeGluetags();
 }
 
 void Graph::changeFaces()
 {
-    // assign a probability of every edge to be chose
-    for(Edge& edge : _edges)
-    {
-        edge._probability = 1 - (double(std::rand()) / RAND_MAX);
-    }
+    ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
+    _edges[random]._probability = 1 - (double(std::rand()) / RAND_MAX);
 
+    // assign a probability of every edge to be chose
+    //for(Edge& edge : _edges)
+    //{
+    //    edge._probability = 1 - (double(std::rand()) / RAND_MAX);
+    //}
 }
 
 void Graph::changeGluetags()

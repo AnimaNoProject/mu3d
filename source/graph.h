@@ -15,20 +15,13 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 10000.0
-#define EPOCH 4.0
+#define TEMP_MAX 5000.0
+#define EPOCH 1.0
 #define TEMP_MIN 10.0
 
 class Gluetag;
 class GluetagToPlane;
 class FaceToPlane;
-
-struct Unfolding
-{
-    std::vector<Edge> _edges;
-    std::vector<Gluetag> _gluetags;
-    int _overlaps;
-};
 
 class Graph
 {
@@ -50,8 +43,6 @@ public:
     double energy();
     bool over();
 private:
-    std::vector<Unfolding> unfoldings;
-
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;
@@ -70,7 +61,6 @@ private:
     double _Cenergy;
 
     double temperature;
-    int resetCounter;
 
     void calculateDual();
     void calculateMSP();

@@ -125,8 +125,8 @@ Gluetag::Gluetag(Edge& edge, bool flag) : _probability(0), overlaps(false)
     _br = _br - side * 0.5;
 
     // top right and top left calculation, top edge of the gluetag is at 1/4 of the height of the targeted face
-    _tr = _br + (target - _br) / 4 - side * 2;
-    _tl = _bl + (target - _bl) / 4 + side * 2;
+    _tr = _br + (target - _br) / 5 - side * 2;
+    _tl = _bl + (target - _bl) / 5 + side * 2;
 
     _color = hex2rgb(colors[id++ % colors.size()]);
 }
