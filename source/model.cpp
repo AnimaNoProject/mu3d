@@ -61,7 +61,6 @@ bool Model::finishedAnnealing()
     if (_graph.energy() <= 0 || _graph.over())
     {
         std::cout << "finished with " << _graph.energy() << std::endl;
-        std::cout << "minimum overlaps was (only gluetags) " << _graph.minOverlaps << std::endl;
         return true;
     }
     else

@@ -30,101 +30,34 @@ void Graph::nextC()
 
     // unfold and check for overlaps
     double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap, gtOverlaps);
-    double newEnergy = overlaps + gtOverlaps;
+    double newEnergy = overlaps;// + gtOverlaps;
 
-    double chance = std::pow(std::exp(1), -((TEMP_MAX - temperature)/(TEMP_MAX/5))) / 100; //std::exp(-energyDelta/(TEMP_MAX - temperature));
-    std::cout << chance << " vs. ";
+    double chance = std::pow(std::exp(1), -((TEMP_MAX - temperature)/(TEMP_MAX/50))) / 50;
     double random = (double(std::rand()) / RAND_MAX);
-    std::cout << random << ", " << (chance > random) << std::endl;
-
-    if(gtOverlaps < minOverlaps)
-    {
-        minOverlaps = gtOverlaps;
-    }
 
     if(newEnergy < _Cenergy) // if it got better we take the new graph
     {
+        std::cout << "new record!! " << newEnergy << std::endl;
         _Cgt = _gluetags;
         _C = _edges;
-        _Cenergy = newEnergy + gtOverlaps;
+        _Cenergy = newEnergy;
     }
     // by a small chance we even make a bad move
     else if (chance > random) // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
     {
+        std::cout << "won by chane: " << newEnergy << std::endl;
         _Cgt = _gluetags;
         _C = _edges;
-        _Cenergy = newEnergy + gtOverlaps;
+        _Cenergy = newEnergy;
     }
 
-    bool gtForced = false;
-    int i = 0;
-    int j = 0;
+    // continue working with the best
+    _edges = _C;
+    _gluetags = _Cgt;
 
-    if(overlaps <= 0 && gtOverlaps > 0)
-    {
-        //std::cout << "tries needed: " << std::pow(_necessaryGluetags.size(), 2) << std::endl;
-
-        for(Gluetag& gt : _necessaryGluetags)
-        {
-            gt.swapFace();
-
-            for(Gluetag& gtInner : _necessaryGluetags)
-            {
-                if(&gt == &gtInner)
-                {
-                    j++;
-                    continue;
-                }
-
-                gtInner.swapFace();
-
-                i++;
-                std::vector<GluetagToPlane> newgtMap;
-                std::vector<FaceToPlane> newfaceMap;
-                std::vector<bool> newdiscovered;
-                resetTree();
-                newdiscovered.resize(_facets.size());
-                newfaceMap.resize(_facets.size());
-
-                int newOverlaps = 0;
-                unfold(_tree, 0, newdiscovered, 0, newfaceMap, newgtMap, newOverlaps);
-                //std::cout << i << ": " << newOverlaps << std::endl;
-                if(newOverlaps <= 0)
-                {
-                    //std::cout << "there should be no gluetag overlaps" << std::endl;
-                    gtForced = true;
-                    _Cenergy = 0;
-                    break;
-                }
-                else if (newOverlaps < minOverlaps)
-                {
-                    minOverlaps = newOverlaps;
-                }
-            }
-
-            if(gtForced)
-            {
-                break;
-            }
-
-            for(Gluetag& endTag : _necessaryGluetags)
-            {
-                endTag.swapFace();
-            }
-        }
-
-        //std::cout << "tries done: " << i + j << std::endl;
-    }
-
-
-    if(!gtForced)
-    {
-        // continue working with the best
-        _edges = _C;
-        _gluetags = _Cgt;
-        calculateMSP();
-        calculateGlueTags();
-    }
+    calculateMSP();
+    calculateGlueTags();
+    resetTree();
 
     // end epoch
     temperature -= EPOCH;
@@ -132,6 +65,11 @@ void Graph::nextC()
 
 void Graph::initC()
 {
+    for(Edge& edge : _edges)
+    {
+        edge._probability = (double(std::rand()) / RAND_MAX);
+    }
+
     // calculate the dualgraph and an initial MSP and Gluetags
     calculateDual();
     calculateMSP();
@@ -141,10 +79,6 @@ void Graph::initC()
     resetTree();
 
     temperature = TEMP_MAX;
-
-    // it is the best we have
-    _Cgt = _gluetags;
-    _C = _edges;
 
     std::vector<GluetagToPlane> gtMap;
     std::vector<FaceToPlane> faceMap;
@@ -158,9 +92,10 @@ void Graph::initC()
     // initialize the energy with this unfolding
     double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap, gtOverlaps);
 
-    _Cenergy = overlaps + gtOverlaps;
-
-    minOverlaps = gtOverlaps;
+    // it is the best we have
+    _Cgt = _gluetags;
+    _C = _edges;
+    _Cenergy = overlaps;// + gtOverlaps;
 }
 
 void Graph::move()
@@ -172,13 +107,7 @@ void Graph::move()
 void Graph::changeFaces()
 {
     ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
-    _edges[random]._probability = 1 - (double(std::rand()) / RAND_MAX);
-
-    // assign a probability of every edge to be chose
-    //for(Edge& edge : _edges)
-    //{
-    //    edge._probability = 1 - (double(std::rand()) / RAND_MAX);
-    //}
+    _edges[random]._probability = (double(std::rand()) / RAND_MAX);
 }
 
 void Graph::changeGluetags()
