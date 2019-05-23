@@ -32,8 +32,15 @@ void Graph::nextC()
     double overlaps = unfold(_tree, 0, discovered, 0, faceMap, gtMap, gtOverlaps);
     double newEnergy = overlaps + gtOverlaps;
 
-    double chance = (newEnergy - _Cenergy) / (TEMP_MAX - temperature); //std::exp(-energyDelta/(TEMP_MAX - temperature));
+    double chance = std::pow(std::exp(1), -((TEMP_MAX - temperature)/(TEMP_MAX/5))) / 100; //std::exp(-energyDelta/(TEMP_MAX - temperature));
+    std::cout << chance << " vs. ";
     double random = (double(std::rand()) / RAND_MAX);
+    std::cout << random << ", " << (chance > random) << std::endl;
+
+    if(gtOverlaps < minOverlaps)
+    {
+        minOverlaps = gtOverlaps;
+    }
 
     if(newEnergy < _Cenergy) // if it got better we take the new graph
     {
@@ -75,7 +82,7 @@ void Graph::nextC()
                 std::vector<GluetagToPlane> newgtMap;
                 std::vector<FaceToPlane> newfaceMap;
                 std::vector<bool> newdiscovered;
-
+                resetTree();
                 newdiscovered.resize(_facets.size());
                 newfaceMap.resize(_facets.size());
 
@@ -128,6 +135,7 @@ void Graph::initC()
     // calculate the dualgraph and an initial MSP and Gluetags
     calculateDual();
     calculateMSP();
+    changeGluetags();
     calculateGlueTags();
 
     resetTree();
@@ -408,7 +416,7 @@ int Graph::unfold(std::vector<std::vector<int>> const &edges, ulong index, std::
         }
     }
 
-    faceMap[index].color = QVector3D(1,1,1);
+    faceMap[index].color = QVector3D(0.7f,0.7f,0.7f);
 
     // check if any overlaps occured with other faces
     for(ulong i = 0; i < discovered.size(); i++)
