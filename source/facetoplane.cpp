@@ -1,5 +1,10 @@
 #include "facetoplane.h"
 
+FaceToPlane::FaceToPlane()
+{
+    color = QVector3D(0.9f, 0.9f, 0.9f);
+}
+
 bool FaceToPlane::overlaps(FaceToPlane& other)
 {
     return Utility::intersects(a, b, other.a, other.b)

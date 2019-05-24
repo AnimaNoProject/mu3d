@@ -50,7 +50,7 @@ Model::Model(const char* filename)
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(QVector3D(0,0,0) - middle);
 
-    _graph.initC();
+    _graph.initializeState();
 
     _graph.oglGluetags(_verticesGT, _indicesGT, _colorsGT);
     _graph.oglLines(_lineVertices, _lineColors);
@@ -71,7 +71,7 @@ void Model::recalculate(QOpenGLShaderProgram* program)
 {
     clearOGL();
 
-    _graph.nextC();
+    _graph.neighbourState();
 
     _graph.oglGluetags(_verticesGT, _indicesGT, _colorsGT);
     _graph.oglLines(_lineVertices, _lineColors);

@@ -49,23 +49,32 @@ void MainWindow::loadModel()
 void MainWindow::unfoldModel()
 {
     if(unfolding)
+    {
         stop();
+    }
     else
+    {
         start();
+    }
+
 }
 
 void MainWindow::start()
 {
+    this->setCursor(Qt::WaitCursor);
+    _loadModel->setEnabled(false);
     _planarWidget->add(_modelWidget->_model);
     _unfold->setText("Stop Unfolding");
     unfolding = true;
-    _modelWidget->_model->_graph.initC();
+    _modelWidget->_model->_graph.initializeState();
     timer->start(1);
 }
 
 void MainWindow::stop()
 {
     timer->stop();
+    this->setCursor(Qt::ArrowCursor);
+    _loadModel->setEnabled(true);
     _unfold->setText("Unfolding");
     unfolding = false;
 }

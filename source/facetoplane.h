@@ -7,6 +7,8 @@
 class FaceToPlane
 {
 public:
+    FaceToPlane();
+
     QVector3D A;
     QVector3D B;
     QVector3D C;
@@ -16,8 +18,6 @@ public:
     QVector2D c;
 
     QVector3D color;
-
-    ulong faceId;
 
     QVector2D const& get(QVector3D const &vec);
     QVector3D const& get(QVector2D const &vec);

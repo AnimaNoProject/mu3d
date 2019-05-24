@@ -89,7 +89,7 @@ void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], 
 
 bool Utility::intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2)
 {
-    if(p1 == p2 || p1 == q2 || q1 == p2 || q1 == q2)
+    if((p1 == p2 && q1 != q2) || (p1 == q2 && q1 != p2) || (q1 == p2 && p1 != q2) || (q1 == q2 && p1 != p2))
     {
         return false;
     }

@@ -20,12 +20,14 @@ public:
     Halfedge _halfedge;
     QVector3D _middle;
 
-    double _probability;
+    double _weight;
 
     Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
     Edge(int sFace, int tFace);
     Edge();
 
+    bool isNeighbour(const Edge& edge);
+    bool is(int A, int B);
     bool operator==(const Edge& other) const;
     bool operator<(const Edge& other) const;
     Facet operator[] (int i) const;
