@@ -31,7 +31,7 @@ public:
     ~Graph();
 
     void initializeState();
-    void neighbourState();
+    bool neighbourState();
 
     void oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
     void oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
@@ -41,6 +41,8 @@ public:
 
     double energy();
     bool over();
+
+    double temperature;
 private:
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
@@ -64,7 +66,6 @@ private:
     std::vector<GluetagToPlane> _planarGluetags;
 
     int resetCounter;
-    double temperature;
 
     void calculateDual();
     void calculateMSP();

@@ -20,9 +20,9 @@ class OGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
 public:
     OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = nullptr);
     virtual ~OGLWidget() override;
-    void importModel(const char* filename);
-    void recalculateModel();
-    Model* _model;
+    virtual void updateGL();
+    virtual void setModel(Model* model);
+
 public slots:
     void cleanup();
 protected:
@@ -34,6 +34,8 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     QOpenGLShaderProgram *_program;
+
+    Model* _model;
 
     const  QString* _vshaderFile;
     const  QString* _fshaderFile;

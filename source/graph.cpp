@@ -9,8 +9,10 @@ Graph::~Graph()
 
 }
 
-void Graph::neighbourState()
+bool Graph::neighbourState()
 {
+    bool redraw = false;
+
     randomMove();
 
     // calculate a new spanning tree and gluetags
@@ -30,9 +32,15 @@ void Graph::neighbourState()
         _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
+
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
+
         resetCounter = 0;
+        redraw = true;
     }
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
     else if (chance > random || resetCounter > RESET_WAIT)
@@ -40,9 +48,15 @@ void Graph::neighbourState()
         _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
+
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
+
         resetCounter = 0;
+        redraw = true;
     }
     else
     {
@@ -53,11 +67,10 @@ void Graph::neighbourState()
     _edges = _C;
     _gluetags = _Cgt;
 
-    calculateMSP();
-    calculateGlueTags();
-
     // end epoch
     temperature -= EPOCH;
+
+    return redraw;
 }
 
 void Graph::initializeState()
@@ -95,9 +108,12 @@ void Graph::initializeState()
 
 void Graph::randomMove()
 {
-    // take a random edge and change it's weight
-    ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
-    _edges[random]._weight = (double(std::rand()) / RAND_MAX);
+    while(std::is_sorted(_edges.begin(), _edges.end()))
+    {
+        // take a random edge and change it's weight
+        ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
+        _edges[random]._weight = (double(std::rand()) / RAND_MAX);
+    }
 }
 
 bool Graph::over()
@@ -199,6 +215,7 @@ std::pair<int, int> Graph::unfold()
     _planarFaces.resize(_facets.size());
     _planarGluetags.clear();
     resetTree();
+
     return unfold(0, discovered, 0);
 }
 
@@ -494,6 +511,10 @@ void Graph::calculateMSP()
 
 void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {
+    gtVertices.clear();
+    gtIndices.clear();
+    gtColors.clear();
+
     for(Gluetag& gluetag : _necessaryGluetags)
     {
         gluetag.getVertices(gtVertices, gtIndices, gtColors);

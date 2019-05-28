@@ -2,7 +2,41 @@
 
 QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>> point)
 {
-    return QVector3D(point.x(), point.y(), point.z());
+    return QVector3D(float(point.x()), float(point.y()), float(point.z()));
+}
+
+QVector2D Utility::intersectionPoint(QVector2D p1, QVector2D p2, QVector2D p3, QVector2D p4)
+{
+    float xnum = (p1.x() * p2.y() - p1.y() * p2.x()) * (p3.x() - p4.x()) -
+                  (p1.x() - p2.x()) * (p3.x() * p4.y() - p3.y() * p4.x());
+    float xden = (p1.x() - p2.x()) * (p3.y() - p4.y()) - (p1.y() - p2.y()) * (p3.x() - p4.x());
+
+    float ynum = (p1.x() * p2.y() - p1.y() * p2.y()) * (p3.y() - p4.y()) -
+              (p1.y() - p2.y()) * (p3.x() * p4.y() - p3.y() * p4.x());
+    float yden = (p1.x() - p2.x()) * (p3.y() - p4.y()) - (p1.y() - p2.y()) * (p3.x() - p4.x());
+
+    return QVector2D(xnum/xden, ynum/yden);
+}
+
+bool Utility::pointInTriangle(QVector2D p, QVector2D v1, QVector2D v2, QVector2D v3)
+{
+    float d1, d2, d3;
+    bool hasNeg;
+    bool hasPos;
+
+    d1 = sign(p, v1, v2);
+    d2 = sign(p, v2, v3);
+    d3 = sign(p, v3, v1);
+
+    hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+    return !(hasNeg && hasPos);
+}
+
+float Utility::sign(QVector2D p1, QVector2D p2, QVector2D p3)
+{
+    return (p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y());
 }
 
 void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo, std::vector<QVector3D> vertices, std::vector<GLushort> indices, std::vector<QVector3D> colors)

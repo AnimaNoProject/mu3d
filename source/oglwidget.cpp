@@ -18,11 +18,12 @@ OGLWidget::OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWid
     _initialized = false;
 }
 
-void OGLWidget::importModel(const char* filename)
+void OGLWidget::setModel(Model* model)
 {
+    _model = model;
+
     // makeCurrent is important, if this is not called, the model cannot
     makeCurrent();
-    _model = new Model(filename); // create the new model
     _model->createGLModelContext(_program);
     _camera->reset();
     doneCurrent();
@@ -35,10 +36,10 @@ OGLWidget::~OGLWidget()
     cleanup();
 }
 
-void OGLWidget::recalculateModel()
+void OGLWidget::updateGL()
 {
     makeCurrent();
-    _model->recalculate(_program);
+    _model->load3DGL(_program);
     doneCurrent();
     update();
 }
@@ -50,7 +51,6 @@ void OGLWidget::initializeGL()
     // if context gets destroyed, cleanup before initializeGL is called again
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OGLWidget::cleanup);
     glClearColor(0.5, 0.5, 0.5, 1);
-    //glEnable(GL_LINE_SMOOTH);
 
     // create new shader program
     _program = new QOpenGLShaderProgram();

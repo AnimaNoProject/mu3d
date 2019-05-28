@@ -5,6 +5,11 @@ MainWindow::MainWindow(int height, int width, QString title)
     // create layout
     QHBoxLayout *layout = new QHBoxLayout();
 
+    _progressBar = new QProgressBar();
+    _progressBar->setRange(0, TEMP_MAX);
+    _progressBar->setValue(0);
+    _progressBar->setTextVisible(false);
+
     // add openglwidegts for rendering
     _modelWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
     _planarWidget = new OGLPlanarWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
@@ -12,6 +17,9 @@ MainWindow::MainWindow(int height, int width, QString title)
     _planarWidget->setMinimumSize(height / 2, width /2);
     layout->addWidget(_modelWidget);
     layout->addWidget(_planarWidget);
+
+    this->statusBar()->addPermanentWidget(_progressBar, 2);
+    this->statusBar()->show();
 
     // Add action to load a model
     _loadModel = this->menuBar()->addAction("Load Model");
@@ -23,6 +31,7 @@ MainWindow::MainWindow(int height, int width, QString title)
 
     // setup window
     this->setCentralWidget(new QWidget);
+
     this->centralWidget()->setLayout(layout);
     this->setWindowTitle(title);
     this->setWindowModality(Qt::ApplicationModal);
@@ -42,8 +51,10 @@ void MainWindow::loadModel()
     if(filename.isNull())
         return;
 
-    _modelWidget->importModel(filename.toLocal8Bit().data());
+    _model = new Model(filename.toLocal8Bit().data());
     _unfold->setDisabled(false);
+
+    _modelWidget->setModel(_model);
 }
 
 void MainWindow::unfoldModel()
@@ -56,17 +67,22 @@ void MainWindow::unfoldModel()
     {
         start();
     }
-
 }
 
 void MainWindow::start()
 {
     this->setCursor(Qt::WaitCursor);
     _loadModel->setEnabled(false);
-    _planarWidget->add(_modelWidget->_model);
+    _planarWidget->setModel(_model);
     _unfold->setText("Stop Unfolding");
     unfolding = true;
-    _modelWidget->_model->_graph.initializeState();
+    _progressBar->setTextVisible(true);
+    _progressBar->setValue(0);
+    _model->_graph.initializeState();
+    _model->clearGL();
+    _planarWidget->updateGL();
+    _modelWidget->updateGL();
+
     timer->start(1);
 }
 
@@ -77,18 +93,28 @@ void MainWindow::stop()
     _loadModel->setEnabled(true);
     _unfold->setText("Unfolding");
     unfolding = false;
+    _progressBar->setFormat("Finished.");
 }
-
 
 void MainWindow::unfoldLoop()
 {
-    _modelWidget->recalculateModel();
-    _planarWidget->unfold();
+    bool redraw = _model->recalculate();
 
-    _modelWidget->update();
-    _planarWidget->update();
+    if(redraw)
+    {
+        _model->clearGL();
+        _planarWidget->updateGL();
+        _modelWidget->updateGL();
+    }
 
-    if(_planarWidget->_model->finishedAnnealing())
+    int iterationsDone = int(TEMP_MAX) - _model->finishedAnnealing();
+
+    _progressBar->setValue(iterationsDone);
+    std::stringstream ss;
+    ss << "Iteration " << iterationsDone << "/" << TEMP_MAX;
+    _progressBar->setFormat(ss.str().c_str());
+
+    if(iterationsDone >= int(TEMP_MAX))
     {
         stop();
     }

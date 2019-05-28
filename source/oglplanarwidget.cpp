@@ -9,15 +9,15 @@ OGLPlanarWidget::~OGLPlanarWidget()
     cleanup();
 }
 
-void OGLPlanarWidget::add(Model* model)
+void OGLPlanarWidget::setModel(Model* model)
 {
     _model = model;
 }
 
-void OGLPlanarWidget::unfold()
+void OGLPlanarWidget::updateGL()
 {
     makeCurrent();
-    _model->unfold();
+    _model->loadPlanarGL(_program);
     doneCurrent();
     _initialized = true;
     update();

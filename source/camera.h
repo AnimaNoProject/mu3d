@@ -14,5 +14,5 @@ private:
     float _delta;
     float _angleX;
     float _angleY;
-    const float _speed = 0.45f;
+    const float _speed = 0.2f;
 };

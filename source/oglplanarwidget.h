@@ -21,8 +21,9 @@ class OGLPlanarWidget : public OGLWidget
 public:
     OGLPlanarWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = nullptr);
     virtual ~OGLPlanarWidget() override;
-    void add(Model* model);
-    void unfold();
+    virtual void updateGL() override;
+    virtual void setModel(Model* model) override;
+
 public slots:
     void cleanup();
 protected:

@@ -23,7 +23,12 @@ public:
     static QVector3D pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>> point);
 
     static bool intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2);
+
+    static QVector2D intersectionPoint(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2);
+    static bool pointInTriangle(QVector2D p, QVector2D v1, QVector2D v2, QVector2D v3);
 private:
     static int orientation(QVector2D p, QVector2D q, QVector2D r);
     static bool onSegment(QVector2D p, QVector2D q, QVector2D r);
+
+    static float sign(QVector2D p1, QVector2D p2, QVector2D p3);
 };
