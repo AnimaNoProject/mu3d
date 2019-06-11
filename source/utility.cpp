@@ -2,7 +2,128 @@
 
 QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>> point)
 {
-    return QVector3D(point.x(), point.y(), point.z());
+    return QVector3D(float(point.x()), float(point.y()), float(point.z()));
+}
+
+float Utility::intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVector2D p2, QVector2D q2, QVector2D r2)
+{
+    std::vector<QVector2D> newpoints;
+
+    if(pointInTriangle(p1, p2, q2, r2))
+    {
+        newpoints.push_back(p1);
+    }
+    if(pointInTriangle(q1, p2, q2, r2))
+    {
+        newpoints.push_back(q1);
+    }
+    if(pointInTriangle(r1, p2, q2, r2))
+    {
+        newpoints.push_back(r1);
+    }
+
+    QVector2D* x;
+
+    x = intersectionPoint(p1, q1, p2, q2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+    x = intersectionPoint(q1, r1, p2, q2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+    x = intersectionPoint(r1, p1, p2, q2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+
+    x = intersectionPoint(p1, q1, q2, r2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+    x = intersectionPoint(q1, r1, q2, r2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+    x = intersectionPoint(r1, p1, q2, r2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+
+    x = intersectionPoint(p1, q1, r2, p2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+    x = intersectionPoint(q1, r1, r2, p2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+    x = intersectionPoint(r1, p1, r2, p2);
+    if(x != nullptr)
+    {
+        newpoints.push_back(*x);
+    }
+
+    float area = 0;
+
+    for(int i = 0; i < newpoints.size(); i++)
+    {
+        int j = (i + 1) % newpoints.size();
+        area += (newpoints.at(j).x() + newpoints.at(i).x()) * (newpoints.at(j).y() - newpoints.at(i).y());
+    }
+
+    return std::abs(area / 2.0);
+}
+
+QVector2D* Utility::intersectionPoint(QVector2D p1, QVector2D p2, QVector2D p3, QVector2D p4)
+{
+    float a1 = p2.y() - p1.y();
+    float b1 = p1.x() - p2.x();
+    float c1 = a1*p1.x() + b1*p1.y();
+
+    float a2 = p4.y() - p3.y();
+    float b2 = p3.x() - p4.x();
+    float c2 = a2*p3.x() + b2*p3.y();
+
+    float determinant = a1*b2 - a2*b1;
+
+    if(determinant == 0)
+    {
+        return nullptr;
+    }
+    else
+    {
+        return new QVector2D((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
+    }
+}
+
+bool Utility::pointInTriangle(QVector2D p, QVector2D v1, QVector2D v2, QVector2D v3)
+{
+    float d1, d2, d3;
+    bool hasNeg;
+    bool hasPos;
+
+    d1 = sign(p, v1, v2);
+    d2 = sign(p, v2, v3);
+    d3 = sign(p, v3, v1);
+
+    hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+    return !(hasNeg && hasPos);
+}
+
+float Utility::sign(QVector2D p1, QVector2D p2, QVector2D p3)
+{
+    return (p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y());
 }
 
 void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo, std::vector<QVector3D> vertices, std::vector<GLushort> indices, std::vector<QVector3D> colors)
@@ -89,7 +210,7 @@ void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], 
 
 bool Utility::intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2)
 {
-    if(p1 == p2 || p1 == q2 || q1 == p2 || q1 == q2)
+    if((p1 == p2 && q1 != q2) || (p1 == q2 && q1 != p2) || (q1 == p2 && p1 != q2) || (q1 == q2 && p1 != p2))
     {
         return false;
     }

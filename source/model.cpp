@@ -50,30 +50,29 @@ Model::Model(const char* filename)
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(QVector3D(0,0,0) - middle);
 
-    _graph.initC();
+    _graph.initializeState();
 
     _graph.oglGluetags(_verticesGT, _indicesGT, _colorsGT);
     _graph.oglLines(_lineVertices, _lineColors);
 }
 
-bool Model::finishedAnnealing()
+int Model::finishedAnnealing()
 {
     if (_graph.energy() <= 0 || _graph.over())
     {
-        std::cout << "finished with " << _graph.energy() << std::endl;
-        std::cout << "minimum overlaps was (only gluetags) " << _graph.minOverlaps << std::endl;
-        return true;
+        return 0;
     }
     else
-        return false;
+        return int(_graph.temperature);
 }
 
-void Model::recalculate(QOpenGLShaderProgram* program)
+void Model::clearGL()
 {
     clearOGL();
+}
 
-    _graph.nextC();
-
+void Model::load3DGL(QOpenGLShaderProgram* program)
+{
     _graph.oglGluetags(_verticesGT, _indicesGT, _colorsGT);
     _graph.oglLines(_lineVertices, _lineColors);
 
@@ -82,6 +81,11 @@ void Model::recalculate(QOpenGLShaderProgram* program)
     Utility::createBuffers(_vaoLines, _vboLines, _lineVertices, _lineColors);
     Utility::createBuffers(_vao, _vbo, _ibo, _vertices, _indices, _colors);
     program->release();
+}
+
+bool Model::recalculate()
+{
+    return _graph.neighbourState();
 }
 
 void Model::createGLModelContext(QOpenGLShaderProgram* program)
@@ -93,12 +97,14 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
     program->release();
 }
 
-void Model::unfold()
+void Model::loadPlanarGL(QOpenGLShaderProgram* program)
 {
     _graph.oglPlanar(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
 
+    program->bind();
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);
     Utility::createBuffers(_vaoPlanarLines, _vboPlanarLines, _planarLines, _planarLinesColors);
+    program->release();
 }
 
 void Model::clearOGL()

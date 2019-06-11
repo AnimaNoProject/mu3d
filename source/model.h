@@ -25,16 +25,21 @@ public:
     Model(const char* filename);
     Model();
     ~Model();
+
     void draw(QOpenGLShaderProgram* program);
     void drawPlanarPatch(QOpenGLShaderProgram* program);
-    void switchRenderMode();
-    void showGluetags();
-    void unfold();
 
-    bool finishedAnnealing();
+    void clearGL();
+    void loadPlanarGL(QOpenGLShaderProgram* program);
+    void load3DGL(QOpenGLShaderProgram* program);
+
+    bool recalculate();
+    int finishedAnnealing();
 
     void createGLModelContext(QOpenGLShaderProgram* program);
-    void recalculate(QOpenGLShaderProgram* program);
+
+    void switchRenderMode();
+    void showGluetags();
 
     Graph _graph;
     QMatrix4x4 _modelMatrixPlanar;

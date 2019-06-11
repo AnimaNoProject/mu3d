@@ -9,15 +9,15 @@ OGLPlanarWidget::~OGLPlanarWidget()
     cleanup();
 }
 
-void OGLPlanarWidget::add(Model* model)
+void OGLPlanarWidget::setModel(Model* model)
 {
     _model = model;
 }
 
-void OGLPlanarWidget::unfold()
+void OGLPlanarWidget::updateGL()
 {
     makeCurrent();
-    _model->unfold();
+    _model->loadPlanarGL(_program);
     doneCurrent();
     _initialized = true;
     update();
@@ -107,6 +107,9 @@ void OGLPlanarWidget::keyPressEvent(QKeyEvent *event)
         case Qt::Key_F1:
             break;
         case Qt::Key_F2:
+            break;
+        case Qt::Key_F3:
+            boostZoom = !boostZoom;
             break;
     }
 }

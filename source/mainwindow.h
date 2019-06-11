@@ -5,10 +5,15 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QTimer>
+#include <QProgressBar>
+#include <QString>
+#include <QStatusBar>
 
 #include "oglwidget.h"
 #include "oglplanarwidget.h"
 #include "model.h"
+#include "graph.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -26,6 +31,9 @@ private:
     OGLPlanarWidget* _planarWidget;
     QAction* _unfold;
     QAction* _loadModel;
+    QProgressBar * _progressBar;
+
+    Model* _model;
 
     QTimer* timer;
 
