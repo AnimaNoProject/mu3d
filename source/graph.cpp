@@ -25,8 +25,6 @@ bool Graph::neighbourState()
     double chance = 1 - std::pow(std::exp(1), -((TEMP_MAX - temperature)/TEMP_MAX));
     double random = (double(std::rand()) / RAND_MAX);
 
-    std::cout << "Overlap: " << newEnergy << std::endl;
-
     // if it got better we take the new graph
     if(newEnergy <= _Cenergy)
     {
@@ -41,7 +39,7 @@ bool Graph::neighbourState()
 
     }
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
-    else if (chance * (1 / 50) > random)
+    else if (chance * (1 / 25) > random)
     {
         _Cgt = _gluetags;
         _C = _edges;
