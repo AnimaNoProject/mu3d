@@ -2,12 +2,10 @@
 
 Graph::Graph()
 {
-    resets = 0;
 }
 
 Graph::~Graph()
 {
-
 }
 
 bool Graph::neighbourState()
@@ -21,11 +19,13 @@ bool Graph::neighbourState()
     calculateGlueTags();
 
     // unfold and check for overlaps
-    std::pair<int, int> overlaps = unfold();
+    std::pair<double, double> overlaps = unfold();
     double newEnergy = overlaps.first + overlaps.second;
 
     double chance = 1 - std::pow(std::exp(1), -((TEMP_MAX - temperature)/TEMP_MAX));
     double random = (double(std::rand()) / RAND_MAX);
+
+    std::cout << "Overlap: " << newEnergy << std::endl;
 
     // if it got better we take the new graph
     if(newEnergy <= _Cenergy)
@@ -37,11 +37,11 @@ bool Graph::neighbourState()
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
 
-        resetCounter = 0;
         redraw = true;
+
     }
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
-    else if (chance * (resetCounter / 100) > random)
+    else if (chance * (1 / 50) > random)
     {
         _Cgt = _gluetags;
         _C = _edges;
@@ -50,13 +50,7 @@ bool Graph::neighbourState()
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
 
-        resetCounter = 0;
         redraw = true;
-    }
-    else
-    {
-        //_edges[movedEdge]._weight = prevValue;
-        resetCounter++;
     }
 
     // continue working with the best
@@ -71,8 +65,6 @@ bool Graph::neighbourState()
 
 void Graph::initializeState()
 {
-    resetCounter = 0;
-
     // init edge weights
     for(Edge& edge : _edges)
     {
@@ -92,12 +84,12 @@ void Graph::initializeState()
     temperature = TEMP_MAX;
 
     // initialize the energy with this unfolding
-    std::pair<int, int> overlaps = unfold();
+    std::pair<double, double> overlaps = unfold();
 
     // it is the best we have
     _Cgt = _gluetags;
     _C = _edges;
-    _Cenergy = overlaps.first;
+    _Cenergy = overlaps.first + overlaps.second;
     _CplanarFaces = _planarFaces;
     _CplanarGluetags = _planarGluetags;
 }
@@ -106,8 +98,6 @@ void Graph::randomMove()
 {
     // take a random edge and change it's weight
     ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
-    prevValue = _edges[random]._weight;
-    movedEdge = random;
     _edges[random]._weight = (double(std::rand()) / RAND_MAX);
 }
 
@@ -202,7 +192,7 @@ void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu
     }
 }
 
-std::pair<int, int> Graph::unfold()
+std::pair<double, double> Graph::unfold()
 {
     std::vector<bool> discovered;
     discovered.resize(_facets.size());
@@ -210,13 +200,12 @@ std::pair<int, int> Graph::unfold()
     _planarFaces.resize(_facets.size());
     _planarGluetags.clear();
     resetTree();
-
     return unfold(0, discovered, 0);
 }
 
-std::pair<int, int> Graph::unfold(ulong index, std::vector<bool>& discovered, ulong parent)
+std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discovered, ulong parent)
 {
-    std::pair<int, int> overlaps;
+    std::pair<double, double> overlaps;
     overlaps.first = 0;
     overlaps.second = 0;
 
@@ -311,10 +300,12 @@ std::pair<int, int> Graph::unfold(ulong index, std::vector<bool>& discovered, ul
                             continue;
                         }
 
-                        if(tmp.overlaps(_planarFaces[i]))
+                        double area = tmp.overlaps(_planarFaces[i]);
+                        if(area > 0)
                         {
                             tmp.overlapping = true;
-                            overlaps.second++;
+                            //overlaps.second++;
+                            overlaps.second += area;
                             break;
                         }
                     }
@@ -322,10 +313,12 @@ std::pair<int, int> Graph::unfold(ulong index, std::vector<bool>& discovered, ul
                     // or overlaps with any existing gluetags
                     for(GluetagToPlane& gtp : _planarGluetags)
                     {
-                        if(gtp.overlaps(tmp))
+                        double area = gtp.overlaps(tmp);
+                        if(area > 0)
                         {
                             tmp.overlapping = true;
-                            overlaps.second++;
+                            //overlaps.second++;
+                            overlaps.second += area;
                             break;
                         }
                     }
@@ -350,8 +343,8 @@ std::pair<int, int> Graph::unfold(ulong index, std::vector<bool>& discovered, ul
         if(area > 0)
         {
             _planarFaces[index].color = QVector3D(1,0,0);
-            //overlaps.first += area;
-            overlaps.first++;
+            overlaps.first += area;
+            //overlaps.first++;
             break;
         }
     }
@@ -359,11 +352,13 @@ std::pair<int, int> Graph::unfold(ulong index, std::vector<bool>& discovered, ul
     // or overlaps with any existing gluetags
     for(GluetagToPlane& gtp : _planarGluetags)
     {
+        double area = gtp.overlaps(_planarFaces[index]);
         // if it's not the gluetag of the current face and overlaps this face
-        if(gtp._gluetag->_placedFace != int(index) && gtp.overlaps(_planarFaces[index]))
+        if(gtp._gluetag->_placedFace != int(index) && area > 0)
         {
             gtp.overlapping = true;
-            overlaps.second++;
+            //overlaps.second++;
+            overlaps.second += area;
             break;
         }
     }
@@ -374,7 +369,7 @@ std::pair<int, int> Graph::unfold(ulong index, std::vector<bool>& discovered, ul
     {
         if(!discovered[ulong(_tree[index][i])])
         {
-            std::pair<int, int> cover = unfold(ulong(_tree[index][i]), discovered, index);
+            std::pair<double, double> cover = unfold(ulong(_tree[index][i]), discovered, index);
             overlaps.first += cover.first;
             overlaps.second += cover.second;
         }

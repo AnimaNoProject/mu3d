@@ -5,7 +5,7 @@ QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>> p
     return QVector3D(float(point.x()), float(point.y()), float(point.z()));
 }
 
-float Utility::intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVector2D p2, QVector2D q2, QVector2D r2)
+double Utility::intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVector2D p2, QVector2D q2, QVector2D r2)
 {
     std::vector<QVector2D> newpoints;
 
@@ -72,11 +72,11 @@ float Utility::intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVecto
         newpoints.push_back(*x);
     }
 
-    float area = 0;
+    double area = 0;
 
-    for(int i = 0; i < newpoints.size(); i++)
+    for(size_t i = 0; i < newpoints.size(); i++)
     {
-        int j = (i + 1) % newpoints.size();
+        size_t j = (i + 1) % newpoints.size();
         area += (newpoints.at(j).x() + newpoints.at(i).x()) * (newpoints.at(j).y() - newpoints.at(i).y());
     }
 

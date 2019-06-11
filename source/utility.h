@@ -24,7 +24,7 @@ public:
 
     static bool intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2);
 
-    static float intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVector2D p2, QVector2D q2, QVector2D r2);
+    static double intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVector2D p2, QVector2D q2, QVector2D r2);
 
 private:
     static QVector2D* intersectionPoint(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2);

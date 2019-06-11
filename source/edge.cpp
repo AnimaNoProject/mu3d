@@ -4,7 +4,7 @@ Edge::Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfe
     :  _sFace(sFace), _tFace(tFace),
       _sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle),
       _length(length),  _halfedge(halfedge),
-      _middle(middle),  _weight(length)
+      _middle(middle),  _weight(double(std::rand()) / RAND_MAX)
 {
 }
 

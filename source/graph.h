@@ -44,10 +44,6 @@ public:
 
     double temperature;
 private:
-    double resets;
-    ulong movedEdge;
-    double prevValue;
-
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;
@@ -69,14 +65,12 @@ private:
     std::vector<FaceToPlane> _planarFaces;
     std::vector<GluetagToPlane> _planarGluetags;
 
-    int resetCounter;
-
     void calculateDual();
     void calculateMSP();
     void calculateGlueTags();
 
-    std::pair<int, int> unfold();
-    std::pair<int, int> unfold(ulong index, std::vector<bool>& discovered, ulong parent);
+    std::pair<double, double> unfold();
+    std::pair<double, double> unfold(ulong index, std::vector<bool>& discovered, ulong parent);
 
     void randomMove();
 

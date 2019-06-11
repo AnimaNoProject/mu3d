@@ -50,9 +50,9 @@ void GluetagToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vecto
     }
 }
 
-bool GluetagToPlane::overlaps(GluetagToPlane& other)
+double GluetagToPlane::overlaps(GluetagToPlane& other)
 {
-    return Utility::intersects(a, d, other.a, other.d)
+    if( Utility::intersects(a, d, other.a, other.d)
         || Utility::intersects(a, d, other.c, other.d)
         || Utility::intersects(a, d, other.b, other.c)
 
@@ -62,12 +62,19 @@ bool GluetagToPlane::overlaps(GluetagToPlane& other)
 
         || Utility::intersects(b, c, other.a, other.c)
         || Utility::intersects(b, c, other.c, other.d)
-        || Utility::intersects(b, c, other.b, other.c);
+        || Utility::intersects(b, c, other.b, other.c))
+    {
+        return Utility::intersectionArea(a, c, d, other.a, other.b, other.c) + Utility::intersectionArea(a, b, d, other.a, other.b, other.c);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-bool GluetagToPlane::overlaps(FaceToPlane& other)
+double GluetagToPlane::overlaps(FaceToPlane& other)
 {
-    return Utility::intersects(a, d, other.a, other.b)
+    if ( Utility::intersects(a, d, other.a, other.b)
         || Utility::intersects(a, d, other.b, other.c)
         || Utility::intersects(a, d, other.c, other.a)
 
@@ -77,7 +84,15 @@ bool GluetagToPlane::overlaps(FaceToPlane& other)
 
         || Utility::intersects(b, c, other.a, other.b)
         || Utility::intersects(b, c, other.b, other.c)
-        || Utility::intersects(b, c, other.c, other.a);
+        || Utility::intersects(b, c, other.c, other.a))
+    {
+        return Utility::intersectionArea(a, c, d, other.a, other.b, other.c) + Utility::intersectionArea(a, b, d, other.a, other.b, other.c);
+    }
+    else
+    {
+        return 0;
+    }
+
 }
 
 QVector2D const& GluetagToPlane::get(QVector3D const &vec)

@@ -18,7 +18,6 @@ double FaceToPlane::overlaps(FaceToPlane& other)
      || Utility::intersects(c, a, other.c, other.a))
     {
         double x = Utility::intersectionArea(a, b, c, other.a, other.b, other.c);
-        //std::cout << "OVERLAPS with area " << x << std::endl;
         return x;
     }
     else

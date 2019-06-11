@@ -60,6 +60,7 @@ int Model::finishedAnnealing()
 {
     if (_graph.energy() <= 0 || _graph.over())
     {
+        std::cout << "Energy: " << _graph.energy() << " and " << _graph.over() << std::endl;
         return 0;
     }
     else

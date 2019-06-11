@@ -15,8 +15,8 @@ public:
     GluetagToPlane(Gluetag* gluetag);
     ~GluetagToPlane();
 
-    bool overlaps(GluetagToPlane& other);
-    bool overlaps(FaceToPlane& other);
+    double overlaps(GluetagToPlane& other);
+    double overlaps(FaceToPlane& other);
 
     QVector2D a;
     QVector2D b;
