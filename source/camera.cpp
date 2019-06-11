@@ -32,7 +32,7 @@ void Camera::rotate(float angleX, float angleY)
     _angleY += angleY;
 }
 
-void Camera::zoom(float delta)
+void Camera::zoom(float delta, bool boost)
 {
-    _delta += delta * _speed;
+    _delta += delta * _speed * ((boost) ? 10 : 1);
 }

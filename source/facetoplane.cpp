@@ -5,17 +5,26 @@ FaceToPlane::FaceToPlane()
     color = QVector3D(0.9f, 0.9f, 0.9f);
 }
 
-bool FaceToPlane::overlaps(FaceToPlane& other)
+double FaceToPlane::overlaps(FaceToPlane& other)
 {
-    return Utility::intersects(a, b, other.a, other.b)
-           || Utility::intersects(a, b, other.b, other.c)
-           || Utility::intersects(a, b, other.c, other.a)
-           || Utility::intersects(b, c, other.a, other.b)
-           || Utility::intersects(b, c, other.b, other.c)
-           || Utility::intersects(b, c, other.c, other.a)
-           || Utility::intersects(c, a, other.a, other.b)
-           || Utility::intersects(c, a, other.b, other.c)
-           || Utility::intersects(c, a, other.c, other.a);
+    if (Utility::intersects(a, b, other.a, other.b)
+     || Utility::intersects(a, b, other.b, other.c)
+     || Utility::intersects(a, b, other.c, other.a)
+     || Utility::intersects(b, c, other.a, other.b)
+     || Utility::intersects(b, c, other.b, other.c)
+     || Utility::intersects(b, c, other.c, other.a)
+     || Utility::intersects(c, a, other.a, other.b)
+     || Utility::intersects(c, a, other.b, other.c)
+     || Utility::intersects(c, a, other.c, other.a))
+    {
+        double x = Utility::intersectionArea(a, b, c, other.a, other.b, other.c);
+        //std::cout << "OVERLAPS with area " << x << std::endl;
+        return x;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void FaceToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colors)

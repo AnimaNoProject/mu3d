@@ -11,5 +11,5 @@ out vec4 fragColor;
 void main()
 {
     gl_Position = viewProjMatrix * modelMatrix * vec4(position, 1.0); 
-    fragColor = vec4(color, 1);
+    fragColor = vec4(color, 0.3);
 }

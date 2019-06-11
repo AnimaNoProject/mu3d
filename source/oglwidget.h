@@ -45,4 +45,6 @@ protected:
 
     QPoint _lastPos;
     bool _initialized;
+
+    bool boostZoom;
 };

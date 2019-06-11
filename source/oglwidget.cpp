@@ -16,6 +16,7 @@ OGLWidget::OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWid
     this->create();
     this->setFocusPolicy(Qt::ClickFocus); // focus for key events can be gained by clicking or tabbing
     _initialized = false;
+    boostZoom = false;
 }
 
 void OGLWidget::setModel(Model* model)
@@ -112,6 +113,9 @@ void OGLWidget::keyPressEvent(QKeyEvent *event)
         case Qt::Key_F2:
             _model->showGluetags();
             break;
+        case Qt::Key_F3:
+            boostZoom = !boostZoom;
+            break;
     }
     update();
 }
@@ -119,7 +123,8 @@ void OGLWidget::keyPressEvent(QKeyEvent *event)
 void OGLWidget::wheelEvent(QWheelEvent *event)
 {
     float steps = (event->angleDelta().y() / 8) / 15;
-    _camera->zoom(steps * 0.5f);
+
+    _camera->zoom(steps * 0.5f, boostZoom);
     update();
 }
 

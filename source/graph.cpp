@@ -2,6 +2,7 @@
 
 Graph::Graph()
 {
+    resets = 0;
 }
 
 Graph::~Graph()
@@ -21,20 +22,17 @@ bool Graph::neighbourState()
 
     // unfold and check for overlaps
     std::pair<int, int> overlaps = unfold();
-    double newEnergy = overlaps.first;
+    double newEnergy = overlaps.first + overlaps.second;
 
-    double chance = std::pow(std::exp(1), -((TEMP_MAX - temperature)/(TEMP_MAX/50))) / 50;
+    double chance = 1 - std::pow(std::exp(1), -((TEMP_MAX - temperature)/TEMP_MAX));
     double random = (double(std::rand()) / RAND_MAX);
 
     // if it got better we take the new graph
-    if(newEnergy < _Cenergy)
+    if(newEnergy <= _Cenergy)
     {
         _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
-
-        _CplanarFaces.clear();
-        _CplanarGluetags.clear();
 
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
@@ -43,14 +41,11 @@ bool Graph::neighbourState()
         redraw = true;
     }
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
-    else if (chance > random || resetCounter > RESET_WAIT)
+    else if (chance * (resetCounter / 100) > random)
     {
         _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
-
-        _CplanarFaces.clear();
-        _CplanarGluetags.clear();
 
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
@@ -60,6 +55,7 @@ bool Graph::neighbourState()
     }
     else
     {
+        //_edges[movedEdge]._weight = prevValue;
         resetCounter++;
     }
 
@@ -108,12 +104,11 @@ void Graph::initializeState()
 
 void Graph::randomMove()
 {
-    while(std::is_sorted(_edges.begin(), _edges.end()))
-    {
-        // take a random edge and change it's weight
-        ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
-        _edges[random]._weight = (double(std::rand()) / RAND_MAX);
-    }
+    // take a random edge and change it's weight
+    ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
+    prevValue = _edges[random]._weight;
+    movedEdge = random;
+    _edges[random]._weight = (double(std::rand()) / RAND_MAX);
 }
 
 bool Graph::over()
@@ -351,9 +346,11 @@ std::pair<int, int> Graph::unfold(ulong index, std::vector<bool>& discovered, ul
             continue;
         }
 
-        if(_planarFaces[index].overlaps(_planarFaces[i]))
+        double area = _planarFaces[index].overlaps(_planarFaces[i]);
+        if(area > 0)
         {
             _planarFaces[index].color = QVector3D(1,0,0);
+            //overlaps.first += area;
             overlaps.first++;
             break;
         }

@@ -108,6 +108,9 @@ void OGLPlanarWidget::keyPressEvent(QKeyEvent *event)
             break;
         case Qt::Key_F2:
             break;
+        case Qt::Key_F3:
+            boostZoom = !boostZoom;
+            break;
     }
 }
 

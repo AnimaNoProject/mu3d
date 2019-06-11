@@ -18,7 +18,7 @@
 #define TEMP_MAX 50000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
-#define RESET_WAIT 500
+#define RESET_WAIT 150
 
 class Gluetag;
 class GluetagToPlane;
@@ -44,6 +44,10 @@ public:
 
     double temperature;
 private:
+    double resets;
+    ulong movedEdge;
+    double prevValue;
+
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;

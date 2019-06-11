@@ -4,7 +4,7 @@ Edge::Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfe
     :  _sFace(sFace), _tFace(tFace),
       _sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle),
       _length(length),  _halfedge(halfedge),
-      _middle(middle),  _weight(1 / length)
+      _middle(middle),  _weight(length)
 {
 }
 
@@ -39,7 +39,7 @@ bool Edge::operator==(const Edge& other) const
 
 bool Edge::operator<(const Edge& other) const
 {
-    return 1 - _weight < 1 - other._weight;
+    return _weight < other._weight;
 }
 
 Facet Edge::operator[] (int i) const
