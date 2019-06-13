@@ -14,6 +14,8 @@
 #include "model.h"
 #include "graph.h"
 
+#include <ctime>
+
 
 class MainWindow : public QMainWindow
 {
@@ -32,6 +34,10 @@ private:
     QAction* _unfold;
     QAction* _loadModel;
     QProgressBar * _progressBar;
+
+    struct timespec up, down;
+    double elapsed;
+
 
     Model* _model;
 

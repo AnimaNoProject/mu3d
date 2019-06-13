@@ -11,7 +11,6 @@ Graph::~Graph()
 bool Graph::neighbourState()
 {
     bool redraw = false;
-
     randomMove();
 
     // calculate a new spanning tree and gluetags
@@ -22,7 +21,7 @@ bool Graph::neighbourState()
     std::pair<double, double> overlaps = unfold();
     double newEnergy = overlaps.first + overlaps.second;
 
-    double chance = 1 - std::pow(std::exp(1), -((TEMP_MAX - temperature)/TEMP_MAX));
+    double chance = (1 - std::pow(std::exp(1), -(temperature)/TEMP_MAX)) / 2000;
     double random = (double(std::rand()) / RAND_MAX);
 
     // if it got better we take the new graph
@@ -39,7 +38,7 @@ bool Graph::neighbourState()
 
     }
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
-    else if (chance * (1 / 25) > random)
+    else if (chance > random)
     {
         _Cgt = _gluetags;
         _C = _edges;
@@ -57,7 +56,6 @@ bool Graph::neighbourState()
 
     // end epoch
     temperature -= EPOCH;
-
     return redraw;
 }
 
@@ -94,9 +92,12 @@ void Graph::initializeState()
 
 void Graph::randomMove()
 {
-    // take a random edge and change it's weight
-    ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
-    _edges[random]._weight = (double(std::rand()) / RAND_MAX);
+    while(std::is_sorted(_edges.begin(), _edges.end()))
+    {
+        // take a random edge and change it's weight
+        ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
+        _edges[random]._weight = (double(std::rand()) / RAND_MAX);
+    }
 }
 
 bool Graph::over()
@@ -269,24 +270,20 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
 
                     GluetagToPlane tmp(&gluetag);
 
-                    // top edge of the gluetag is 1/4 of the size of the base edge
-                    QVector2D side = (p2 - p1) / 4;
-
-                    // adjust size of base of gluetag
                     if(P1 == gluetag._bl)
                     {
-                        tmp.a = p1 + side * 0.5;
-                        tmp.b = p2 - side * 0.5;
+                        tmp.a = p1;
+                        tmp.b = p2;
                     }
                     else
                     {
-                        tmp.b = p1 + side * 0.5;
-                        tmp.a = p2 - side * 0.5;
+                        tmp.b = p1;
+                        tmp.a = p2;
                     }
 
                     planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
 
-                    planar(gluetag._bl, gluetag._tl, gluetag._tr, tmp.a, tmp.c, tmp.a, tmp.d);
+                    planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
 
                     tmp.overlapping = false;
                     // check if any overlaps occured with other faces

@@ -17,8 +17,7 @@ double FaceToPlane::overlaps(FaceToPlane& other)
      || Utility::intersects(c, a, other.b, other.c)
      || Utility::intersects(c, a, other.c, other.a))
     {
-        double x = Utility::intersectionArea(a, b, c, other.a, other.b, other.c);
-        return x;
+        return Utility::intersectionArea(a, b, c, other.a, other.b, other.c);
     }
     else
     {

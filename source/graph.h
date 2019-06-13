@@ -15,10 +15,9 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 50000.0
+#define TEMP_MAX 40000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
-#define RESET_WAIT 150
 
 class Gluetag;
 class GluetagToPlane;

@@ -12,20 +12,20 @@ GluetagToPlane::~GluetagToPlane()
 void GluetagToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colors)
 {
     vertices.push_back(QVector3D(a, 0));
-    vertices.push_back(QVector3D(d, 0));
-    vertices.push_back(QVector3D(c, 0));
-
-    vertices.push_back(QVector3D(a, 0));
     vertices.push_back(QVector3D(b, 0));
     vertices.push_back(QVector3D(c, 0));
 
-    verticesLines.push_back(QVector3D(a, 0));
-    verticesLines.push_back(QVector3D(d, 0));
+    vertices.push_back(QVector3D(c, 0));
+    vertices.push_back(QVector3D(b, 0));
+    vertices.push_back(QVector3D(d, 0));
 
+    verticesLines.push_back(QVector3D(a, 0));
     verticesLines.push_back(QVector3D(c, 0));
-    verticesLines.push_back(QVector3D(d, 0));
 
     verticesLines.push_back(QVector3D(b, 0));
+    verticesLines.push_back(QVector3D(d, 0));
+
+    verticesLines.push_back(QVector3D(d, 0));
     verticesLines.push_back(QVector3D(c, 0));
 
     if(!overlapping)
@@ -52,19 +52,20 @@ void GluetagToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vecto
 
 double GluetagToPlane::overlaps(GluetagToPlane& other)
 {
-    if( Utility::intersects(a, d, other.a, other.d)
-        || Utility::intersects(a, d, other.c, other.d)
-        || Utility::intersects(a, d, other.b, other.c)
+    if( Utility::intersects(a, c, other.a, other.c)
+        || Utility::intersects(a, c, other.c, other.d)
+        || Utility::intersects(a, c, other.b, other.d)
 
-        || Utility::intersects(c, d, other.a, other.d)
+        || Utility::intersects(c, d, other.a, other.c)
         || Utility::intersects(c, d, other.c, other.d)
-        || Utility::intersects(c, d, other.b, other.c)
+        || Utility::intersects(c, d, other.b, other.d)
 
-        || Utility::intersects(b, c, other.a, other.c)
-        || Utility::intersects(b, c, other.c, other.d)
-        || Utility::intersects(b, c, other.b, other.c))
+        || Utility::intersects(b, d, other.a, other.c)
+        || Utility::intersects(b, d, other.c, other.d)
+        || Utility::intersects(b, d, other.b, other.d))
     {
-        return Utility::intersectionArea(a, c, d, other.a, other.b, other.c) + Utility::intersectionArea(a, b, d, other.a, other.b, other.c);
+        return Utility::intersectionArea(a, b, c, other.a, other.b, other.c) + Utility::intersectionArea(c, b, d, other.a, other.b, other.c) +
+            Utility::intersectionArea(a, b, c, other.c, other.b, other.d) + Utility::intersectionArea(c, b, d, other.c, other.b, other.d);
     }
     else
     {
@@ -74,19 +75,19 @@ double GluetagToPlane::overlaps(GluetagToPlane& other)
 
 double GluetagToPlane::overlaps(FaceToPlane& other)
 {
-    if ( Utility::intersects(a, d, other.a, other.b)
-        || Utility::intersects(a, d, other.b, other.c)
-        || Utility::intersects(a, d, other.c, other.a)
+    if ( Utility::intersects(a, c, other.a, other.b)
+        || Utility::intersects(a, c, other.b, other.c)
+        || Utility::intersects(a, c, other.c, other.a)
 
         || Utility::intersects(c, d, other.a, other.b)
         || Utility::intersects(c, d, other.b, other.c)
         || Utility::intersects(c, d, other.c, other.a)
 
-        || Utility::intersects(b, c, other.a, other.b)
-        || Utility::intersects(b, c, other.b, other.c)
-        || Utility::intersects(b, c, other.c, other.a))
+        || Utility::intersects(b, d, other.a, other.b)
+        || Utility::intersects(b, d, other.b, other.c)
+        || Utility::intersects(b, d, other.c, other.a))
     {
-        return Utility::intersectionArea(a, c, d, other.a, other.b, other.c) + Utility::intersectionArea(a, b, d, other.a, other.b, other.c);
+        return Utility::intersectionArea(a, b, c, other.a, other.b, other.c) + Utility::intersectionArea(c, b, d, other.a, other.b, other.c);
     }
     else
     {

@@ -78,12 +78,14 @@ void MainWindow::start()
     unfolding = true;
     _progressBar->setTextVisible(true);
     _progressBar->setValue(0);
+    _progressBar->resetFormat();
     _model->_graph.initializeState();
     _model->clearGL();
     _planarWidget->updateGL();
     _modelWidget->updateGL();
 
-    timer->start(1);
+    clock_gettime(CLOCK_MONOTONIC, &up);
+    timer->start();
 }
 
 void MainWindow::stop()
@@ -93,7 +95,14 @@ void MainWindow::stop()
     _loadModel->setEnabled(true);
     _unfold->setText("Unfolding");
     unfolding = false;
-    _progressBar->setFormat("Finished.");
+
+    clock_gettime(CLOCK_MONOTONIC, &down);
+    elapsed = (down.tv_sec - up.tv_sec);
+    elapsed += (down.tv_nsec - up.tv_nsec) / 1000000000.0;
+
+    std::stringstream ss;
+    ss << "Time: " << elapsed << "s";
+    _progressBar->setFormat(ss.str().c_str());
 }
 
 void MainWindow::unfoldLoop()
@@ -108,11 +117,7 @@ void MainWindow::unfoldLoop()
     }
 
     int iterationsDone = int(TEMP_MAX) - _model->finishedAnnealing();
-
     _progressBar->setValue(iterationsDone);
-    std::stringstream ss;
-    ss << "Iteration " << iterationsDone << "/" << TEMP_MAX;
-    _progressBar->setFormat(ss.str().c_str());
 
     if(iterationsDone >= int(TEMP_MAX))
     {
