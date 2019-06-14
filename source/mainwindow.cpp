@@ -51,11 +51,6 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::checkMemory()
-{
-
-}
-
 void MainWindow::loadModel()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Choose 3D Model", QDir::currentPath(), "OFF Files (*.off)");
