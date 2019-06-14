@@ -14,7 +14,7 @@
 #include "model.h"
 #include "graph.h"
 
-#include <ctime>
+#include <thread>
 
 
 class MainWindow : public QMainWindow
@@ -34,9 +34,12 @@ private:
     QAction* _unfold;
     QAction* _loadModel;
     QProgressBar * _progressBar;
+    QProgressBar * _memoryUsage;
 
     struct timespec up, down;
     double elapsed;
+
+    std::thread* memorywatcher;
 
 
     Model* _model;
@@ -45,6 +48,7 @@ private:
 
     bool unfolding;
     bool unfoldSuccess;
+
 
     void start();
     void stop();

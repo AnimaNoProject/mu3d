@@ -10,6 +10,11 @@ MainWindow::MainWindow(int height, int width, QString title)
     _progressBar->setValue(0);
     _progressBar->setTextVisible(false);
 
+    _memoryUsage = new QProgressBar();
+    _memoryUsage->setRange(0, 10000);
+    _memoryUsage->setValue(0);
+    _memoryUsage->setTextVisible(false);
+
     // add openglwidegts for rendering
     _modelWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
     _planarWidget = new OGLPlanarWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
@@ -19,6 +24,7 @@ MainWindow::MainWindow(int height, int width, QString title)
     layout->addWidget(_planarWidget);
 
     this->statusBar()->addPermanentWidget(_progressBar, 2);
+    this->statusBar()->addPermanentWidget(_memoryUsage, 2);
     this->statusBar()->show();
 
     // Add action to load a model
@@ -43,6 +49,11 @@ MainWindow::MainWindow(int height, int width, QString title)
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::checkMemory()
+{
+
 }
 
 void MainWindow::loadModel()

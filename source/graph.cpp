@@ -19,7 +19,7 @@ bool Graph::neighbourState()
 
     // unfold and check for overlaps
     std::pair<double, double> overlaps = unfold();
-    double newEnergy = overlaps.first + overlaps.second;
+    double newEnergy = overlaps.first * 100 + overlaps.second;
 
     double chance = (1 - std::pow(std::exp(1), -(temperature)/TEMP_MAX)) / 2000;
     double random = (double(std::rand()) / RAND_MAX);
@@ -35,7 +35,6 @@ bool Graph::neighbourState()
         _CplanarGluetags = _planarGluetags;
 
         redraw = true;
-
     }
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
     else if (chance > random)
@@ -85,7 +84,7 @@ void Graph::initializeState()
     // it is the best we have
     _Cgt = _gluetags;
     _C = _edges;
-    _Cenergy = overlaps.first + overlaps.second;
+    _Cenergy = overlaps.first * 100 + overlaps.second;
     _CplanarFaces = _planarFaces;
     _CplanarGluetags = _planarGluetags;
 }
@@ -158,7 +157,7 @@ void Graph::planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, Q
     float cl = QVector3D::dotProduct(B - A, C - A) / float(std::pow(lengthAB, 2));
 
     c = QVector2D(a.x() + cl * (b.x() - a.x()) - s * (b.y() - a.y()),
-                   a.y() + cl * (b.y() - a.y()) + s * (b.x() - a.x()));
+                  a.y() + cl * (b.y() - a.y()) + s * (b.x() - a.x()));
 }
 
 void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu)
@@ -180,8 +179,8 @@ void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu
     ||
     (
     (((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) > 0)
-         && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
-    ))
+             && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
+                ))
     {
         pu = pu1;
     }
@@ -220,7 +219,7 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
         planar(_planarFaces[index].A, _planarFaces[index].B, _planarFaces[index].C, _planarFaces[index].a, _planarFaces[index].b, _planarFaces[index].c);
     }
     else
-    {  
+    {
         // determine which Vertices are known
         Polyhedron::Halfedge_around_facet_circulator hfc = _facets[int(index)]->facet_begin();
         do
@@ -250,80 +249,90 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
 
     for(Gluetag& gluetag : _necessaryGluetags)
     {
-        if(gluetag._placedFace == int(index))
+        if(gluetag._placedFace != int(index))
         {
-            Polyhedron::Halfedge_around_facet_circulator hfc = _facets[int(index)]->facet_begin();
-            do
-            {
-                QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
-
-                // if this vertex is not shared it is the unkown one
-                if(Pu != Utility::pointToVector(gluetag._edge._halfedge->vertex()->point())
-                && Pu != Utility::pointToVector(gluetag._edge._halfedge->prev()->vertex()->point()))
-                {
-                    QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point()); // bottom left
-                    QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point()); // bottom right
-
-                    QVector2D p1 = _planarFaces[index].get(P1);
-                    QVector2D p2 = _planarFaces[index].get(P2);
-                    QVector2D p3prev = _planarFaces[index].get(Pu);
-
-                    GluetagToPlane tmp(&gluetag);
-
-                    if(P1 == gluetag._bl)
-                    {
-                        tmp.a = p1;
-                        tmp.b = p2;
-                    }
-                    else
-                    {
-                        tmp.b = p1;
-                        tmp.a = p2;
-                    }
-
-                    planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
-
-                    planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
-
-                    tmp.overlapping = false;
-                    // check if any overlaps occured with other faces
-
-                    for(ulong i = 0; i < discovered.size(); i++)
-                    {
-                        if(tmp._gluetag->_placedFace == int(i))
-                        {
-                            continue;
-                        }
-
-                        double area = tmp.overlaps(_planarFaces[i]);
-                        if(area > 0)
-                        {
-                            tmp.overlapping = true;
-                            //overlaps.second++;
-                            overlaps.second += area;
-                            break;
-                        }
-                    }
-
-                    // or overlaps with any existing gluetags
-                    for(GluetagToPlane& gtp : _planarGluetags)
-                    {
-                        double area = gtp.overlaps(tmp);
-                        if(area > 0)
-                        {
-                            tmp.overlapping = true;
-                            //overlaps.second++;
-                            overlaps.second += area;
-                            break;
-                        }
-                    }
-
-                    _planarGluetags.push_back(tmp);
-                }
-            } while (++hfc != _facets[int(index)]->facet_begin());
+            continue;
         }
+        Polyhedron::Halfedge_around_facet_circulator hfc = _facets[int(index)]->facet_begin();
+        do
+        {
+            QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
+
+            // if this vertex is not shared it is the unkown one
+            if(Pu != Utility::pointToVector(gluetag._edge._halfedge->vertex()->point())
+                && Pu != Utility::pointToVector(gluetag._edge._halfedge->prev()->vertex()->point()))
+            {
+                QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point()); // bottom left
+                QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point()); // bottom right
+
+                QVector2D p1 = _planarFaces[index].get(P1);
+                QVector2D p2 = _planarFaces[index].get(P2);
+                QVector2D p3prev = _planarFaces[index].get(Pu);
+
+                GluetagToPlane tmp(&gluetag);
+
+                if(P1 == gluetag._bl)
+                {
+                    tmp.a = p1;
+                    tmp.b = p2;
+                }
+                else
+                {
+                    tmp.b = p1;
+                    tmp.a = p2;
+                }
+
+                planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
+
+                planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
+
+                tmp.overlapping = false;
+                // check if any overlaps occured with other faces
+
+                // THREAD Overlap GT/FACE
+                for(ulong i = 0; i < discovered.size(); i++)
+                {
+                    if(tmp._gluetag->_placedFace == int(i))
+                    {
+                        continue;
+                    }
+
+                    double area = tmp.overlaps(_planarFaces[i]);
+                    if(area > 0)
+                    {
+                        tmp.overlapping = true;
+                        //overlaps.second++;
+                        overlaps.second += area;
+                        break;
+                    }
+                }
+                // THREAD Overlap GT/FACE
+
+                // or overlaps with any existing gluetags
+                // THREAD GT/GT Overlap
+                for(GluetagToPlane& gtp : _planarGluetags)
+                {
+                    double area = gtp.overlaps(tmp);
+                    if(area > 0)
+                    {
+                        tmp.overlapping = true;
+                        //overlaps.second++;
+                        overlaps.second += area;
+                        break;
+                    }
+                }
+                // THREAD GT/GT Overlap
+
+                // JOIN Threads here
+
+                _planarGluetags.push_back(tmp);
+            }
+        } while (++hfc != _facets[int(index)]->facet_begin());
+
     }
 
+
+    // THREAD Face Overlap
     // check if any overlaps occured with other faces
     for(ulong i = 0; i < discovered.size(); i++)
     {
@@ -343,7 +352,9 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
             break;
         }
     }
+    // Thread Face Overlap
 
+    // THREAD GT Overlap
     // or overlaps with any existing gluetags
     for(GluetagToPlane& gtp : _planarGluetags)
     {
@@ -357,6 +368,9 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
             break;
         }
     }
+    // THREAD GT Overlap
+
+    // join GT Overlap and Face Overlap Thread
 
     discovered[index] = true;
     // go through all adjacent edges
@@ -468,7 +482,7 @@ void Graph::calculateMSP()
                 // add edge to the "to be cut" list
                 _cutEdges.push_back(edge);
 
-                // cleanup the adjacence list
+            // cleanup the adjacence list
                 adjacenceList[ulong(edge._sFace)].erase(remove(adjacenceList[ulong(edge._sFace)].begin(), adjacenceList[ulong(edge._sFace)].end(), edge._tFace), adjacenceList[ulong(edge._sFace)].end());
                 adjacenceList[ulong(edge._tFace)].erase(remove(adjacenceList[ulong(edge._tFace)].begin(), adjacenceList[ulong(edge._tFace)].end(), edge._sFace), adjacenceList[ulong(edge._tFace)].end());
 
@@ -654,7 +668,7 @@ void Graph::oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D
 
     // add all cut edges
     for(Edge& edge : _cutEdges)
-    {     
+    {
         lineVertices.push_back(Utility::pointToVector(edge._halfedge->prev()->vertex()->point()));
         lineVertices.push_back(Utility::pointToVector(edge._halfedge->vertex()->point()));
 
