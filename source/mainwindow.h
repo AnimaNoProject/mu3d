@@ -16,6 +16,11 @@
 
 #include <thread>
 
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+#include "sys/types.h"
+#include "sys/sysinfo.h"
 
 class MainWindow : public QMainWindow
 {
@@ -28,6 +33,7 @@ public:
     void unfoldModel();
 public slots:
     void unfoldLoop();
+    void updateMemoryUsage();
 private:
     OGLWidget* _modelWidget;
     OGLPlanarWidget* _planarWidget;
@@ -39,12 +45,10 @@ private:
     struct timespec up, down;
     double elapsed;
 
-    std::thread* memorywatcher;
-
-
     Model* _model;
 
     QTimer* timer;
+    QTimer* memory;
 
     bool unfolding;
     bool unfoldSuccess;
@@ -52,4 +56,7 @@ private:
 
     void start();
     void stop();
+
+
+    int parseLine(char* line);
 };

@@ -1,5 +1,10 @@
 #include "facetoplane.h"
 
+FaceToPlane::~FaceToPlane()
+{
+
+}
+
 FaceToPlane::FaceToPlane()
 {
     color = QVector3D(0.9f, 0.9f, 0.9f);

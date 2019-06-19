@@ -8,6 +8,7 @@ class FaceToPlane
 {
 public:
     FaceToPlane();
+    ~FaceToPlane();
 
     QVector3D A;
     QVector3D B;

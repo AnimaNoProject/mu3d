@@ -8,12 +8,19 @@ MainWindow::MainWindow(int height, int width, QString title)
     _progressBar = new QProgressBar();
     _progressBar->setRange(0, TEMP_MAX);
     _progressBar->setValue(0);
-    _progressBar->setTextVisible(false);
+    _progressBar->setFormat("%v out of %m");
+    _progressBar->setTextVisible(true);
+
+    struct sysinfo memInfo;
+    sysinfo (&memInfo);
+    ulong totalPhysMem = memInfo.totalram;
+    totalPhysMem *= memInfo.mem_unit;
 
     _memoryUsage = new QProgressBar();
-    _memoryUsage->setRange(0, 10000);
+    _memoryUsage->setRange(0, totalPhysMem / 1000 / 1000 );
     _memoryUsage->setValue(0);
-    _memoryUsage->setTextVisible(false);
+    _memoryUsage->setFormat("%vMB out of %mMB");
+    _memoryUsage->setTextVisible(true);
 
     // add openglwidegts for rendering
     _modelWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
@@ -44,11 +51,42 @@ MainWindow::MainWindow(int height, int width, QString title)
 
     unfolding = false;
     timer = new QTimer(this);
+    memory = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(unfoldLoop()));
+    connect(memory, SIGNAL(timeout()), this, SLOT(updateMemoryUsage()));
+
+    memory->setInterval(10000);
+    memory->start();
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::updateMemoryUsage()
+{
+    FILE* file = fopen("/proc/self/status", "r");
+    int result = -1;
+    char line[128];
+
+    while (fgets(line, 128, file) != NULL){
+        if (strncmp(line, "VmRSS:", 6) == 0){
+            result = parseLine(line);
+            break;
+        }
+    }
+    fclose(file);
+    _memoryUsage->setValue(result / 1000);
+}
+
+int MainWindow::parseLine(char* line){
+    // This assumes that a digit will be found and the line ends in " Kb".
+    int i = strlen(line);
+    const char* p = line;
+    while (*p <'0' || *p > '9') p++;
+    line[i-3] = '\0';
+    i = atoi(p);
+    return i;
 }
 
 void MainWindow::loadModel()
@@ -84,7 +122,7 @@ void MainWindow::start()
     unfolding = true;
     _progressBar->setTextVisible(true);
     _progressBar->setValue(0);
-    _progressBar->resetFormat();
+    _progressBar->setFormat("%v out of %m");
     _model->_graph.initializeState();
     _model->clearGL();
     _planarWidget->updateGL();

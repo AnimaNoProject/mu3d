@@ -288,21 +288,18 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
 
                 tmp.overlapping = false;
 
-                std::future<double> gtfoverlap = std::async(&Graph::gtfOverlap, this, std::ref(tmp), std::ref(discovered));
-                std::future<double> gtgtoverlap = std::async(&Graph::gtgtOverlap, this, std::ref(tmp));
 
-                overlaps.second += gtfoverlap.get() + gtgtoverlap.get();
+                overlaps.second += gtfOverlap(tmp, discovered);
+                overlaps.second += gtgtOverlap(tmp);
+
                 _planarGluetags.push_back(tmp);
             }
         } while (++hfc != _facets[int(index)]->facet_begin());
 
     }
 
-    std::future<double> foverlaps = std::async(&Graph::fOverlapArea, this, index, std::ref(discovered), parent);
-    std::future<double> gtoverlaps = std::async(&Graph::gtOverlapArea, this, index);
-
-    overlaps.first += foverlaps.get();
-    overlaps.second += gtoverlaps.get();
+    overlaps.first += fOverlapArea(index, discovered, parent);
+    overlaps.second += gtOverlapArea(index);
 
     discovered[index] = true;
     // go through all adjacent edges
