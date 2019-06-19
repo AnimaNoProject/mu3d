@@ -8,6 +8,9 @@
 
 #include <random>
 
+#include <thread>
+#include <future>
+
 #include "edge.h"
 #include "gluetag.h"
 #include "gluetagtoplane.h"
@@ -15,7 +18,7 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 40000.0
+#define TEMP_MAX 11.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
 
@@ -70,6 +73,12 @@ private:
 
     std::pair<double, double> unfold();
     std::pair<double, double> unfold(ulong index, std::vector<bool>& discovered, ulong parent);
+
+    double gtOverlapArea(size_t index);
+    double fOverlapArea(ulong index, std::vector<bool>& discovered, ulong parent);
+
+    double gtgtOverlap(GluetagToPlane& gt);
+    double gtfOverlap(GluetagToPlane& gt, std::vector<bool>& discovered);
 
     void randomMove();
 

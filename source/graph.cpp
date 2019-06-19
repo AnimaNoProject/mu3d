@@ -68,7 +68,7 @@ void Graph::initializeState()
     // init gluetag probabilities
     for(Gluetag& gluetag : _gluetags)
     {
-        gluetag._probability = 1 - (double(std::rand()) / RAND_MAX);
+        gluetag._probability = (double(std::rand()) / RAND_MAX);
     }
 
     // calculate the dualgraph and an initial MSP and Gluetags
@@ -287,90 +287,22 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
                 planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
 
                 tmp.overlapping = false;
-                // check if any overlaps occured with other faces
 
-                // THREAD Overlap GT/FACE
-                for(ulong i = 0; i < discovered.size(); i++)
-                {
-                    if(tmp._gluetag->_placedFace == int(i))
-                    {
-                        continue;
-                    }
+                std::future<double> gtfoverlap = std::async(&Graph::gtfOverlap, this, std::ref(tmp), std::ref(discovered));
+                std::future<double> gtgtoverlap = std::async(&Graph::gtgtOverlap, this, std::ref(tmp));
 
-                    double area = tmp.overlaps(_planarFaces[i]);
-                    if(area > 0)
-                    {
-                        tmp.overlapping = true;
-                        //overlaps.second++;
-                        overlaps.second += area;
-                        break;
-                    }
-                }
-                // THREAD Overlap GT/FACE
-
-                // or overlaps with any existing gluetags
-                // THREAD GT/GT Overlap
-                for(GluetagToPlane& gtp : _planarGluetags)
-                {
-                    double area = gtp.overlaps(tmp);
-                    if(area > 0)
-                    {
-                        tmp.overlapping = true;
-                        //overlaps.second++;
-                        overlaps.second += area;
-                        break;
-                    }
-                }
-                // THREAD GT/GT Overlap
-
-                // JOIN Threads here
-
+                overlaps.second += gtfoverlap.get() + gtgtoverlap.get();
                 _planarGluetags.push_back(tmp);
             }
         } while (++hfc != _facets[int(index)]->facet_begin());
 
     }
 
+    std::future<double> foverlaps = std::async(&Graph::fOverlapArea, this, index, std::ref(discovered), parent);
+    std::future<double> gtoverlaps = std::async(&Graph::gtOverlapArea, this, index);
 
-    // THREAD Face Overlap
-    // check if any overlaps occured with other faces
-    for(ulong i = 0; i < discovered.size(); i++)
-    {
-        // if the other face was not yet discovered, or it's the curent face or it's the parent
-        // it can not overlap anyways
-        if(!discovered[i] || i == index || i == parent)
-        {
-            continue;
-        }
-
-        double area = _planarFaces[index].overlaps(_planarFaces[i]);
-        if(area > 0)
-        {
-            _planarFaces[index].color = QVector3D(1,0,0);
-            overlaps.first += area;
-            //overlaps.first++;
-            break;
-        }
-    }
-    // Thread Face Overlap
-
-    // THREAD GT Overlap
-    // or overlaps with any existing gluetags
-    for(GluetagToPlane& gtp : _planarGluetags)
-    {
-        double area = gtp.overlaps(_planarFaces[index]);
-        // if it's not the gluetag of the current face and overlaps this face
-        if(gtp._gluetag->_placedFace != int(index) && area > 0)
-        {
-            gtp.overlapping = true;
-            //overlaps.second++;
-            overlaps.second += area;
-            break;
-        }
-    }
-    // THREAD GT Overlap
-
-    // join GT Overlap and Face Overlap Thread
+    overlaps.first += foverlaps.get();
+    overlaps.second += gtoverlaps.get();
 
     discovered[index] = true;
     // go through all adjacent edges
@@ -385,6 +317,79 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
     }
 
     return overlaps;
+}
+
+double Graph::gtfOverlap(GluetagToPlane& gt, std::vector<bool>& discovered)
+{
+    for(ulong i = 0; i < discovered.size(); i++)
+    {
+        if(gt._gluetag->_placedFace == int(i))
+        {
+            continue;
+        }
+
+        double area = gt.overlaps(_planarFaces[i]);
+        if(area > 0)
+        {
+            gt.overlapping = true;
+            return area;
+        }
+    }
+
+    return 0;
+}
+
+double Graph::gtgtOverlap(GluetagToPlane& gt)
+{
+    for(GluetagToPlane& gtp : _planarGluetags)
+    {
+        double area = gtp.overlaps(gt);
+        if(area > 0)
+        {
+            gt.overlapping = true;
+            return area;
+        }
+    }
+
+    return 0;
+}
+
+double Graph::fOverlapArea(ulong index, std::vector<bool>& discovered, ulong parent)
+{
+    for(ulong i = 0; i < discovered.size(); i++)
+    {
+        // if the other face was not yet discovered, or it's the curent face or it's the parent
+        // it can not overlap anyways
+        if(!discovered[i] || i == index || i == parent)
+        {
+            continue;
+        }
+
+        double area = _planarFaces[index].overlaps(_planarFaces[i]);
+        if(area > 0)
+        {
+            _planarFaces[index].color = QVector3D(1,0,0);
+            return area;
+        }
+    }
+
+    return 0;
+}
+
+double Graph::gtOverlapArea(size_t index)
+{
+    for(GluetagToPlane& gtp : _planarGluetags)
+    {
+        double area = gtp.overlaps(_planarFaces[index]);
+        // if it's not the gluetag of the current face and overlaps this face
+        if(gtp._gluetag->_placedFace != int(index) && area > 0)
+        {
+            gtp.overlapping = true;
+            return area;
+        }
+    }
+
+    return 0;
 }
 
 void Graph::addFace(Facet facet)
