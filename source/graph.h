@@ -18,7 +18,7 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 40000.0
+#define TEMP_MAX 400000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
 
@@ -88,8 +88,8 @@ private:
 
     QVector3D faceCenter(Facet facet);
 
-    bool isSingleComponent(std::vector<std::vector<int>>& adjacenceList);
-    bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool> &discovered, int parent);
+    bool isSingleComponent(std::vector<std::vector<int>> &adjacenceList);
+    bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool>& discovered, int parent);
 
     int find(Facet facet);
     bool find(Edge& edge);

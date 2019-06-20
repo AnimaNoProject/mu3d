@@ -18,6 +18,10 @@ Edge::Edge()
 
 }
 
+Edge::~Edge()
+{
+}
+
 bool Edge::isNeighbour(const Edge& edge)
 {
     return _halfedge->vertex() == edge._halfedge->vertex()

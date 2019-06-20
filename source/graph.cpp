@@ -27,9 +27,15 @@ bool Graph::neighbourState()
     // if it got better we take the new graph
     if(newEnergy <= _Cenergy)
     {
+        _Cgt.clear();
+        _C.clear();
+
         _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
 
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
@@ -39,19 +45,30 @@ bool Graph::neighbourState()
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
     else if (chance > random)
     {
+        _Cgt.clear();
+        _C.clear();
+
         _Cgt = _gluetags;
         _C = _edges;
         _Cenergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
 
         _CplanarFaces = _planarFaces;
         _CplanarGluetags = _planarGluetags;
 
         redraw = true;
     }
-
     // continue working with the best
-    _edges = _C;
-    _gluetags = _Cgt;
+    else
+    {
+        _edges.clear();
+        _gluetags.clear();
+
+        _edges = _C;
+        _gluetags = _Cgt;
+    }
 
     // end epoch
     temperature -= EPOCH;

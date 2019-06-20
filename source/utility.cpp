@@ -1,11 +1,11 @@
 #include "utility.h"
 
-QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>> point)
+QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& point)
 {
     return QVector3D(float(point.x()), float(point.y()), float(point.z()));
 }
 
-double Utility::intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVector2D p2, QVector2D q2, QVector2D r2)
+double Utility::intersectionArea(QVector2D& p1, QVector2D& q1, QVector2D& r1, QVector2D& p2, QVector2D& q2, QVector2D& r2)
 {
     std::vector<QVector2D> newpoints;
 
@@ -21,55 +21,58 @@ double Utility::intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVect
     {
         newpoints.push_back(r1);
     }
-
-    QVector2D* x;
-
-    x = intersectionPoint(p1, q1, p2, q2);
-    if(x != nullptr)
+    if(pointInTriangle(p2, p1, q1, r1))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(p1);
     }
-    x = intersectionPoint(q1, r1, p2, q2);
-    if(x != nullptr)
+    if(pointInTriangle(q2, p1, q1, r1))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(q2);
     }
-    x = intersectionPoint(r1, p1, p2, q2);
-    if(x != nullptr)
+    if(pointInTriangle(r2, p1, q1, r1))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(r2);
     }
 
-    x = intersectionPoint(p1, q1, q2, r2);
-    if(x != nullptr)
+    QVector2D ip;
+
+    if(intersectionPoint(p1, q1, p2, q2, ip))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(ip);
     }
-    x = intersectionPoint(q1, r1, q2, r2);
-    if(x != nullptr)
+    if(intersectionPoint(q1, r1, p2, q2, ip))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(ip);
     }
-    x = intersectionPoint(r1, p1, q2, r2);
-    if(x != nullptr)
+    if(intersectionPoint(r1, p1, p2, q2, ip))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(ip);
     }
 
-    x = intersectionPoint(p1, q1, r2, p2);
-    if(x != nullptr)
+    if(intersectionPoint(p1, q1, q2, r2, ip))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(ip);
     }
-    x = intersectionPoint(q1, r1, r2, p2);
-    if(x != nullptr)
+    if(intersectionPoint(q1, r1, q2, r2, ip))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(ip);
     }
-    x = intersectionPoint(r1, p1, r2, p2);
-    if(x != nullptr)
+    if(intersectionPoint(r1, p1, q2, r2, ip))
     {
-        newpoints.push_back(*x);
+        newpoints.push_back(ip);
+    }
+
+    if(intersectionPoint(p1, q1, r2, p2, ip))
+    {
+        newpoints.push_back(ip);
+    }
+    if(intersectionPoint(q1, r1, r2, p2, ip))
+    {
+        newpoints.push_back(ip);
+    }
+    if(intersectionPoint(r1, p1, r2, p2, ip))
+    {
+        newpoints.push_back(ip);
     }
 
     double area = 0;
@@ -83,7 +86,7 @@ double Utility::intersectionArea(QVector2D p1, QVector2D q1, QVector2D r1, QVect
     return std::abs(area / 2.0);
 }
 
-QVector2D* Utility::intersectionPoint(QVector2D p1, QVector2D p2, QVector2D p3, QVector2D p4)
+bool Utility::intersectionPoint(QVector2D& p1, QVector2D& p2, QVector2D& p3, QVector2D& p4, QVector2D& ip)
 {
     float a1 = p2.y() - p1.y();
     float b1 = p1.x() - p2.x();
@@ -97,15 +100,16 @@ QVector2D* Utility::intersectionPoint(QVector2D p1, QVector2D p2, QVector2D p3, 
 
     if(determinant == 0)
     {
-        return nullptr;
+        return false;
     }
     else
     {
-        return new QVector2D((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
+        ip = QVector2D((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
+        return true;
     }
 }
 
-bool Utility::pointInTriangle(QVector2D p, QVector2D v1, QVector2D v2, QVector2D v3)
+bool Utility::pointInTriangle(QVector2D& p, QVector2D& v1, QVector2D& v2, QVector2D& v3)
 {
     float d1, d2, d3;
     bool hasNeg;
@@ -121,12 +125,13 @@ bool Utility::pointInTriangle(QVector2D p, QVector2D v1, QVector2D v2, QVector2D
     return !(hasNeg && hasPos);
 }
 
-float Utility::sign(QVector2D p1, QVector2D p2, QVector2D p3)
+float Utility::sign(QVector2D& p1, QVector2D& p2, QVector2D& p3)
 {
     return (p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y());
 }
 
-void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo, std::vector<QVector3D> vertices, std::vector<GLushort> indices, std::vector<QVector3D> colors)
+void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], QOpenGLBuffer& ibo,
+                            std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors)
 {
     // delcare Vertex and Index buffer
     vbo[0] = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
@@ -172,7 +177,7 @@ void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], 
     ibo.destroy();
 }
 
-void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], std::vector<QVector3D> vertices, std::vector<QVector3D> colors)
+void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors)
 {
     // delcare Vertex
     vbo[0].destroy();
@@ -208,7 +213,7 @@ void Utility::createBuffers(QOpenGLVertexArrayObject& vao, QOpenGLBuffer vbo[], 
     vaoLinesBinder.release();
 }
 
-bool Utility::intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2)
+bool Utility::intersects(QVector2D& p1, QVector2D& q1, QVector2D& p2, QVector2D& q2)
 {
     if((p1 == p2 && q1 != q2) || (p1 == q2 && q1 != p2) || (q1 == p2 && p1 != q2) || (q1 == q2 && p1 != p2))
     {
@@ -245,7 +250,7 @@ bool Utility::intersects(QVector2D p1, QVector2D q1, QVector2D p2, QVector2D q2)
     return false;
 }
 
-int Utility::orientation(QVector2D p, QVector2D q, QVector2D r)
+int Utility::orientation(QVector2D& p, QVector2D& q, QVector2D& r)
 {
     float val = (q.y() - p.y()) * (r.x() - q.x()) -
                 (q.x() - p.x()) * (r.y() - q.y());
@@ -264,7 +269,7 @@ int Utility::orientation(QVector2D p, QVector2D q, QVector2D r)
     }
 }
 
-bool Utility::onSegment(QVector2D p, QVector2D q, QVector2D r)
+bool Utility::onSegment(QVector2D& p, QVector2D& q, QVector2D& r)
 {
     if(q.x() <= std::max(p.x(), r.x()) && q.x() >= std::min(p.x(), r.x()) &&
        q.y() <= std::max(p.y(), r.y()) && q.y() >= std::min(p.y(), r.y()))

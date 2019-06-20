@@ -55,7 +55,7 @@ MainWindow::MainWindow(int height, int width, QString title)
     connect(timer, SIGNAL(timeout()), this, SLOT(unfoldLoop()));
     connect(memory, SIGNAL(timeout()), this, SLOT(updateMemoryUsage()));
 
-    memory->setInterval(10000);
+    memory->setInterval(2000);
     memory->start();
 }
 

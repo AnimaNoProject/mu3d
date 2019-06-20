@@ -82,6 +82,13 @@ void Model::load3DGL(QOpenGLShaderProgram* program)
     Utility::createBuffers(_vaoLines, _vboLines, _lineVertices, _lineColors);
     Utility::createBuffers(_vao, _vbo, _ibo, _vertices, _indices, _colors);
     program->release();
+
+    _vbo[0].destroy();
+    _vbo[1].destroy();
+    _vboGT[0].destroy();
+    _vboGT[1].destroy();
+    _vboLines[0].destroy();
+    _vboLines[1].destroy();
 }
 
 bool Model::recalculate()
@@ -96,6 +103,13 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
     Utility::createBuffers(_vaoGT, _vboGT, _iboGT, _verticesGT, _indicesGT, _colorsGT);
     Utility::createBuffers(_vaoLines, _vboLines, _lineVertices, _lineColors);
     program->release();
+
+    _vbo[0].destroy();
+    _vbo[1].destroy();
+    _vboGT[0].destroy();
+    _vboGT[1].destroy();
+    _vboLines[0].destroy();
+    _vboLines[1].destroy();
 }
 
 void Model::loadPlanarGL(QOpenGLShaderProgram* program)
@@ -106,6 +120,11 @@ void Model::loadPlanarGL(QOpenGLShaderProgram* program)
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);
     Utility::createBuffers(_vaoPlanarLines, _vboPlanarLines, _planarLines, _planarLinesColors);
     program->release();
+
+    _vboPlanar[0].destroy();
+    _vboPlanar[1].destroy();
+    _vboPlanarLines[0].destroy();
+    _vboPlanarLines[1].destroy();
 }
 
 void Model::clearOGL()
@@ -119,13 +138,9 @@ void Model::clearOGL()
     _planarLinesColors.clear();
 
     _vao.destroy();
-    _vbo[0].destroy();
-    _vbo[1].destroy();
     _ibo.destroy();
 
     _vaoGT.destroy();
-    _vboGT[0].destroy();
-    _vboGT[1].destroy();
     _iboGT.destroy();
 
     _verticesGT.clear();
@@ -133,16 +148,10 @@ void Model::clearOGL()
     _colorsGT.clear();
 
     _vaoLines.destroy();
-    _vboLines[0].destroy();
-    _vboLines[1].destroy();
 
     _vaoPlanar.destroy();
-    _vboPlanar[0].destroy();
-    _vboPlanar[1].destroy();
 
     _vaoPlanarLines.destroy();
-    _vboPlanarLines[0].destroy();
-    _vboPlanarLines[1].destroy();
 }
 
 void Model::draw(QOpenGLShaderProgram* program)
@@ -234,4 +243,5 @@ Model::Model()
 
 Model::~Model()
 {
+    delete this;
 }
