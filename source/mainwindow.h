@@ -8,6 +8,7 @@
 #include <QProgressBar>
 #include <QString>
 #include <QStatusBar>
+#include <QLabel>
 
 #include "oglwidget.h"
 #include "oglplanarwidget.h"
@@ -41,22 +42,22 @@ private:
     QAction* _loadModel;
     QProgressBar * _progressBar;
     QProgressBar * _memoryUsage;
+    QLabel* _timeLabel;
 
-    struct timespec up, down;
-    double elapsed;
+    struct timespec _timeStart, _timeFinish;
+    double _epochTime;
+    double _unfoldTime;
 
     Model* _model;
 
-    QTimer* timer;
-    QTimer* memory;
+    QTimer* _unfoldTimer;
+    QTimer* _memoryUsageTimer;
 
-    bool unfolding;
-    bool unfoldSuccess;
+    bool _isUnfolding;
+    bool _unfoldSuccess;
 
 
     void start();
     void stop();
-
-
     int parseLine(char* line);
 };

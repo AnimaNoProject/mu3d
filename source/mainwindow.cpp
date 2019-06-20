@@ -22,6 +22,8 @@ MainWindow::MainWindow(int height, int width, QString title)
     _memoryUsage->setFormat("%vMB out of %mMB");
     _memoryUsage->setTextVisible(true);
 
+    _timeLabel = new QLabel();
+    _timeLabel->setText("Epoch-Time: ");
     // add openglwidegts for rendering
     _modelWidget = new OGLWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
     _planarWidget = new OGLPlanarWidget(new QString("./shader/shader.vert"), new QString("./shader/shader.frag"));
@@ -30,8 +32,11 @@ MainWindow::MainWindow(int height, int width, QString title)
     layout->addWidget(_modelWidget);
     layout->addWidget(_planarWidget);
 
+    this->statusBar()->addPermanentWidget(_timeLabel);
+    _timeLabel->setFixedWidth(175);
     this->statusBar()->addPermanentWidget(_progressBar, 2);
-    this->statusBar()->addPermanentWidget(_memoryUsage, 2);
+    this->statusBar()->addPermanentWidget(_memoryUsage);
+    _memoryUsage->setFixedWidth(300);
     this->statusBar()->show();
 
     // Add action to load a model
@@ -49,14 +54,14 @@ MainWindow::MainWindow(int height, int width, QString title)
     this->setWindowTitle(title);
     this->setWindowModality(Qt::ApplicationModal);
 
-    unfolding = false;
-    timer = new QTimer(this);
-    memory = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(unfoldLoop()));
-    connect(memory, SIGNAL(timeout()), this, SLOT(updateMemoryUsage()));
+    _isUnfolding = false;
+    _unfoldTimer = new QTimer(this);
+    _memoryUsageTimer = new QTimer(this);
+    connect(_unfoldTimer, SIGNAL(timeout()), this, SLOT(unfoldLoop()));
+    connect(_memoryUsageTimer, SIGNAL(timeout()), this, SLOT(updateMemoryUsage()));
 
-    memory->setInterval(2000);
-    memory->start();
+    _memoryUsageTimer->setInterval(2000);
+    _memoryUsageTimer->start();
 }
 
 MainWindow::~MainWindow()
@@ -69,7 +74,7 @@ void MainWindow::updateMemoryUsage()
     int result = -1;
     char line[128];
 
-    while (fgets(line, 128, file) != NULL){
+    while (fgets(line, 128, file) != nullptr){
         if (strncmp(line, "VmRSS:", 6) == 0){
             result = parseLine(line);
             break;
@@ -81,7 +86,7 @@ void MainWindow::updateMemoryUsage()
 
 int MainWindow::parseLine(char* line){
     // This assumes that a digit will be found and the line ends in " Kb".
-    int i = strlen(line);
+    int i = int(strlen(line));
     const char* p = line;
     while (*p <'0' || *p > '9') p++;
     line[i-3] = '\0';
@@ -103,7 +108,7 @@ void MainWindow::loadModel()
 
 void MainWindow::unfoldModel()
 {
-    if(unfolding)
+    if(_isUnfolding)
     {
         stop();
     }
@@ -119,7 +124,7 @@ void MainWindow::start()
     _loadModel->setEnabled(false);
     _planarWidget->setModel(_model);
     _unfold->setText("Stop Unfolding");
-    unfolding = true;
+    _isUnfolding = true;
     _progressBar->setTextVisible(true);
     _progressBar->setValue(0);
     _progressBar->setFormat("%v out of %m");
@@ -128,29 +133,26 @@ void MainWindow::start()
     _planarWidget->updateGL();
     _modelWidget->updateGL();
 
-    clock_gettime(CLOCK_MONOTONIC, &up);
-    timer->start();
+    _unfoldTimer->start();
 }
 
 void MainWindow::stop()
 {
-    timer->stop();
+    _unfoldTimer->stop();
     this->setCursor(Qt::ArrowCursor);
     _loadModel->setEnabled(true);
     _unfold->setText("Unfolding");
-    unfolding = false;
-
-    clock_gettime(CLOCK_MONOTONIC, &down);
-    elapsed = (down.tv_sec - up.tv_sec);
-    elapsed += (down.tv_nsec - up.tv_nsec) / 1000000000.0;
+    _isUnfolding = false;
 
     std::stringstream ss;
-    ss << "Time: " << elapsed << "s";
+    ss << "Time: " << _unfoldTime << "s";
     _progressBar->setFormat(ss.str().c_str());
 }
 
 void MainWindow::unfoldLoop()
 {
+    clock_gettime(CLOCK_MONOTONIC, &_timeStart);
+
     bool redraw = _model->recalculate();
 
     if(redraw)
@@ -162,6 +164,16 @@ void MainWindow::unfoldLoop()
 
     int iterationsDone = int(TEMP_MAX) - _model->finishedAnnealing();
     _progressBar->setValue(iterationsDone);
+
+    clock_gettime(CLOCK_MONOTONIC, &_timeFinish);
+    _epochTime = (_timeFinish.tv_sec - _timeStart.tv_sec) * 1000;
+    _epochTime += (_timeFinish.tv_nsec - _timeStart.tv_nsec) / 1000000.0;
+
+    _unfoldTime += _epochTime;
+
+    std::stringstream ss;
+    ss << "Epoch-Time: " << std::fixed << std::setprecision(5) << _epochTime << "ms";
+    _timeLabel->setText(ss.str().c_str());
 
     if(iterationsDone >= int(TEMP_MAX))
     {
