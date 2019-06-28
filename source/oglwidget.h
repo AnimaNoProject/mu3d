@@ -18,9 +18,11 @@ class OGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     Q_OBJECT
 
 public:
-    OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = 0);
-    ~OGLWidget();
-    void importModel(const char* filename);
+    OGLWidget(const QString* vshaderFile,const QString* fshaderFile, QWidget *parent = nullptr);
+    virtual ~OGLWidget() override;
+    virtual void updateGL();
+    virtual void setModel(Model* model);
+
 public slots:
     void cleanup();
 protected:
@@ -31,15 +33,18 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
-private:
     QOpenGLShaderProgram *_program;
+
+    Model* _model;
 
     const  QString* _vshaderFile;
     const  QString* _fshaderFile;
 
-    Model* _model;
     Camera* _camera;
     QMatrix4x4 _projMatrix;
 
     QPoint _lastPos;
+    bool _initialized;
+
+    bool boostZoom;
 };

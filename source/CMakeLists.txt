@@ -14,6 +14,12 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread")
+
 # external libraries
 find_package(CGAL)
 find_package(Qt5Widgets CONFIG REQUIRED)
@@ -30,13 +36,26 @@ set(3d-mesh-unfolding_SRCS
     mainwindow.cpp
     oglwidget.h
     oglwidget.cpp
+    oglplanarwidget.h
+    oglplanarwidget.cpp
+    utility.h
+    utility.cpp
     model.h
     model.cpp
     camera.h
     camera.cpp
+    graph.h
+    graph.cpp
+    edge.h
+    edge.cpp
+    gluetag.h
+    gluetag.cpp
+    facetoplane.h
+    facetoplane.cpp
+    gluetagtoplane.h
+    gluetagtoplane.cpp
 )
 
 # create the executeable from all source files
 add_executable(${PROJECT_NAME} ${3d-mesh-unfolding_SRCS})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} )
-target_link_libraries(${PROJECT_NAME} CGAL::CGAL Qt5::Widgets ${OPENGL_gl_LIBRARY})
+target_link_libraries(${PROJECT_NAME} CGAL::CGAL Qt5::Widgets ${OPENGL_gl_LIBRARY} ${Boost_LIBRARIES})

@@ -1,6 +1,6 @@
 #include "camera.h"
 
-Camera::Camera() : _angleX(0), _angleY(0), _delta(-10)
+Camera::Camera() : _delta(-10), _angleX(0), _angleY(0)
 {
 }
 
@@ -16,8 +16,14 @@ QMatrix4x4 Camera::getMatrix()
     matrix.translate(0, 0, _delta);
     matrix.rotate(_angleX, 0, 1, 0);
     matrix.rotate(_angleY, 1, 0, 0);
-    matrix.translate(0, 0, 0);
     return matrix;
+}
+
+void Camera::reset()
+{
+    _delta = -10;
+    _angleX = 0;
+    _angleY = 0;
 }
 
 void Camera::rotate(float angleX, float angleY)
@@ -26,7 +32,7 @@ void Camera::rotate(float angleX, float angleY)
     _angleY += angleY;
 }
 
-void Camera::zoom(float delta)
+void Camera::zoom(float delta, bool boost)
 {
-    _delta += delta;
+    _delta += delta * _speed * ((boost) ? 10 : 1);
 }
