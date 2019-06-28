@@ -145,7 +145,7 @@ void MainWindow::stop()
     _isUnfolding = false;
 
     std::stringstream ss;
-    ss << "Time: " << _unfoldTime << "s";
+    ss << "Time: " << _unfoldTime / 1000 << "s";
     _progressBar->setFormat(ss.str().c_str());
 }
 
