@@ -136,10 +136,9 @@ void MainWindow::start()
 
     if(_bruteForce->isChecked())
     {
-        int max = _model->_graph.initBruteForce();
+        ulong max = _model->_graph.initBruteForce();
         iterations = 0;
         _progressBar->setMaximum(max);
-        std::cout << max << std::endl;
     }
     else
     {

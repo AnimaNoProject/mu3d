@@ -12,7 +12,7 @@ int Graph::initBruteForce()
 {
     calculateDual();
 
-    n = _edges.size() * 2;
+    n = _edges.size();
     r = _facets.size() - 1;
 
     v = std::vector<bool>(n);
@@ -23,8 +23,10 @@ int Graph::initBruteForce()
     std::cout << "n: " << n << std::endl;
     std::cout << "r: " << r << std::endl;
 
-    //return factorial(int(n)) / (factorial(int(k)) * factorial(int(n-k)));
-    return 0;
+    //int max = factorial(int(n)) / (factorial(int(r)) * factorial(int(n-r)));
+    //std::cout << "maximum: " << max << std::endl;
+
+    return 10000000;
 }
 
 int Graph::factorial(int n)
