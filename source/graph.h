@@ -54,7 +54,9 @@ public:
 
     double temperature;
 private:
-    std::string bitmask;
+    int n;
+    int r;
+    std::vector<bool> v;
 
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
@@ -79,19 +81,17 @@ private:
 
     void calculateDual();
 
-    bool calculateMSP(std::vector<size_t> edges);
+    bool calculateMSP(std::vector<int> edges);
     void calculateMSP();
 
     void calculateGlueTags();
 
-    std::pair<double, double> unfold();
-    std::pair<double, double> unfold(ulong index, std::vector<bool>& discovered, ulong parent);
+    void unfoldTriangles();
+    void unfoldTriangles(ulong index, std::vector<bool>& discovered, ulong parent);
+    void unfoldGluetags();
 
-    double gtOverlapArea(size_t index);
-    double fOverlapArea(ulong index, std::vector<bool>& discovered, ulong parent);
-
-    double gtgtOverlap(GluetagToPlane& gt);
-    double gtfOverlap(GluetagToPlane& gt, std::vector<bool>& discovered);
+    double findTriangleOverlaps();
+    double findGluetagOverlaps();
 
     void randomMove();
 
