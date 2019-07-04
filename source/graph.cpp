@@ -57,8 +57,6 @@ bool Graph::nextBruteForce()
         return false;
     }
 
-    calculateGlueTags();
-
     // unfold and check for overlaps
     unfoldTriangles();
     double trioverlaps = findTriangleOverlaps();
@@ -66,6 +64,7 @@ bool Graph::nextBruteForce()
 
     if(trioverlaps <= 0)
     {
+        calculateGlueTags();
         unfoldGluetags();
         gtoverlaps = findGluetagOverlaps();
     }
@@ -194,12 +193,9 @@ void Graph::initializeState()
 
 void Graph::randomMove()
 {
-    while(std::is_sorted(_edges.begin(), _edges.end()))
-    {
-        // take a random edge and change it's weight
-        ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
-        _edges[random]._weight = (double(std::rand()) / RAND_MAX);
-    }
+    // take a random edge and change it's weight
+    ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
+    _edges[random]._weight = (double(std::rand()) / RAND_MAX);
 }
 
 bool Graph::over()
