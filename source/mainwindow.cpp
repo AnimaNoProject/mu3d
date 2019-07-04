@@ -41,7 +41,12 @@ MainWindow::MainWindow(int height, int width, QString title)
 
     // Add action to load a model
     _loadModel = this->menuBar()->addAction("Load Model");
-    _unfold = this->menuBar()->addAction("Unfold");
+
+    QMenu* menu = this->menuBar()->addMenu("Unfolding");
+
+    _unfold = menu->addAction("Unfold");
+    _bruteForce = menu->addAction("Bruteforce?");
+    _bruteForce->setCheckable(true);
 
     _unfold->setDisabled(true);
     QObject::connect(_loadModel, &QAction::triggered, this, &MainWindow::loadModel);
@@ -128,10 +133,22 @@ void MainWindow::start()
     _progressBar->setTextVisible(true);
     _progressBar->setValue(0);
     _progressBar->setFormat("%v out of %m");
-    _model->_graph.initializeState();
-    _model->clearGL();
-    _planarWidget->updateGL();
-    _modelWidget->updateGL();
+
+    if(_bruteForce->isChecked())
+    {
+        int max = _model->_graph.initBruteForce();
+        iterations = 0;
+        _progressBar->setMaximum(max);
+        std::cout << max << std::endl;
+    }
+    else
+    {
+        _model->_graph.initializeState();
+        _model->clearGL();
+        _planarWidget->updateGL();
+        _modelWidget->updateGL();
+        _progressBar->setMaximum(TEMP_MAX);
+    }
 
     _unfoldTimer->start();
 }
@@ -149,11 +166,9 @@ void MainWindow::stop()
     _progressBar->setFormat(ss.str().c_str());
 }
 
-void MainWindow::unfoldLoop()
+void MainWindow::anneal()
 {
-    clock_gettime(CLOCK_MONOTONIC, &_timeStart);
-
-    bool redraw = _model->recalculate();
+    bool redraw = _model->anneal();
 
     if(redraw)
     {
@@ -165,6 +180,44 @@ void MainWindow::unfoldLoop()
     int iterationsDone = int(TEMP_MAX) - _model->finishedAnnealing();
     _progressBar->setValue(iterationsDone);
 
+    if(iterationsDone >= int(TEMP_MAX))
+    {
+        stop();
+    }
+}
+
+void MainWindow::bruteforce()
+{
+    bool redraw = _model->bruteForce();
+
+    _progressBar->setValue(++iterations);
+
+    if(redraw)
+    {
+        _model->clearGL();
+        _planarWidget->updateGL();
+        _modelWidget->updateGL();
+    }
+
+    if(_model->finishedBruteForce())
+    {
+        stop();
+    }
+}
+
+void MainWindow::unfoldLoop()
+{
+    clock_gettime(CLOCK_MONOTONIC, &_timeStart);
+
+    if(_bruteForce->isChecked())
+    {
+        bruteforce();
+    }
+    else
+    {
+        anneal();
+    }
+
     clock_gettime(CLOCK_MONOTONIC, &_timeFinish);
     _epochTime = (_timeFinish.tv_sec - _timeStart.tv_sec) * 1000;
     _epochTime += (_timeFinish.tv_nsec - _timeStart.tv_nsec) / 1000000.0;
@@ -174,9 +227,4 @@ void MainWindow::unfoldLoop()
     std::stringstream ss;
     ss << "Epoch-Time: " << std::fixed << std::setprecision(5) << _epochTime << "ms";
     _timeLabel->setText(ss.str().c_str());
-
-    if(iterationsDone >= int(TEMP_MAX))
-    {
-        stop();
-    }
 }

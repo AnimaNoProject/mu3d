@@ -8,6 +8,79 @@ Graph::~Graph()
 {
 }
 
+int Graph::initBruteForce()
+{
+    calculateDual();
+
+    size_t n = _edges.size() * 2;
+    size_t k = _facets.size() - 1;
+
+    bitmask = std::string(k, 1);
+    bitmask.resize(n, 0);
+
+    _Cenergy = 1000000000000;
+
+    std::cout << "n: " << n << std::endl;
+    std::cout << "k: " << k << std::endl;
+
+    //return factorial(int(n)) / (factorial(int(k)) * factorial(int(n-k)));
+    return 0;
+}
+
+int Graph::factorial(int n)
+{
+  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+}
+
+bool Graph::nextBruteForce()
+{
+    if(std::prev_permutation(bitmask.begin(), bitmask.end()))
+    {
+        std::vector<size_t> edges;
+        for (size_t i = 0; i < _edges.size(); i++)
+        {
+            if (bitmask[i])
+            {
+                edges.push_back(i);
+            }
+        }
+        if(!calculateMSP(edges))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        _Cenergy = 0;
+        return false;
+    }
+
+    calculateGlueTags();
+
+    // unfold and check for overlaps
+    std::pair<double, double> overlaps = unfold();
+    double newEnergy = overlaps.first * 100 + overlaps.second;
+
+    // if it got better we take the new graph
+    if(newEnergy <= _Cenergy)
+    {
+        _Cgt.clear();
+        _C.clear();
+
+        _Cgt = _gluetags;
+        _C = _edges;
+        _Cenergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
+
+        _CplanarFaces = _planarFaces;
+        _CplanarGluetags = _planarGluetags;
+    }
+
+    return true;
+}
+
 bool Graph::neighbourState()
 {
     bool redraw = false;
@@ -19,13 +92,13 @@ bool Graph::neighbourState()
 
     // unfold and check for overlaps
     std::pair<double, double> overlaps = unfold();
-    double newEnergy = overlaps.first * 100 + overlaps.second;
+    double newEnergy = overlaps.first + overlaps.second;
 
     double chance = (1 - std::pow(std::exp(1), -(temperature)/TEMP_MAX)) / 2000;
     double random = (double(std::rand()) / RAND_MAX);
 
     // if it got better we take the new graph
-    if(newEnergy <= _Cenergy)
+    if(newEnergy < _Cenergy)
     {
         _Cgt.clear();
         _C.clear();
@@ -77,16 +150,7 @@ bool Graph::neighbourState()
 
 void Graph::initializeState()
 {
-    // init edge weights
-    for(Edge& edge : _edges)
-    {
-        edge._weight = (double(std::rand()) / RAND_MAX);
-    }
-    // init gluetag probabilities
-    for(Gluetag& gluetag : _gluetags)
-    {
-        gluetag._probability = (double(std::rand()) / RAND_MAX);
-    }
+    initEdgeWeight();
 
     // calculate the dualgraph and an initial MSP and Gluetags
     calculateDual();
@@ -101,7 +165,7 @@ void Graph::initializeState()
     // it is the best we have
     _Cgt = _gluetags;
     _C = _edges;
-    _Cenergy = overlaps.first * 100 + overlaps.second;
+    _Cenergy = overlaps.first + overlaps.second;
     _CplanarFaces = _planarFaces;
     _CplanarGluetags = _planarGluetags;
 }
@@ -119,6 +183,11 @@ void Graph::randomMove()
 bool Graph::over()
 {
     return temperature <= TEMP_MIN;
+}
+
+bool Graph::finishedBruteFroce()
+{
+    return _Cenergy <= 0;
 }
 
 double Graph::energy()
@@ -315,7 +384,7 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
 
     }
 
-    overlaps.first += fOverlapArea(index, discovered, parent);
+    overlaps.first += fOverlapArea(index, discovered, parent) * 100;
     overlaps.second += gtOverlapArea(index);
 
     discovered[index] = true;
@@ -462,6 +531,59 @@ void Graph::calculateDual()
     }
 }
 
+bool Graph::calculateMSP(std::vector<size_t> edges)
+{
+    // clear the previous msp edges
+    _mspEdges.clear();
+    _cutEdges.clear();
+
+    // create the adjacence list
+    std::vector<std::vector<int>> adjacenceList;
+    adjacenceList.resize(_facets.size());
+
+    // go through all possible edges
+    for(size_t edge : edges)
+    {
+        // add edge to msp, add adjacent faces
+        _mspEdges.push_back(_edges[edge]);
+        adjacenceList[ulong(_edges[edge]._sFace)].push_back(_edges[edge]._tFace);
+        adjacenceList[ulong(_edges[edge]._tFace)].push_back(_edges[edge]._sFace);
+
+        // list storing discovered nodes
+        std::vector<bool> discovered(_facets.size());
+
+        // if the MSP is now cyclic, the added egde needs to be removed again
+        for(ulong i = 0; i < _facets.size(); i++)
+        {
+            // if the node is alone (no incident edges), or already discovered, no need to check
+            if(adjacenceList[i].empty() || discovered[i])
+                continue;
+
+            // if the graph is cyclic
+            if(!isAcyclic(adjacenceList, i, discovered, -1))
+            {
+                return false;
+            }
+        }
+    }
+
+    if(isSingleComponent(adjacenceList))
+    {
+        for(Edge edge : _edges)
+        {
+            if(std::find(_mspEdges.begin(), _mspEdges.end(), edge) == _mspEdges.end())
+            {
+                _cutEdges.push_back(edge);
+            }
+        }
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Graph::calculateMSP()
 {
     // clear the previous msp edges
@@ -528,6 +650,8 @@ void Graph::calculateMSP()
         std::cout << "Graph is a NOT single component!" << std::endl;
 #endif
 }
+
+
 
 void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {
@@ -618,10 +742,11 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
     // list storing discovered nodes
     std::vector<bool> discovered(_facets.size());
 
-    bool isSingleComponent = true;
-
-    // check if it is acyclic from the first nodeedges
-    isSingleComponent = isAcyclic(adjacenceList, 0, discovered, -1);
+    // check if it is acyclic from the first node
+    if(!isAcyclic(adjacenceList, 0, discovered, -1))
+    {
+        return false;
+    }
 
     // if not all nodes have been discovered, the graph is not connected
     for (ulong i = 0; i < discovered.size(); i++)
@@ -630,13 +755,13 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
         // if node at index i was not discovered the graph is not connected
         if(!discovered[i])
         {
-            isSingleComponent = false;
 #ifndef NDEBUG
             std::cout << "not connected face: " << i << std::endl;
 #endif
+            return false;
         }
     }
-    return isSingleComponent;
+    return true;
 }
 
 bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong start, std::vector<bool> &discovered, int parent)
@@ -663,7 +788,20 @@ bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong 
     // graph is acyclic
     return true;
 }
-class Graph;
+
+void Graph::initEdgeWeight()
+{
+    // init edge weights
+    for(Edge& edge : _edges)
+    {
+        edge._weight = (double(std::rand()) / RAND_MAX);
+    }
+    // init gluetag probabilities
+    for(Gluetag& gluetag : _gluetags)
+    {
+        gluetag._probability = (double(std::rand()) / RAND_MAX);
+    }
+}
 
 void Graph::oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors)
 {

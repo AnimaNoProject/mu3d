@@ -9,6 +9,7 @@
 #include <QString>
 #include <QStatusBar>
 #include <QLabel>
+#include <QCheckBox>
 
 #include "oglwidget.h"
 #include "oglplanarwidget.h"
@@ -43,6 +44,8 @@ private:
     QProgressBar * _progressBar;
     QProgressBar * _memoryUsage;
     QLabel* _timeLabel;
+    QAction* _bruteForce;
+
 
     struct timespec _timeStart, _timeFinish;
     double _epochTime;
@@ -56,6 +59,11 @@ private:
     bool _isUnfolding;
     bool _unfoldSuccess;
 
+    int iterations;
+
+    void anneal();
+
+    void bruteforce();
 
     void start();
     void stop();

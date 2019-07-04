@@ -8,6 +8,10 @@
 
 #include <random>
 
+#include <algorithm>
+#include <iostream>
+#include <string>
+
 #include <thread>
 #include <future>
 
@@ -35,6 +39,9 @@ public:
     void initializeState();
     bool neighbourState();
 
+    int initBruteForce();
+    bool nextBruteForce();
+
     void oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
     void oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
     void oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
@@ -43,9 +50,12 @@ public:
 
     double energy();
     bool over();
+    bool finishedBruteFroce();
 
     double temperature;
 private:
+    std::string bitmask;
+
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;
@@ -68,7 +78,10 @@ private:
     std::vector<GluetagToPlane> _planarGluetags;
 
     void calculateDual();
+
+    bool calculateMSP(std::vector<size_t> edges);
     void calculateMSP();
+
     void calculateGlueTags();
 
     std::pair<double, double> unfold();
@@ -93,4 +106,8 @@ private:
 
     int find(Facet facet);
     bool find(Edge& edge);
+
+    void initEdgeWeight();
+
+    int factorial(int n);
 };
