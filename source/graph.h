@@ -87,7 +87,7 @@ private:
     void calculateGlueTags();
 
     void unfoldTriangles();
-    void unfoldTriangles(ulong index, std::vector<bool>& discovered, ulong parent);
+    void unfoldTriangles(int index, std::vector<bool>& discovered, int parent);
     void unfoldGluetags();
 
     double findTriangleOverlaps();
@@ -102,7 +102,7 @@ private:
     QVector3D faceCenter(Facet facet);
 
     bool isSingleComponent(std::vector<std::vector<int>> &adjacenceList);
-    bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool>& discovered, int parent);
+    bool isAcyclic(std::vector<std::vector<int>> const &graph, int start, std::vector<bool>& discovered, int parent);
 
     int find(Facet facet);
     bool find(Edge& edge);

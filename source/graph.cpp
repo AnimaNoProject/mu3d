@@ -12,17 +12,16 @@ int Graph::initBruteForce()
 {
     calculateDual();
 
-    n = _edges.size();
-    r = _facets.size() - 1;
+    n = int(_edges.size());
+    r = int(_facets.size() - 1);
 
-    v = std::vector<bool>(n);
+    v = std::vector<bool>(ulong(n));
     std::fill(v.begin(), v.begin() + r, true);
 
     _Cenergy = 1000000000000;
 
-    std::cout << "n: " << n << std::endl;
-    std::cout << "r: " << r << std::endl;
-
+    //std::cout << "n: " << n << std::endl;
+    //std::cout << "r: " << r << std::endl;
     //int max = factorial(int(n)) / (factorial(int(r)) * factorial(int(n-r)));
     //std::cout << "maximum: " << max << std::endl;
 
@@ -42,7 +41,7 @@ bool Graph::nextBruteForce()
 
         for(int i = 0; i < n; i++)
         {
-            if(v[i])
+            if(v[ulong(i)])
             {
                 edges.push_back(i);
             }
@@ -90,7 +89,6 @@ bool Graph::nextBruteForce()
         _CplanarGluetags = _planarGluetags;
     }
 
-    std::cout << "should redraw" << std::endl;
     return true;
 }
 
@@ -311,18 +309,21 @@ void Graph::unfoldTriangles()
     unfoldTriangles(0, discovered, 0);
 }
 
-void Graph::unfoldTriangles(ulong index, std::vector<bool>& discovered, ulong parent)
+void Graph::unfoldTriangles(int index, std::vector<bool>& discovered, int parent)
 {
     // only the case for the first triangle
     if(index == parent)
     {
         Facet facet = _facets[int(index)];
 
-        _planarFaces[index].A = Utility::pointToVector(facet->facet_begin()->vertex()->point());
-        _planarFaces[index].B = Utility::pointToVector(facet->facet_begin()->next()->vertex()->point());
-        _planarFaces[index].C = Utility::pointToVector(facet->facet_begin()->next()->next()->vertex()->point());
+        _planarFaces[ulong(index)].A = Utility::pointToVector(facet->facet_begin()->vertex()->point());
+        _planarFaces[ulong(index)].B = Utility::pointToVector(facet->facet_begin()->next()->vertex()->point());
+        _planarFaces[ulong(index)].C = Utility::pointToVector(facet->facet_begin()->next()->next()->vertex()->point());
 
-        planar(_planarFaces[index].A, _planarFaces[index].B, _planarFaces[index].C, _planarFaces[index].a, _planarFaces[index].b, _planarFaces[index].c);
+        planar(_planarFaces[ulong(index)].A, _planarFaces[ulong(index)].B, _planarFaces[ulong(index)].C, _planarFaces[ulong(index)].a, _planarFaces[ulong(index)].b, _planarFaces[ulong(index)].c);
+
+        _planarFaces[ulong(index)].parent = index;
+        _planarFaces[ulong(index)].self = index;
     }
     else
     {
@@ -332,37 +333,37 @@ void Graph::unfoldTriangles(ulong index, std::vector<bool>& discovered, ulong pa
         {
             QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
             // if this vertex is not shared it is the unkown one
-            if(Pu != _planarFaces[parent].A && Pu != _planarFaces[parent].B && Pu != _planarFaces[parent].C)
+            if(Pu != _planarFaces[ulong(parent)].A && Pu != _planarFaces[ulong(parent)].B && Pu != _planarFaces[ulong(parent)].C)
             { // bottom right
                 QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point());
                 QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point());
 
-                QVector2D p1 = _planarFaces[parent].get(P1);
-                QVector2D p2 = _planarFaces[parent].get(P2);
-                QVector2D p3prev = _planarFaces[parent].get(_planarFaces[parent].get(P1, P2));
+                QVector2D p1 = _planarFaces[ulong(parent)].get(P1);
+                QVector2D p2 = _planarFaces[ulong(parent)].get(P2);
+                QVector2D p3prev = _planarFaces[ulong(parent)].get(_planarFaces[ulong(parent)].get(P1, P2));
 
-                _planarFaces[index].A = P1;
-                _planarFaces[index].B = P2;
-                _planarFaces[index].C = Pu;
-                _planarFaces[index].a = p1;
-                _planarFaces[index].b = p2;
+                _planarFaces[ulong(index)].A = P1;
+                _planarFaces[ulong(index)].B = P2;
+                _planarFaces[ulong(index)].C = Pu;
+                _planarFaces[ulong(index)].a = p1;
+                _planarFaces[ulong(index)].b = p2;
 
-                _planarFaces[index].self = index;
-                _planarFaces[index].parent = parent;
+                _planarFaces[ulong(index)].self = int(index);
+                _planarFaces[ulong(index)].parent = int(parent);
 
-                planar(P1, P2, Pu, p1, p2, p3prev, _planarFaces[index].c);
+                planar(P1, P2, Pu, p1, p2, p3prev, _planarFaces[ulong(index)].c);
                 break;
             }
         } while (++hfc != _facets[int(index)]->facet_begin());
     }
 
-    discovered[index] = true;
+    discovered[ulong(index)] = true;
     // go through all adjacent edges
-    for(ulong i = 0; i < _tree[index].size(); ++i)
+    for(ulong i = 0; i < _tree[ulong(index)].size(); ++i)
     {
-        if(!discovered[ulong(_tree[index][i])])
+        if(!discovered[ulong(_tree[ulong(index)][i])])
         {
-            unfoldTriangles(ulong(_tree[index][i]), discovered, index);
+            unfoldTriangles(_tree[ulong(index)][i], discovered, index);
         }
     }
 }
@@ -371,7 +372,7 @@ void Graph::unfoldGluetags()
 {
     for(Gluetag& gluetag : _necessaryGluetags)
     {
-        size_t index = gluetag._placedFace;
+        int index = gluetag._placedFace;
         Polyhedron::Halfedge_around_facet_circulator hfc = _facets[index]->facet_begin();
         do
         {
@@ -384,9 +385,9 @@ void Graph::unfoldGluetags()
                 QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point()); // bottom left
                 QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point()); // bottom right
 
-                QVector2D p1 = _planarFaces[index].get(P1);
-                QVector2D p2 = _planarFaces[index].get(P2);
-                QVector2D p3prev = _planarFaces[index].get(Pu);
+                QVector2D p1 = _planarFaces[ulong(index)].get(P1);
+                QVector2D p2 = _planarFaces[ulong(index)].get(P2);
+                QVector2D p3prev = _planarFaces[ulong(index)].get(Pu);
 
                 GluetagToPlane tmp(&gluetag);
 
@@ -549,18 +550,18 @@ bool Graph::calculateMSP(std::vector<int> edges)
     for(int edge : edges)
     {
         // add edge to msp, add adjacent faces
-        _mspEdges.push_back(_edges[edge]);
-        adjacenceList[ulong(_edges[edge]._sFace)].push_back(_edges[edge]._tFace);
-        adjacenceList[ulong(_edges[edge]._tFace)].push_back(_edges[edge]._sFace);
+        _mspEdges.push_back(_edges[ulong(edge)]);
+        adjacenceList[ulong(_edges[ulong(edge)]._sFace)].push_back(_edges[ulong(edge)]._tFace);
+        adjacenceList[ulong(_edges[ulong(edge)]._tFace)].push_back(_edges[ulong(edge)]._sFace);
 
         // list storing discovered nodes
         std::vector<bool> discovered(_facets.size());
 
         // if the MSP is now cyclic, the added egde needs to be removed again
-        for(ulong i = 0; i < _facets.size(); i++)
+        for(int i = 0; i < int(_facets.size()); i++)
         {
             // if the node is alone (no incident edges), or already discovered, no need to check
-            if(adjacenceList[i].empty() || discovered[i])
+            if(adjacenceList[ulong(i)].empty() || discovered[ulong(i)])
                 continue;
 
             // if the graph is cyclic
@@ -613,10 +614,10 @@ void Graph::calculateMSP()
         std::vector<bool> discovered(_facets.size());
 
         // if the MSP is now cyclic, the added egde needs to be removed again
-        for(ulong i = 0; i < _facets.size(); i++)
+        for(int i = 0; i < int(_facets.size()); i++)
         {
             // if the node is alone (no incident edges), or already discovered, no need to check
-            if(adjacenceList[i].empty() || discovered[i])
+            if(adjacenceList[ulong(i)].empty() || discovered[ulong(i)])
                 continue;
 
             // if the graph is cyclic
@@ -768,18 +769,18 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
     return true;
 }
 
-bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong start, std::vector<bool> &discovered, int parent)
+bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, int start, std::vector<bool> &discovered, int parent)
 {
     // mark current node as discovered
-    discovered[start] = true;
+    discovered[ulong(start)] = true;
 
     // loop through every edge from (start -> node(s))
-    for(int node : adjacenceList[start])
+    for(int node : adjacenceList[ulong(start)])
     {
         // if this node was not discovered
         if (!discovered[ulong(node)])
         {
-            if(!isAcyclic(adjacenceList, ulong(node), discovered, int(start))) // start dfs from node
+            if(!isAcyclic(adjacenceList, node, discovered, int(start))) // start dfs from node
                 return false;
         }
         // node is discovered but not a parent => back-edge (cycle)

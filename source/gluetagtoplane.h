@@ -25,8 +25,8 @@ public:
 
     bool overlapping;
 
-    int faceindex;
-    int self;
+    long faceindex;
+    long self;
 
     Gluetag* _gluetag;
 
