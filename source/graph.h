@@ -84,7 +84,7 @@ private:
     bool calculateMSP(std::vector<int> edges);
     void calculateMSP();
 
-    void calculateGlueTags();
+    void calculateGlueTags(std::vector<Gluetag> gluetags);
 
     void unfoldTriangles();
     void unfoldTriangles(int index, std::vector<bool>& discovered, int parent);

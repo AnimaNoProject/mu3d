@@ -64,9 +64,30 @@ bool Graph::nextBruteForce()
 
     if(trioverlaps <= 0)
     {
-        calculateGlueTags();
-        unfoldGluetags();
-        gtoverlaps = findGluetagOverlaps();
+        std::vector<Gluetag> possibleGluetags;
+
+        for(Gluetag& gluetag : _gluetags)
+        {
+            for(Edge& edge : _cutEdges)
+            {
+                if(edge._sFace == gluetag._placedFace || edge._tFace == gluetag._placedFace)
+                {
+                    possibleGluetags.push_back(gluetag);
+                    break;
+                }
+            }
+        }
+
+        do
+        {
+            calculateGlueTags(possibleGluetags);
+            unfoldGluetags();
+            gtoverlaps = findGluetagOverlaps();
+            if(gtoverlaps <= 0)
+            {
+                break;
+            }
+        } while (std::next_permutation(_gluetags.begin(), _gluetags.end()));
     }
 
     double newEnergy = gtoverlaps + trioverlaps;
@@ -98,7 +119,7 @@ bool Graph::neighbourState()
 
     // calculate a new spanning tree and gluetags
     calculateMSP();
-    calculateGlueTags();
+    calculateGlueTags(_gluetags);
 
     // unfold and check for overlaps
     unfoldTriangles();
@@ -109,7 +130,6 @@ bool Graph::neighbourState()
     {
         unfoldGluetags();
         gtoverlaps = findGluetagOverlaps();
-
     }
 
     double newEnergy = trioverlaps + gtoverlaps;
@@ -175,7 +195,7 @@ void Graph::initializeState()
     // calculate the dualgraph and an initial MSP and Gluetags
     calculateDual();
     calculateMSP();
-    calculateGlueTags();
+    calculateGlueTags(_gluetags);
 
     temperature = TEMP_MAX;
 
@@ -366,6 +386,7 @@ void Graph::unfoldTriangles(int index, std::vector<bool>& discovered, int parent
 
 void Graph::unfoldGluetags()
 {
+    _planarGluetags.clear();
     for(Gluetag& gluetag : _necessaryGluetags)
     {
         int index = gluetag._placedFace;
@@ -432,18 +453,15 @@ double Graph::findGluetagOverlaps()
         }
     }
 
-    for(GluetagToPlane& ogt : _planarGluetags)
+    for(size_t i = 0; i < _planarGluetags.size(); i++)
     {
-        for(GluetagToPlane& gt : _planarGluetags)
+        for(size_t j = i + 1; j < _planarGluetags.size(); j++)
         {
-            if(ogt.faceindex == gt.faceindex)
-                continue;
-
-            double area = gt.overlaps(ogt);
+            double area = _planarGluetags[j].overlaps(_planarGluetags[i]);
             if(area > 0)
             {
                 overlaps += area;
-                gt.overlapping = true;
+                _planarGluetags[j].overlapping = true;
                 break;
             }
         }
@@ -456,18 +474,19 @@ double Graph::findTriangleOverlaps()
 {
     double overlaps = 0;
 
-    for(FaceToPlane& oface : _planarFaces)
+    for(size_t i = 0; i < _planarFaces.size(); i++)
     {
-        for(FaceToPlane& face : _planarFaces)
+        for(size_t j = i + 1; j < _planarFaces.size(); j++)
         {
-            if(oface.self == face.self || oface.parent == face.self || oface.self == face.parent || oface.parent == face.parent)
+            if(_planarFaces[i].self == _planarFaces[j].self || _planarFaces[i].parent == _planarFaces[j].self
+                    || _planarFaces[i].self == _planarFaces[j].parent || _planarFaces[i].parent == _planarFaces[j].parent)
                 continue;
 
-            double area = face.overlaps(oface);
+            double area = _planarFaces[j].overlaps(_planarFaces[i]);
             if(area > 0)
             {
                 overlaps += area * 100;
-                face.color = QVector3D(1, 0, 0);
+                _planarFaces[j].color = QVector3D(1, 0, 0);
                 break;
             }
         }
@@ -666,12 +685,10 @@ void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort
     }
 }
 
-void Graph::calculateGlueTags()
+void Graph::calculateGlueTags(std::vector<Gluetag> gluetags)
 {
     // clear old gluetags
     _necessaryGluetags.clear();
-
-    std::sort(_gluetags.begin(), _gluetags.end());
 
 #ifndef NDEBUG
     std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
@@ -681,7 +698,7 @@ void Graph::calculateGlueTags()
     std::vector<bool> tagged;
     tagged.resize(_facets.size());
 
-    for(Gluetag& gluetag : _gluetags)
+    for(Gluetag& gluetag : gluetags)
     {
         // if the edge the gluetag is attached to is not a cut edge we skip this gluetag
         if(std::find(_cutEdges.begin(), _cutEdges.end(), gluetag._edge) == _cutEdges.end())

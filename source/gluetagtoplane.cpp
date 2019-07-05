@@ -30,6 +30,7 @@ void GluetagToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vecto
 
     if(!overlapping)
     {
+        /*
         colors.push_back(_gluetag->_color);
         colors.push_back(_gluetag->_color);
         colors.push_back(_gluetag->_color);
@@ -37,6 +38,15 @@ void GluetagToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vecto
         colors.push_back(_gluetag->_color);
         colors.push_back(_gluetag->_color);
         colors.push_back(_gluetag->_color);
+        */
+
+        colors.push_back(QVector3D(0,0.5,1));
+        colors.push_back(QVector3D(0,0.5,1));
+        colors.push_back(QVector3D(0,0.5,1));
+
+        colors.push_back(QVector3D(0,0.5,1));
+        colors.push_back(QVector3D(0,0.5,1));
+        colors.push_back(QVector3D(0,0.5,1));
     }
     else
     {
