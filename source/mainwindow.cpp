@@ -133,6 +133,7 @@ void MainWindow::start()
     _progressBar->setTextVisible(true);
     _progressBar->setValue(0);
     _progressBar->setFormat("%v out of %m");
+    _unfoldTime = 0;
 
     if(_bruteForce->isChecked())
     {
