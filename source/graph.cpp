@@ -131,6 +131,9 @@ bool Graph::neighbourState()
         unfoldGluetags();
         gtoverlaps = findGluetagOverlaps();
     }
+    else {
+        gtoverlaps = 25;
+    }
 
     double newEnergy = trioverlaps + gtoverlaps;
 
