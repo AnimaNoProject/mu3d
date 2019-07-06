@@ -67,6 +67,11 @@ int Model::finishedAnnealing()
         return int(_graph.temperature);
 }
 
+bool Model::finishedBruteForce()
+{
+    return _graph.energy() <= 0 || _graph.finishedBruteFroce();
+}
+
 void Model::clearGL()
 {
     clearOGL();
@@ -91,7 +96,12 @@ void Model::load3DGL(QOpenGLShaderProgram* program)
     _vboLines[1].destroy();
 }
 
-bool Model::recalculate()
+bool Model::bruteForce()
+{
+    return _graph.nextBruteForce();
+}
+
+bool Model::anneal()
 {
     return _graph.neighbourState();
 }

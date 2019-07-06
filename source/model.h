@@ -33,8 +33,11 @@ public:
     void loadPlanarGL(QOpenGLShaderProgram* program);
     void load3DGL(QOpenGLShaderProgram* program);
 
-    bool recalculate();
+    bool anneal();
+    bool bruteForce();
     int finishedAnnealing();
+
+    bool finishedBruteForce();
 
     void createGLModelContext(QOpenGLShaderProgram* program);
 

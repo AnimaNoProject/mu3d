@@ -25,6 +25,9 @@ public:
 
     bool overlapping;
 
+    long faceindex;
+    long self;
+
     Gluetag* _gluetag;
 
     QVector2D const& get(QVector3D const &vec);

@@ -8,6 +8,110 @@ Graph::~Graph()
 {
 }
 
+int Graph::initBruteForce()
+{
+    calculateDual();
+
+    n = int(_edges.size());
+    r = int(_facets.size() - 1);
+
+    v = std::vector<bool>(ulong(n));
+    std::fill(v.begin(), v.begin() + r, true);
+
+    _Cenergy = 1000000000000;
+
+    //std::cout << "n: " << n << std::endl;
+    //std::cout << "r: " << r << std::endl;
+    //int max = factorial(int(n)) / (factorial(int(r)) * factorial(int(n-r)));
+    //std::cout << "maximum: " << max << std::endl;
+
+    return 10000000;
+}
+
+int Graph::factorial(int n)
+{
+  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+}
+
+bool Graph::nextBruteForce()
+{
+    if(std::prev_permutation(v.begin(), v.end()))
+    {
+        std::vector<int> edges;
+
+        for(int i = 0; i < n; i++)
+        {
+            if(v[ulong(i)])
+            {
+                edges.push_back(i);
+            }
+        }
+        if(!calculateMSP(edges))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        _Cenergy = 0;
+        return false;
+    }
+
+    // unfold and check for overlaps
+    unfoldTriangles();
+    double trioverlaps = findTriangleOverlaps();
+    double gtoverlaps = 0;
+
+    if(trioverlaps <= 0)
+    {
+        std::vector<Gluetag> possibleGluetags;
+
+        for(Gluetag& gluetag : _gluetags)
+        {
+            for(Edge& edge : _cutEdges)
+            {
+                if(edge._sFace == gluetag._placedFace || edge._tFace == gluetag._placedFace)
+                {
+                    possibleGluetags.push_back(gluetag);
+                    break;
+                }
+            }
+        }
+
+        do
+        {
+            calculateGlueTags(possibleGluetags);
+            unfoldGluetags();
+            gtoverlaps = findGluetagOverlaps();
+            if(gtoverlaps <= 0)
+            {
+                break;
+            }
+        } while (std::next_permutation(_gluetags.begin(), _gluetags.end()));
+    }
+
+    double newEnergy = gtoverlaps + trioverlaps;
+
+    // if it got better we take the new graph
+    if(newEnergy <= _Cenergy)
+    {
+        _Cgt.clear();
+        _C.clear();
+
+        _Cgt = _gluetags;
+        _C = _edges;
+        _Cenergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
+
+        _CplanarFaces = _planarFaces;
+        _CplanarGluetags = _planarGluetags;
+    }
+
+    return true;
+}
+
 bool Graph::neighbourState()
 {
     bool redraw = false;
@@ -15,11 +119,23 @@ bool Graph::neighbourState()
 
     // calculate a new spanning tree and gluetags
     calculateMSP();
-    calculateGlueTags();
+    calculateGlueTags(_gluetags);
 
     // unfold and check for overlaps
-    std::pair<double, double> overlaps = unfold();
-    double newEnergy = overlaps.first * 100 + overlaps.second;
+    unfoldTriangles();
+    double trioverlaps = findTriangleOverlaps();
+    double gtoverlaps = 0;
+
+    if(trioverlaps <= 0)
+    {
+        unfoldGluetags();
+        gtoverlaps = findGluetagOverlaps();
+    }
+    else {
+        gtoverlaps = 25;
+    }
+
+    double newEnergy = trioverlaps + gtoverlaps;
 
     double chance = (1 - std::pow(std::exp(1), -(temperature)/TEMP_MAX)) / 2000;
     double random = (double(std::rand()) / RAND_MAX);
@@ -43,7 +159,7 @@ bool Graph::neighbourState()
         redraw = true;
     }
     // if it is worse, there is a chance we take the worse one (helps getting out of local minimum
-    else if (chance > random)
+    else if (chance >= random)
     {
         _Cgt.clear();
         _C.clear();
@@ -77,48 +193,42 @@ bool Graph::neighbourState()
 
 void Graph::initializeState()
 {
-    // init edge weights
-    for(Edge& edge : _edges)
-    {
-        edge._weight = (double(std::rand()) / RAND_MAX);
-    }
-    // init gluetag probabilities
-    for(Gluetag& gluetag : _gluetags)
-    {
-        gluetag._probability = (double(std::rand()) / RAND_MAX);
-    }
+    initEdgeWeight();
 
     // calculate the dualgraph and an initial MSP and Gluetags
     calculateDual();
     calculateMSP();
-    calculateGlueTags();
+    calculateGlueTags(_gluetags);
 
     temperature = TEMP_MAX;
 
     // initialize the energy with this unfolding
-    std::pair<double, double> overlaps = unfold();
+    unfoldTriangles();
+    unfoldGluetags();
 
     // it is the best we have
     _Cgt = _gluetags;
     _C = _edges;
-    _Cenergy = overlaps.first * 100 + overlaps.second;
+    _Cenergy = findTriangleOverlaps() + findGluetagOverlaps();
     _CplanarFaces = _planarFaces;
     _CplanarGluetags = _planarGluetags;
 }
 
 void Graph::randomMove()
 {
-    while(std::is_sorted(_edges.begin(), _edges.end()))
-    {
-        // take a random edge and change it's weight
-        ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
-        _edges[random]._weight = (double(std::rand()) / RAND_MAX);
-    }
+    // take a random edge and change it's weight
+    ulong random = ulong(rand())%(_edges.size() + 0 + 1) + 0;
+    _edges[random]._weight = (double(std::rand()) / RAND_MAX);
 }
 
 bool Graph::over()
 {
     return temperature <= TEMP_MIN;
+}
+
+bool Graph::finishedBruteFroce()
+{
+    return _Cenergy <= 0;
 }
 
 double Graph::energy()
@@ -207,7 +317,7 @@ void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu
     }
 }
 
-std::pair<double, double> Graph::unfold()
+void Graph::unfoldTriangles()
 {
     std::vector<bool> discovered;
     discovered.resize(_facets.size());
@@ -215,25 +325,24 @@ std::pair<double, double> Graph::unfold()
     _planarFaces.resize(_facets.size());
     _planarGluetags.clear();
     resetTree();
-    return unfold(0, discovered, 0);
+    unfoldTriangles(0, discovered, 0);
 }
 
-std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discovered, ulong parent)
+void Graph::unfoldTriangles(int index, std::vector<bool>& discovered, int parent)
 {
-    std::pair<double, double> overlaps;
-    overlaps.first = 0;
-    overlaps.second = 0;
-
     // only the case for the first triangle
     if(index == parent)
     {
         Facet facet = _facets[int(index)];
 
-        _planarFaces[index].A = Utility::pointToVector(facet->facet_begin()->vertex()->point());
-        _planarFaces[index].B = Utility::pointToVector(facet->facet_begin()->next()->vertex()->point());
-        _planarFaces[index].C = Utility::pointToVector(facet->facet_begin()->next()->next()->vertex()->point());
+        _planarFaces[ulong(index)].A = Utility::pointToVector(facet->facet_begin()->vertex()->point());
+        _planarFaces[ulong(index)].B = Utility::pointToVector(facet->facet_begin()->next()->vertex()->point());
+        _planarFaces[ulong(index)].C = Utility::pointToVector(facet->facet_begin()->next()->next()->vertex()->point());
 
-        planar(_planarFaces[index].A, _planarFaces[index].B, _planarFaces[index].C, _planarFaces[index].a, _planarFaces[index].b, _planarFaces[index].c);
+        planar(_planarFaces[ulong(index)].A, _planarFaces[ulong(index)].B, _planarFaces[ulong(index)].C, _planarFaces[ulong(index)].a, _planarFaces[ulong(index)].b, _planarFaces[ulong(index)].c);
+
+        _planarFaces[ulong(index)].parent = index;
+        _planarFaces[ulong(index)].self = index;
     }
     else
     {
@@ -243,34 +352,48 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
         {
             QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
             // if this vertex is not shared it is the unkown one
-            if(Pu != _planarFaces[parent].A && Pu != _planarFaces[parent].B && Pu != _planarFaces[parent].C)
+            if(Pu != _planarFaces[ulong(parent)].A && Pu != _planarFaces[ulong(parent)].B && Pu != _planarFaces[ulong(parent)].C)
             { // bottom right
                 QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point());
                 QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point());
 
-                QVector2D p1 = _planarFaces[parent].get(P1);
-                QVector2D p2 = _planarFaces[parent].get(P2);
-                QVector2D p3prev = _planarFaces[parent].get(_planarFaces[parent].get(P1, P2));
+                QVector2D p1 = _planarFaces[ulong(parent)].get(P1);
+                QVector2D p2 = _planarFaces[ulong(parent)].get(P2);
+                QVector2D p3prev = _planarFaces[ulong(parent)].get(_planarFaces[ulong(parent)].get(P1, P2));
 
-                _planarFaces[index].A = P1;
-                _planarFaces[index].B = P2;
-                _planarFaces[index].C = Pu;
-                _planarFaces[index].a = p1;
-                _planarFaces[index].b = p2;
+                _planarFaces[ulong(index)].A = P1;
+                _planarFaces[ulong(index)].B = P2;
+                _planarFaces[ulong(index)].C = Pu;
+                _planarFaces[ulong(index)].a = p1;
+                _planarFaces[ulong(index)].b = p2;
 
-                planar(P1, P2, Pu, p1, p2, p3prev, _planarFaces[index].c);
+                _planarFaces[ulong(index)].self = int(index);
+                _planarFaces[ulong(index)].parent = int(parent);
+
+                planar(P1, P2, Pu, p1, p2, p3prev, _planarFaces[ulong(index)].c);
                 break;
             }
         } while (++hfc != _facets[int(index)]->facet_begin());
     }
 
+    discovered[ulong(index)] = true;
+    // go through all adjacent edges
+    for(ulong i = 0; i < _tree[ulong(index)].size(); ++i)
+    {
+        if(!discovered[ulong(_tree[ulong(index)][i])])
+        {
+            unfoldTriangles(_tree[ulong(index)][i], discovered, index);
+        }
+    }
+}
+
+void Graph::unfoldGluetags()
+{
+    _planarGluetags.clear();
     for(Gluetag& gluetag : _necessaryGluetags)
     {
-        if(gluetag._placedFace != int(index))
-        {
-            continue;
-        }
-        Polyhedron::Halfedge_around_facet_circulator hfc = _facets[int(index)]->facet_begin();
+        int index = gluetag._placedFace;
+        Polyhedron::Halfedge_around_facet_circulator hfc = _facets[index]->facet_begin();
         do
         {
             QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
@@ -282,9 +405,9 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
                 QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point()); // bottom left
                 QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point()); // bottom right
 
-                QVector2D p1 = _planarFaces[index].get(P1);
-                QVector2D p2 = _planarFaces[index].get(P2);
-                QVector2D p3prev = _planarFaces[index].get(Pu);
+                QVector2D p1 = _planarFaces[ulong(index)].get(P1);
+                QVector2D p2 = _planarFaces[ulong(index)].get(P2);
+                QVector2D p3prev = _planarFaces[ulong(index)].get(Pu);
 
                 GluetagToPlane tmp(&gluetag);
 
@@ -304,106 +427,75 @@ std::pair<double, double> Graph::unfold(ulong index, std::vector<bool>& discover
                 planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
 
                 tmp.overlapping = false;
-
-
-                overlaps.second += gtfOverlap(tmp, discovered);
-                overlaps.second += gtgtOverlap(tmp);
+                tmp.faceindex = index;
 
                 _planarGluetags.push_back(tmp);
             }
         } while (++hfc != _facets[int(index)]->facet_begin());
+    }
+}
 
+double Graph::findGluetagOverlaps()
+{
+    double overlaps = 0;
+
+    for(GluetagToPlane& gt : _planarGluetags)
+    {
+        for(FaceToPlane& face : _planarFaces)
+        {
+            if(gt.faceindex == face.self)
+                continue;
+
+            double area = gt.overlaps(face);
+            if(area > 0)
+            {
+                overlaps += area;
+                gt.overlapping = true;
+                break;
+            }
+        }
     }
 
-    overlaps.first += fOverlapArea(index, discovered, parent);
-    overlaps.second += gtOverlapArea(index);
-
-    discovered[index] = true;
-    // go through all adjacent edges
-    for(ulong i = 0; i < _tree[index].size(); ++i)
+    for(size_t i = 0; i < _planarGluetags.size(); i++)
     {
-        if(!discovered[ulong(_tree[index][i])])
+        for(size_t j = i + 1; j < _planarGluetags.size(); j++)
         {
-            std::pair<double, double> cover = unfold(ulong(_tree[index][i]), discovered, index);
-            overlaps.first += cover.first;
-            overlaps.second += cover.second;
+            double area = _planarGluetags[j].overlaps(_planarGluetags[i]);
+            if(area > 0)
+            {
+                overlaps += area;
+                _planarGluetags[j].overlapping = true;
+                break;
+            }
         }
     }
 
     return overlaps;
 }
 
-double Graph::gtfOverlap(GluetagToPlane& gt, std::vector<bool>& discovered)
+double Graph::findTriangleOverlaps()
 {
-    for(ulong i = 0; i < discovered.size(); i++)
-    {
-        if(gt._gluetag->_placedFace == int(i))
-        {
-            continue;
-        }
+    double overlaps = 0;
 
-        double area = gt.overlaps(_planarFaces[i]);
-        if(area > 0)
+    for(size_t i = 0; i < _planarFaces.size(); i++)
+    {
+        for(size_t j = i + 1; j < _planarFaces.size(); j++)
         {
-            gt.overlapping = true;
-            return area;
+            if(_planarFaces[i].self == _planarFaces[j].self || _planarFaces[i].parent == _planarFaces[j].self
+                    || _planarFaces[i].self == _planarFaces[j].parent || _planarFaces[i].parent == _planarFaces[j].parent)
+                continue;
+
+            double area = _planarFaces[j].overlaps(_planarFaces[i]);
+            if(area > 0)
+            {
+                overlaps += area * 100;
+                _planarFaces[j].color = QVector3D(1, 0, 0);
+                break;
+            }
         }
     }
 
-    return 0;
-}
-
-double Graph::gtgtOverlap(GluetagToPlane& gt)
-{
-    for(GluetagToPlane& gtp : _planarGluetags)
-    {
-        double area = gtp.overlaps(gt);
-        if(area > 0)
-        {
-            gt.overlapping = true;
-            return area;
-        }
-    }
-
-    return 0;
-}
-
-double Graph::fOverlapArea(ulong index, std::vector<bool>& discovered, ulong parent)
-{
-    for(ulong i = 0; i < discovered.size(); i++)
-    {
-        // if the other face was not yet discovered, or it's the curent face or it's the parent
-        // it can not overlap anyways
-        if(!discovered[i] || i == index || i == parent)
-        {
-            continue;
-        }
-
-        double area = _planarFaces[index].overlaps(_planarFaces[i]);
-        if(area > 0)
-        {
-            _planarFaces[index].color = QVector3D(1,0,0);
-            return area;
-        }
-    }
-
-    return 0;
-}
-
-double Graph::gtOverlapArea(size_t index)
-{
-    for(GluetagToPlane& gtp : _planarGluetags)
-    {
-        double area = gtp.overlaps(_planarFaces[index]);
-        // if it's not the gluetag of the current face and overlaps this face
-        if(gtp._gluetag->_placedFace != int(index) && area > 0)
-        {
-            gtp.overlapping = true;
-            return area;
-        }
-    }
-
-    return 0;
+    return overlaps;
 }
 
 void Graph::addFace(Facet facet)
@@ -462,6 +554,59 @@ void Graph::calculateDual()
     }
 }
 
+bool Graph::calculateMSP(std::vector<int> edges)
+{
+    // clear the previous msp edges
+    _mspEdges.clear();
+    _cutEdges.clear();
+
+    // create the adjacence list
+    std::vector<std::vector<int>> adjacenceList;
+    adjacenceList.resize(_facets.size());
+
+    // go through all possible edges
+    for(int edge : edges)
+    {
+        // add edge to msp, add adjacent faces
+        _mspEdges.push_back(_edges[ulong(edge)]);
+        adjacenceList[ulong(_edges[ulong(edge)]._sFace)].push_back(_edges[ulong(edge)]._tFace);
+        adjacenceList[ulong(_edges[ulong(edge)]._tFace)].push_back(_edges[ulong(edge)]._sFace);
+
+        // list storing discovered nodes
+        std::vector<bool> discovered(_facets.size());
+
+        // if the MSP is now cyclic, the added egde needs to be removed again
+        for(int i = 0; i < int(_facets.size()); i++)
+        {
+            // if the node is alone (no incident edges), or already discovered, no need to check
+            if(adjacenceList[ulong(i)].empty() || discovered[ulong(i)])
+                continue;
+
+            // if the graph is cyclic
+            if(!isAcyclic(adjacenceList, i, discovered, -1))
+            {
+                return false;
+            }
+        }
+    }
+
+    if(isSingleComponent(adjacenceList))
+    {
+        for(Edge edge : _edges)
+        {
+            if(std::find(_mspEdges.begin(), _mspEdges.end(), edge) == _mspEdges.end())
+            {
+                _cutEdges.push_back(edge);
+            }
+        }
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Graph::calculateMSP()
 {
     // clear the previous msp edges
@@ -487,10 +632,10 @@ void Graph::calculateMSP()
         std::vector<bool> discovered(_facets.size());
 
         // if the MSP is now cyclic, the added egde needs to be removed again
-        for(ulong i = 0; i < _facets.size(); i++)
+        for(int i = 0; i < int(_facets.size()); i++)
         {
             // if the node is alone (no incident edges), or already discovered, no need to check
-            if(adjacenceList[i].empty() || discovered[i])
+            if(adjacenceList[ulong(i)].empty() || discovered[ulong(i)])
                 continue;
 
             // if the graph is cyclic
@@ -529,6 +674,8 @@ void Graph::calculateMSP()
 #endif
 }
 
+
+
 void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {
     gtVertices.clear();
@@ -541,12 +688,10 @@ void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort
     }
 }
 
-void Graph::calculateGlueTags()
+void Graph::calculateGlueTags(std::vector<Gluetag> gluetags)
 {
     // clear old gluetags
     _necessaryGluetags.clear();
-
-    std::sort(_gluetags.begin(), _gluetags.end());
 
 #ifndef NDEBUG
     std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
@@ -556,7 +701,7 @@ void Graph::calculateGlueTags()
     std::vector<bool> tagged;
     tagged.resize(_facets.size());
 
-    for(Gluetag& gluetag : _gluetags)
+    for(Gluetag& gluetag : gluetags)
     {
         // if the edge the gluetag is attached to is not a cut edge we skip this gluetag
         if(std::find(_cutEdges.begin(), _cutEdges.end(), gluetag._edge) == _cutEdges.end())
@@ -618,10 +763,11 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
     // list storing discovered nodes
     std::vector<bool> discovered(_facets.size());
 
-    bool isSingleComponent = true;
-
-    // check if it is acyclic from the first nodeedges
-    isSingleComponent = isAcyclic(adjacenceList, 0, discovered, -1);
+    // check if it is acyclic from the first node
+    if(!isAcyclic(adjacenceList, 0, discovered, -1))
+    {
+        return false;
+    }
 
     // if not all nodes have been discovered, the graph is not connected
     for (ulong i = 0; i < discovered.size(); i++)
@@ -630,27 +776,27 @@ bool Graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
         // if node at index i was not discovered the graph is not connected
         if(!discovered[i])
         {
-            isSingleComponent = false;
 #ifndef NDEBUG
             std::cout << "not connected face: " << i << std::endl;
 #endif
+            return false;
         }
     }
-    return isSingleComponent;
+    return true;
 }
 
-bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong start, std::vector<bool> &discovered, int parent)
+bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, int start, std::vector<bool> &discovered, int parent)
 {
     // mark current node as discovered
-    discovered[start] = true;
+    discovered[ulong(start)] = true;
 
     // loop through every edge from (start -> node(s))
-    for(int node : adjacenceList[start])
+    for(int node : adjacenceList[ulong(start)])
     {
         // if this node was not discovered
         if (!discovered[ulong(node)])
         {
-            if(!isAcyclic(adjacenceList, ulong(node), discovered, int(start))) // start dfs from node
+            if(!isAcyclic(adjacenceList, node, discovered, int(start))) // start dfs from node
                 return false;
         }
         // node is discovered but not a parent => back-edge (cycle)
@@ -663,7 +809,20 @@ bool Graph::isAcyclic(std::vector<std::vector<int>> const &adjacenceList, ulong 
     // graph is acyclic
     return true;
 }
-class Graph;
+
+void Graph::initEdgeWeight()
+{
+    // init edge weights
+    for(Edge& edge : _edges)
+    {
+        edge._weight = (double(std::rand()) / RAND_MAX);
+    }
+    // init gluetag probabilities
+    for(Gluetag& gluetag : _gluetags)
+    {
+        gluetag._probability = (double(std::rand()) / RAND_MAX);
+    }
+}
 
 void Graph::oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors)
 {

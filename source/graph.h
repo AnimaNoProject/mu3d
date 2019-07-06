@@ -8,6 +8,10 @@
 
 #include <random>
 
+#include <algorithm>
+#include <iostream>
+#include <string>
+
 #include <thread>
 #include <future>
 
@@ -35,6 +39,9 @@ public:
     void initializeState();
     bool neighbourState();
 
+    int initBruteForce();
+    bool nextBruteForce();
+
     void oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
     void oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
     void oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
@@ -43,9 +50,14 @@ public:
 
     double energy();
     bool over();
+    bool finishedBruteFroce();
 
     double temperature;
 private:
+    int n;
+    int r;
+    std::vector<bool> v;
+
     /** Calculated once, always valid **/
     std::map<int, Facet> _facets;
     std::vector<Edge> _edges;
@@ -68,17 +80,18 @@ private:
     std::vector<GluetagToPlane> _planarGluetags;
 
     void calculateDual();
+
+    bool calculateMSP(std::vector<int> edges);
     void calculateMSP();
-    void calculateGlueTags();
 
-    std::pair<double, double> unfold();
-    std::pair<double, double> unfold(ulong index, std::vector<bool>& discovered, ulong parent);
+    void calculateGlueTags(std::vector<Gluetag> gluetags);
 
-    double gtOverlapArea(size_t index);
-    double fOverlapArea(ulong index, std::vector<bool>& discovered, ulong parent);
+    void unfoldTriangles();
+    void unfoldTriangles(int index, std::vector<bool>& discovered, int parent);
+    void unfoldGluetags();
 
-    double gtgtOverlap(GluetagToPlane& gt);
-    double gtfOverlap(GluetagToPlane& gt, std::vector<bool>& discovered);
+    double findTriangleOverlaps();
+    double findGluetagOverlaps();
 
     void randomMove();
 
@@ -89,8 +102,12 @@ private:
     QVector3D faceCenter(Facet facet);
 
     bool isSingleComponent(std::vector<std::vector<int>> &adjacenceList);
-    bool isAcyclic(std::vector<std::vector<int>> const &graph, ulong start, std::vector<bool>& discovered, int parent);
+    bool isAcyclic(std::vector<std::vector<int>> const &graph, int start, std::vector<bool>& discovered, int parent);
 
     int find(Facet facet);
     bool find(Edge& edge);
+
+    void initEdgeWeight();
+
+    int factorial(int n);
 };
