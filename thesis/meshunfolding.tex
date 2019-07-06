@@ -51,7 +51,7 @@
 %  {title before name}{name}{title after name}{gender}
 %  where both titles are optional (i.e. can be given as empty brackets {}).
 \setauthor{}{\authorname}{}{male}
-\setadvisor{Ph.D.}{Hsiang-Yun WU}{}{female}
+\setadvisor{Ph.D.}{Hsiang-Yun Wu}{}{female}
 
 % For bachelor and master theses:
 %\setfirstassistant{Pretitle}{Forename Surname}{Posttitle}{male}
@@ -130,10 +130,139 @@
 \mainmatter
 
 \chapter{Introduction}
-\todo{Enter your text here.}
 
-\chapter{Additional Chapter}
-\todo{Enter your text here.}
+\begin{itemize}
+	\item Describe what 3D Meshunfolding is
+	\item What can it be used for? - Papercraft mostly, self folding materials
+	\item What Problems arise? - Performance, Distortion, Overlaps
+\end{itemize}
+
+\section{Motivation}
+
+\begin{itemize}
+	\item Can be used for Papercraft and Papercraft is fun
+	\item Previous work mostly focused on unfolding
+	\item Gluetags can improve reconstruction experience
+	\item Can simple algorithms yield good results?
+\end{itemize}
+
+\section{Goal}
+
+\begin{itemize}
+	\item Implement algorith to transform 3D models into planar patch
+	\item add minimum amount of gluetags, to have stable structure
+	\item detect overlaps and resolve them
+	\item visualize all steps of the algorithm with opengl
+	\item evaluate the findings
+\end{itemize}
+
+\chapter{Definitions}
+
+\section{Dualgraph}
+
+\begin{itemize}
+	\item what is a dual graph
+	\item describe what it is used for in this problem
+\end{itemize}
+
+\section{Minimum Spanning Tree}
+
+\begin{itemize}
+	\item what is a minimum spanning tree
+	\item how is it related to this problem
+\end{itemize}
+
+\section{Simulated Annealing}
+
+\begin{itemize}
+	\item what is simulated annealing
+	\item how can it be used for this problem
+\end{itemize}
+
+\chapter{Implementation/Methodology}
+
+\section{Overview}
+
+\begin{itemize}
+	\item general approach - what steps do i have to do:
+	\item read the data from files
+	\item display and interact with 3d model
+	\item calculation of gluetags
+	\item unfolding of model
+\end{itemize}
+
+\section{Datastructure}
+
+\begin{itemize}
+	\item cgal datastructure as a base - short explaination why polyhedron mesh is usefull -> halfedges linking faces together
+	\item own datastructures description planarTriangles vs. 3D Triangles to "link" 2d triangle with 3d triangle
+	\item gluetags are already calculated and kept in the datastructure for later unfolding
+\end{itemize}
+
+\section{Unfolding}
+
+\begin{itemize}
+	\item explaining dual graph calculation
+	\item explaining algorithm, how simulated annealing is adapted for this problem
+	\item explaining calculation of spanning tree
+	\item explaining unfolding of 3d triangles
+	\item explaining overlap detection how it is done
+	\item explaining decision if triangle unfolding was found -> gluetgs are calculated
+	\item explaining decision if a gluetag is used or not
+	\item gluetag overlap detection similar to triangle overlap -> gluetag consist of two triangles
+	\item new energy < old energy we take this step
+\end{itemize}
+
+\section{Conflict Detection}
+
+\begin{itemize}
+	\item conflict detection most important part
+	\item description and example of problematic areas that often arise
+	\item triangles checked against other triangles - write how i did it, calculating 
+	\item gluetags checked against triangles and other gluetags
+\end{itemize}
+
+\chapter{Evaluation}
+
+\section{Performance}
+
+\begin{itemize}
+	\item table evaluating the performance against some example meshes
+	\item maybe some pictures of unfoldings and original mesh??
+	\item maybe graph for performance per polygon increase
+\end{itemize}
+
+\section{Limitations}
+
+\begin{itemize}
+	\item random walk in annealing can be problematic, especially for big and complex meshes - sometimes finds fast solution, sometimes doesn't
+	\item bigger meshes need far more iterations -> more sophisticated algorithm needed to scale better
+	\item amount of gluetags cannot be calculated in advance - unfolding decides how many gluetags are needed
+\end{itemize}
+
+\chapter{Discussion}
+
+\begin{itemize}
+	\item comparison to bruteforcing the unfolding
+	\item show some formulas that there are really really many possible unfoldings and trillions of possible gluetag positions and actually that my algorithm works rather well
+	\item even sophisticated algorithms for unfolding without gluetags have performance problems if the mesh gets too big
+\end{itemize}
+
+\chapter{Conclusion}
+
+\section{Summary}
+
+\begin{itemize}
+	\item ???? overall it works fast for smaller meshes, but has its limitations as discussed before
+\end{itemize}
+
+\section{Future Work}
+
+\begin{itemize}
+	\item post process gluetags to resolve very small overlap areas to cut down computation time
+	\item change minimum spanning tree to more sophisticated calculation to get an unfolding faster than with a random walk
+	\item find a way to make search space smaller for gluetags to improve performance
+\end{itemize}
 
 \backmatter
 
