@@ -132,28 +132,30 @@
 \chapter{Introduction}
 
 \begin{itemize}
-	\item Describe what 3D Meshunfolding is
-	\item What can it be used for? - Papercraft mostly, self folding materials
-	\item What Problems arise? - Performance, Distortion, Overlaps
+	\item What is 3D-Mesh-Unfolding
+	\item Why do 3D-Mesh-Unfolding? Papercraft, Self-folding Materials
+	\item What problems arise when unfolding a 3D-Model? - Overlaps, Distortions
 \end{itemize}
 
 \section{Motivation}
 
 \begin{itemize}
-	\item Can be used for Papercraft and Papercraft is fun
-	\item Previous work mostly focused on unfolding
+	\item Adding Gluetags makes the problem more difficult
+	\item Previous work mostly focused on unfolding techniques
 	\item Gluetags can improve reconstruction experience
-	\item Can simple algorithms yield good results?
+	\item Simple Algorithms can already yield good results
 \end{itemize}
 
 \section{Goal}
 
 \begin{itemize}
-	\item Implement algorith to transform 3D models into planar patch
-	\item add minimum amount of gluetags, to have stable structure
-	\item detect overlaps and resolve them
-	\item visualize all steps of the algorithm with opengl
-	\item evaluate the findings
+	\item Calculate Gluetags for the 3D Model
+	\item Implement algorithm to transform 3D models into planar patch
+	\item Unfold a minimum Amount of Gluetags and add them to the planar patch
+	\item Detect Overlaps between Faces and Gluetags
+	\item Resolve Overlaps using simulated annealing to find a global optimum
+	\item Visualize the process of unfolding and enable interaction with 3D Model and planar Patch
+	\item Evaluate the performance and limitations of the Algorithm
 \end{itemize}
 
 \chapter{Definitions}
@@ -161,65 +163,121 @@
 \section{Dualgraph}
 
 \begin{itemize}
-	\item what is a dual graph
-	\item describe what it is used for in this problem
+	\item Dualgraph is calculated from a Mesh that is interpreteda s a graph, where the vertices are nodes and the edges between vertices are edges between nodes
+	\item Faces are connected through edges of the Graph, these connections turn into edges of the dual graph
+	\item Faces are nodes in the Dual Graph
+	\item Edges of the Dualgraph can either be bent or cut for the unfolding, leading to a planar patch that can be reconstructed
+	\item Image of a dual graph example
 \end{itemize}
 
 \section{Minimum Spanning Tree}
 
 \begin{itemize}
-	\item what is a minimum spanning tree
-	\item how is it related to this problem
+	\item Minimum spanning tree is the minimum amount of edges to connect all nodes, therefore it is acyclic
+	\item Can be used to find a possible unfolding
+	\item Simple to implement and good performance
+	\item Image showing the Spanning tree in an unfolded patch
 \end{itemize}
 
 \section{Simulated Annealing}
 
 \begin{itemize}
-	\item what is simulated annealing
-	\item how can it be used for this problem
+	\item Simmulated annealing is a process to find an global optimum as opposed to a local optimum in a greedy algorithm
+	\item Simple to implement and can yield results within a set range of iterations
+	\item Global optimum is needed for an unfolding, since no overlaps can be produced to find a result
 \end{itemize}
 
-\chapter{Implementation/Methodology}
+\chapter{Methodology}
 
 \section{Overview}
 
 \begin{itemize}
-	\item general approach - what steps do i have to do:
-	\item read the data from files
-	\item display and interact with 3d model
-	\item calculation of gluetags
-	\item unfolding of model
+	\item Overview of the whole algorithm, which steps are done
+	\item Data is read from off files, models need to be complete, without holes
+	\item All possible gluetags are calculated for the 3D Model
+	\item Possible unfoldings are calculated in each iteration of the annealing process
+	\item Each possible unfolding is checked for overlaps and evaluated
 \end{itemize}
 
-\section{Datastructure}
+\section{Data}
 
 \begin{itemize}
-	\item cgal datastructure as a base - short explaination why polyhedron mesh is usefull -> halfedges linking faces together
-	\item own datastructures description planarTriangles vs. 3D Triangles to "link" 2d triangle with 3d triangle
-	\item gluetags are already calculated and kept in the datastructure for later unfolding
+	\item meshes need to be triangulated and without doubled vertices, also no holes can be present
+	\item for calculation the faces and their connecting edges gets indexed to improve performance as edges are only calculated using indices
 \end{itemize}
 
-\section{Unfolding}
+\section{Dualgraph Calculation}
 
 \begin{itemize}
-	\item explaining dual graph calculation
-	\item explaining algorithm, how simulated annealing is adapted for this problem
-	\item explaining calculation of spanning tree
-	\item explaining unfolding of 3d triangles
-	\item explaining overlap detection how it is done
-	\item explaining decision if triangle unfolding was found -> gluetgs are calculated
-	\item explaining decision if a gluetag is used or not
-	\item gluetag overlap detection similar to triangle overlap -> gluetag consist of two triangles
-	\item new energy < old energy we take this step
+	\item dual graph can be calculated from the original mesh 
+	\item dual graph needs to be only calculate once as it does not change
+	\item for each face it's neighbours are calculated from the halfedges and the opposite halfedges
+	\item edges are saved with the faces indices for later calculation
 \end{itemize}
 
-\section{Conflict Detection}
+\section{Gluetag Calculation}
 
 \begin{itemize}
-	\item conflict detection most important part
-	\item description and example of problematic areas that often arise
-	\item triangles checked against other triangles - write how i did it, calculating 
-	\item gluetags checked against triangles and other gluetags
+	\item for each edge a gluetag is already calculated in 3D
+	\item the vertices for each edge are the base of the gluetag
+	\item gluetags are calculated for each edge, to target both faces of the edge both once as the source of the gluetag and the target of it
+	\item gluetags have a trapezoid shape with the smaller part directing to the targeted face, they will take up a maximum of 1/5 of the target space
+	\item gluetags only need to be calculated once as they don't change
+	\item gluetags can in theory change in shape and size, depending on the preferences of the user, whereas the bigger the gluetags are the smaller the solution space for unfoldings will be
+\end{itemize}
+
+\section{Minimum Spanning Tree Calculation}
+
+\begin{itemize}
+	\item for the spanning tree the edges are sorted by their weight
+	\item edges are iterated through and filled into an adjacence list
+	\item for each iteration the adjacence list is checked if the added edge results in a cycle, if it did, the edge will be removed from the adjacence list and added to the list of cut edges
+	\item fo each iteration a list with discovered faces is used to determine if the graph is not only acyclic but also complete, as one complete unfolding is necessary
+	\item the resulting edges are kept in two list, the edges that are kept and folded and the edges that are cut
+\end{itemize}
+
+\section{Transformation from 3D to 2D}
+
+\begin{itemize}
+	\item the adjacence list calculated in the previous step is also used to determine the order of unfolding the faces
+	\item the first face is a special case
+	\item say the vertices is made up of A,B,C in 3D and a,b,c in 2D
+	\item a can be set to 0,0 disregarding the original position of A
+	\item b can be calculated by using the distance of A and B and setting it to 0,dist(A,B)
+	\item c is more complex and has 2 solutions ;INSERT FORMULA
+	\item for the all other vertices two points are already given
+	\item which points are given can be calculated by which Vertices are the same in 3D
+	\item the third point needs to be on the opposite side of the edge A1B1 compared to the third point of the previous triangle
+	\item gluetags can be treated the same as normal triangles, as they are built out of two triangles, their calculation is only done if the triangles unfold without overlaps to save computational time
+\end{itemize}
+
+\section{Overlap Detection}
+
+\begin{itemize}
+	\item for overlap detection the unfolded triangles are iterated in two nested loops as the second ones start is increased to avoid double checking for overlaps
+	\item overlapping area can be calculated similar to the sunderland clipping algorithm, though a more simpler approach can be used
+	\item two example cases of overlaps; IMAGE
+	\item all edges are checked if intersections occur, there is no overlap
+	\item otherwise the overlap can be defined as a polygon which can be calculated by calculating all points that are within the other triangle and the intersections of the edges
+	\item formulas for the calculation of points inside a triangle and intersections of edges
+	\item the result of these points defines the overlapping polygon and the area can be calculated
+	\item the overlapping area is used to determine the quality of the unfolding
+	\item gluetag overlap detection is similar to the triangle overlaps, as the gluetag consist of two triangles and each triangle can be checked for overlaps
+\end{itemize}
+
+\section{Simmulated Annealing Process}
+
+\begin{itemize}
+	\item simmulated annealing is the process that combines previous explained points
+	\item a temperature is defined that will be lowered in each iteration until the minimum temperature is reached
+	\item before iterating a starting state is calculated by random, the energy of the state should be minimized in the process, as the energy is the sum of the overlap area
+	\item first a random neighborhood state is calculated for the state s
+	\item then the faces are unfolded and their overlaps are calculated
+	\item if no faces overlap, the gluetags are unfolded and the overlaps are calculated
+	\item anyways the energy of the overlaps is calculated	
+	\item if it is smaller than the previous, it is used for future calculations, else the old state will be used
+	\item but for a small chance ;INSERT FORMULA;, a worse move is taken to lessen the probability of getting stuck in a local minimum
+	\item if the energy of the state is zero, an unfolding was found and the loop ends
 \end{itemize}
 
 \chapter{Evaluation}
@@ -227,24 +285,27 @@
 \section{Performance}
 
 \begin{itemize}
-	\item table evaluating the performance against some example meshes
-	\item maybe some pictures of unfoldings and original mesh??
-	\item maybe graph for performance per polygon increase
+	\item TABLE that evaluates the performance for different meshes
+	\item pictures of unfoldings vs. original meshes
+	\item graph depicting performance vs. mesh size
+	\item Performance degrades the bigger the mesh gets
+	\item optimal performance is below 200 faces
+	\item Over 700 faces solution space gets so small and random walk is unlikely to find an unfolding
 \end{itemize}
 
 \section{Limitations}
 
 \begin{itemize}
-	\item random walk in annealing can be problematic, especially for big and complex meshes - sometimes finds fast solution, sometimes doesn't
-	\item bigger meshes need far more iterations -> more sophisticated algorithm needed to scale better
-	\item amount of gluetags cannot be calculated in advance - unfolding decides how many gluetags are needed
+	\item random walk in annealing can be problematic, especially for big and complex meshes - sometimes finds fast solution, sometimes doesn't, the bigger the mesh the unliklier a global optimum with an energy of 0 can be found
+	\item bigger meshes need far more iterations and computation time in each iteration -> more sophisticated algorithm needed to scale better
+	\item amount of gluetags cannot be calculated in advance - unfolding decides how many gluetags are needed, same unfolding can have a different amount of gluetags depending on their position, bruteforcing of gluetags takes too long; insert formula and example
 \end{itemize}
 
 \chapter{Discussion}
 
 \begin{itemize}
-	\item comparison to bruteforcing the unfolding
-	\item show some formulas that there are really really many possible unfoldings and trillions of possible gluetag positions and actually that my algorithm works rather well
+	\item if i get a result: performance vs bruteforcing a solution
+	\item formula calculating the selection of edges; search space is really big and solution space is hard to calculate but rather small
 	\item even sophisticated algorithms for unfolding without gluetags have performance problems if the mesh gets too big
 \end{itemize}
 
