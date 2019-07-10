@@ -21,7 +21,9 @@
 \usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
 \usepackage{todonotes} % Provides tooltip-like todo notes.
 \usepackage{hyperref}  % Enables cross linking in the electronic document version. This package has to be included second to last.
-\usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last.
+\usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last
+
+\usepackage{tikz}.
 
 % Define convenience functions to use the author name and the thesis title in the PDF document properties.
 \newcommand{\authorname}{Thorsten Korpitsch} % The author name without titles.
@@ -34,7 +36,7 @@
     pdfauthor       = {\authorname},          % The author's name in the document properties (optional).
     pdftitle        = {\thesistitle},         % The document's title in the document properties (optional).
     pdfsubject      = {Subject},              % The document's subject in the document properties (optional).
-    pdfkeywords     = {a, list, of, keywords} % The document's keywords in the document properties (optional).
+    pdfkeywords     = {unfolding, 3d meshunfolding} % The document's keywords in the document properties (optional).
 }
 
 \setpnumwidth{2.5em}        % Avoid overfull hboxes in the table of contents (see memoir manual).
@@ -131,13 +133,13 @@
 
 \chapter{Introduction}
 
+\section{Background}
+
 \begin{itemize}
 	\item What is 3D-Mesh-Unfolding
 	\item Why do 3D-Mesh-Unfolding? Papercraft, Self-folding Materials
 	\item What problems arise when unfolding a 3D-Model? - Overlaps, Distortions
 \end{itemize}
-
-\section{Motivation}
 
 \begin{itemize}
 	\item Adding Gluetags makes the problem more difficult
@@ -145,8 +147,6 @@
 	\item Gluetags can improve reconstruction experience
 	\item Simple Algorithms can already yield good results
 \end{itemize}
-
-\section{Goal}
 
 \begin{itemize}
 	\item Calculate Gluetags for the 3D Model
@@ -156,6 +156,26 @@
 	\item Resolve Overlaps using simulated annealing to find a global optimum
 	\item Visualize the process of unfolding and enable interaction with 3D Model and planar Patch
 	\item Evaluate the performance and limitations of the Algorithm
+\end{itemize}
+
+\begin{itemize}
+	\item result
+\end{itemize}
+
+\begin{itemize}
+	\item structure of the following chapters
+\end{itemize}
+
+\chapter{Related Work}
+
+\section{Unfolding}
+
+\section{Simulated Annealing}
+
+\begin{itemize}
+	\item Simmulated annealing is a process to find an global optimum as opposed to a local optimum in a greedy algorithm
+	\item Simple to implement and can yield results within a set range of iterations
+	\item Global optimum is needed for an unfolding, since no overlaps can be produced to find a result
 \end{itemize}
 
 \chapter{Definitions}
@@ -179,19 +199,19 @@
 	\item Image showing the Spanning tree in an unfolded patch
 \end{itemize}
 
-\section{Simulated Annealing}
-
-\begin{itemize}
-	\item Simmulated annealing is a process to find an global optimum as opposed to a local optimum in a greedy algorithm
-	\item Simple to implement and can yield results within a set range of iterations
-	\item Global optimum is needed for an unfolding, since no overlaps can be produced to find a result
-\end{itemize}
-
 \chapter{Methodology}
 
 \section{Overview}
 
+\begin{tikzpicture}[node distance=2.5cm, every node/.style={fill=white}, align=center]
+	\node (start) [block] {Mesh is loaded};
+	\node (calcdual) [block, below of=start] {Calculating Dualgraph}
+	
+	\draw[->] (start) -- (calcdual)
+\end{tikzpicture}
+
 \begin{itemize}
+	\item IMAGE here
 	\item Overview of the whole algorithm, which steps are done
 	\item Data is read from off files, models need to be complete, without holes
 	\item All possible gluetags are calculated for the 3D Model
@@ -236,7 +256,7 @@
 	\item the resulting edges are kept in two list, the edges that are kept and folded and the edges that are cut
 \end{itemize}
 
-\section{Transformation from 3D to 2D}
+\section{Unfolding}
 
 \begin{itemize}
 	\item the adjacence list calculated in the previous step is also used to determine the order of unfolding the faces
@@ -265,7 +285,17 @@
 	\item gluetag overlap detection is similar to the triangle overlaps, as the gluetag consist of two triangles and each triangle can be checked for overlaps
 \end{itemize}
 
-\section{Simmulated Annealing Process}
+\chapter{Implementation}
+
+\section{Specifications}
+
+\begin{itemize}
+	\item computer specs
+	\item programming language
+	\item libraries
+\end{itemize}
+
+\section{Simmulated Annealing}
 
 \begin{itemize}
 	\item simmulated annealing is the process that combines previous explained points
@@ -280,7 +310,13 @@
 	\item if the energy of the state is zero, an unfolding was found and the loop ends
 \end{itemize}
 
-\chapter{Evaluation}
+\chapter{Results and Evaluation}
+
+\section{Results}
+
+\begin{itemize}
+	\item pictures of unfoldings vs. original meshes
+\end{itemize}
 
 \section{Performance}
 
@@ -301,12 +337,12 @@
 	\item amount of gluetags cannot be calculated in advance - unfolding decides how many gluetags are needed, same unfolding can have a different amount of gluetags depending on their position, bruteforcing of gluetags takes too long; insert formula and example
 \end{itemize}
 
-\chapter{Discussion}
+\section{Discussion}
 
 \begin{itemize}
-	\item if i get a result: performance vs bruteforcing a solution
-	\item formula calculating the selection of edges; search space is really big and solution space is hard to calculate but rather small
-	\item even sophisticated algorithms for unfolding without gluetags have performance problems if the mesh gets too big
+	\item tune parameters
+	\item annealing vs bruteforce
+	\item mesh size influences time
 \end{itemize}
 
 \chapter{Conclusion}
@@ -320,6 +356,7 @@
 \section{Future Work}
 
 \begin{itemize}
+	\item determine unfolding quality
 	\item post process gluetags to resolve very small overlap areas to cut down computation time
 	\item change minimum spanning tree to more sophisticated calculation to get an unfolding faster than with a random walk
 	\item find a way to make search space smaller for gluetags to improve performance
