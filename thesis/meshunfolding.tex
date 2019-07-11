@@ -146,18 +146,17 @@
 
 \section{Background}
 
-\begin{itemize}
-	\item What is 3D-Mesh-Unfolding
-	\item Why do 3D-Mesh-Unfolding? Papercraft, Self-folding Materials
-	\item What problems arise when unfolding a 3D-Model? - Overlaps, Distortions
-\end{itemize}
+The focus in papercraft lies within the creation of 3D models from paper or paper-like material. The models that are created range from simple ones, like paper aeroplanes, to elaborate models of buildings or districts for planning. Further it can be used in combination with self-folding materials to form structures after printing the planar patch. It is a complex task due to two kinds of conflicts that appear in the unfolding process. Distortion of the model, as well as faces overlapping each other, are problems that occur when unfolding a 3D Mesh whereas both should be avoided to allow authentic reconstruction.
 
-\begin{itemize}
-	\item Adding Gluetags makes the problem more difficult
-	\item Previous work mostly focused on unfolding techniques
-	\item Gluetags can improve reconstruction experience
-	\item Simple Algorithms can already yield good results
-\end{itemize}
+\section{Motivation}
+
+As the reconstruction of a model can be quite tricky, even with indicators helping with glueing the right faces together, like the solution presented by Takahashi et al. \cite{takahashi2011optimized}, glueing the faces together if they are tiny is still a hard task.
+The task of adding Gluetags, which can improve the reconstruction experience, has not been well explored as most of the previous work focused on finding ways to get qualitative unfoldings. The addition of Gluetags makes the problem more difficult as the solution space for a solution without overlaps gets smaller, whereas the search space of possible unfoldings and possible Gluetag positions grows.
+
+\section{Goal}
+
+The goal of this thesis is to explore the viability of adding Gluetags to the cut Edges. Gluetags are to be calculated for the 3D-Model and will be unfolded in the same way as triangles of the Mesh. An simple algorithm will be suggested that can find an overlap-free unfolding for the 3D-Model with Gluetags attached. To find an overlap-free Unfolding, an algorithm to detect Overlaps will be constructed, to detect Overlaps between Faces of the triangles and Gluetags, as well as Faces and other Faces or Gluetags and other Gluetags.
+The Overlaps will be resolved by using a 
 
 \begin{itemize}
 	\item Calculate Gluetags for the 3D Model
