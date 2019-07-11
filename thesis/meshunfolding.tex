@@ -20,10 +20,21 @@
 \usepackage[usenames,dvipsnames,table]{xcolor} % Allows the definition and use of colors. This package has to be included before tikz.
 \usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
 \usepackage{todonotes} % Provides tooltip-like todo notes.
+
+%%%%%%%%%%%%%%%%%%%%% needed for tikz figures
+\usepackage{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+\usetikzlibrary{calc}
+
+\tikzstyle{block} = [rectangle, thick, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black]
+\tikzstyle{io} = 	[trapezium, trapezium left angle=70, trapezium right angle=-70, trapezium stretches=true, thick, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+%%%%%%%%%%%%%%%%%%%%%
+
 \usepackage{hyperref}  % Enables cross linking in the electronic document version. This package has to be included second to last.
 \usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last
 
-\usepackage{tikz}.
 
 % Define convenience functions to use the author name and the thesis title in the PDF document properties.
 \newcommand{\authorname}{Thorsten Korpitsch} % The author name without titles.
@@ -180,6 +191,13 @@
 
 \chapter{Definitions}
 
+\section{Data}
+
+\begin{itemize}
+	\item meshes need to be triangulated and without doubled vertices, also no holes can be present
+	\item for calculation the faces and their connecting edges gets indexed to improve performance as edges are only calculated using indices
+\end{itemize}
+
 \section{Dualgraph}
 
 \begin{itemize}
@@ -203,30 +221,15 @@
 
 \section{Overview}
 
-\begin{tikzpicture}[node distance=2.5cm, every node/.style={fill=white}, align=center]
-	\node (start) [block] {Mesh is loaded};
-	\node (calcdual) [block, below of=start] {Calculating Dualgraph}
-	
-	\draw[->] (start) -- (calcdual)
-\end{tikzpicture}
+\begin{figure}
+\includestandalone{"figoverview"}
+\caption{Overview of the 3D Mesh-Unfolding Process.}
+\label{fig:overview}
+\end{figure}
 
-\begin{itemize}
-	\item IMAGE here
-	\item Overview of the whole algorithm, which steps are done
-	\item Data is read from off files, models need to be complete, without holes
-	\item All possible gluetags are calculated for the 3D Model
-	\item Possible unfoldings are calculated in each iteration of the annealing process
-	\item Each possible unfolding is checked for overlaps and evaluated
-\end{itemize}
+After loading a Mesh, the Dualgraph of the Mesh is calculated as a first step, as seen in Figure \ref{fig:overview}, as it is necessary for all later calculations. After that for each Edge two Gluetags are calculated, each targeting one Face of the Edge and having its source on the other Face. Then the simulated annealing process starts. In each iteration, a new Minimum Spanning Tree is calculated, which is then unfolded. Afterwards Overlaps are calculated, if Overlaps are found a new Minimum Spanning Tree is calculated. If no Overlaps are found, the process ends, as an overlap-free solution has been found. In the following subchapters, each Step is described in more detail, whereas the Simulated Annealing Process is explained in more detail in \autoref{chap:Implementation}.
 
-\section{Data}
-
-\begin{itemize}
-	\item meshes need to be triangulated and without doubled vertices, also no holes can be present
-	\item for calculation the faces and their connecting edges gets indexed to improve performance as edges are only calculated using indices
-\end{itemize}
-
-\section{Dualgraph Calculation}
+\section{Calculate Dualgraph}
 
 \begin{itemize}
 	\item dual graph can be calculated from the original mesh 
@@ -235,7 +238,7 @@
 	\item edges are saved with the faces indices for later calculation
 \end{itemize}
 
-\section{Gluetag Calculation}
+\section{Calculate Gluetag}
 
 \begin{itemize}
 	\item for each edge a gluetag is already calculated in 3D
@@ -246,7 +249,7 @@
 	\item gluetags can in theory change in shape and size, depending on the preferences of the user, whereas the bigger the gluetags are the smaller the solution space for unfoldings will be
 \end{itemize}
 
-\section{Minimum Spanning Tree Calculation}
+\section{Calculate Minimum Spanning Tree}
 
 \begin{itemize}
 	\item for the spanning tree the edges are sorted by their weight
@@ -286,6 +289,7 @@
 \end{itemize}
 
 \chapter{Implementation}
+\label{chap:Implementation}
 
 \section{Specifications}
 
