@@ -4,10 +4,9 @@
 \usetikzlibrary{shapes.geometric, arrows}
 \usetikzlibrary{calc}
 
-\tikzstyle{block} = [rectangle, thick, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black]
-\tikzstyle{io} = 	[trapezium, trapezium left angle=70, trapezium right angle=-70, trapezium stretches=true, thick, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black]
-\tikzstyle{arrow} = [thick,->,>=stealth]
-
+\tikzset{block/.style = {rectangle, thick, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black}}
+\tikzset{io/.style = 	{trapezium, trapezium left angle=70, trapezium right angle=-70, trapezium stretches=true, thick, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black}}
+\tikzset{arrow/.style = {thick,->,>=stealth}}
 
 \begin{document}
 \begin{tikzpicture}[node distance=2cm]
@@ -26,9 +25,9 @@
 	\draw [arrow] (msp) 	-- (unfold);
 	\draw [arrow] (unfold) 	-- (od);
 	
-	\draw [arrow] (od) |- node[anchor=north] {No Overlaps Found} 	(finish);
-	\draw [arrow] (od) |- node[anchor=south] {Overlaps Found} 		(msp);
+	\draw [arrow] (od) 		|- node[anchor=north] {No Overlaps Found} 	(finish);
+	\draw [arrow] (od) 		|- node[anchor=south] {Overlaps Found} 		(msp);
 	
-	\draw[red,thick,dotted] ($(msp.north west)+(-0.3,0.6)$) node[right, yshift=0.2cm, xshift=2cm] {Simmulated Annealing} rectangle ($(od.south east)+(0.3,-0.6)$);
+	\draw[red,thick,dotted] ($(msp.north west)+(-0.3,0.6)$) node[right, yshift=0.2cm, xshift=2cm] {Simulated Annealing Loop} rectangle ($(od.south east)+(0.3,-0.6)$);
 \end{tikzpicture}
 \end{document}
