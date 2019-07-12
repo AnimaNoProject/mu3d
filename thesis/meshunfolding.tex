@@ -108,7 +108,6 @@
 %\setfirstreviewerdata{Affiliation, Country}
 %\setsecondreviewerdata{Affiliation, Country}
 
-
 \begin{document}
 
 \frontmatter % Switches to roman numbering.
@@ -159,7 +158,7 @@ The goal of this thesis is to explore the viability of adding Gluetags to the cu
 The Overlaps will be resolved by using simulated annealing to find a global optimum. Each step of the Unfolding Process will be visualized. Users will be able to interact with the 3D-Model and the final planar Patch. Furthermore, the performance and the limitations of the approach will be evaluated.
 
 \section{Results}
-The implemented approach can generate good results, but is limited by the number of triangles that a Model consists of. Meshes with lower than 200 triangles are unfolded consistently without any Overlaps remaining. Experiments have shown clear constraints if Meshes go above 700 triangles, which would need an sharp increase of iterations necessary to find an unfolding. These unfoldings for big Meshes are also not consistently achieveable.
+The suggested approach can generate good results, but is limited by the number of triangles that a model consists of. Meshes with lower than 200 triangles are unfolded consistently without any overlaps remaining. Experiments have shown clear constraints if meshes have more than 700 triangles, which sharply increase of iterations necessary to find an unfolding, which are also not achieved consistently.
 
 \section{Structure}
 In Chapter \ref{chap:relatedwork} previous findings related to 3D-Mesh unfolding are discussed and the differences to this approach are highlighted. Also the optimization approach of simulated annealing will be introduced. Chapter \ref{chap:definitions} defines the concepts of Dualgraphs and Minimum Spanning Trees and furthermore will describe the way the data is structured, once it is loaded into the program. Chapter \ref{chap:methodology} will explain the theoretical approach of the steps necessary to unfold 3D-Meshes. Chapter \ref{chap:Implementation} will bring more detail into the implementation of the before explained approach. In Chapter \ref{chap:reseval} the detailed results of this thesis will be discussed. Also the performance, its limitations and tuning of parameters will be explained in detail. Chapter \ref{chap:conclusion} summarises the findings and gives an outlook on future work to improve.
@@ -167,16 +166,23 @@ In Chapter \ref{chap:relatedwork} previous findings related to 3D-Mesh unfolding
 \chapter{Related Work}
 \label{chap:relatedwork}
 
-\section{Unfolding}
+\section{3D-Mesh Unfolding}
+According to Takahashi et al.~\cite{takahashi2011optimized} unfolding 3D-Meshes, more concrete polyhedron models, into a single patch is still a well-known open problem. In their paper they have proposed a heuristic approach using a genetic-based algorithm to find distortion free unfoldings. The key concept is to use topological surgerry to construct models through stitch together boundary edges of the unfolded mesh.
+
+Straub et al.~\cite{straubcreating} explored the unfolding and calculating gluetags to an unfolded mesh, in which they also explorer the removal of overlaps introducing new subdivisions to the mesh. As in the previous mentioned paper, a heuristic approach is used to calculate possible unfoldings. They use a greedy algorithm to optimize the cut out and to resolve overlaps. Gluetags that have been calculated to an unfolding are optimized after an unfolding is found.
+
+Chang et al.~\cite{xi2016learning} have focused their work to unfold orthogonal polyhedra. They propose algorithms to unfold 1-layer orthogonal polyhedra by introducing additional cuts depending on their genus. Their main concept is to find a subset of faces, that traverses the surface of the polyhedron, to unfold it along its line. 
+
+There are also a lot of other papers mostly exploring a theoretical approach of unfolding meshes with focuses on different areas, deploying sophisticated algorithms with the focus. Other papers focus on different kind of models. Yet the focus on the reconstruction experience has been neglected. In this thesis I want to focus on explorin the addition of gluetags to triangulated polyhedral meshes. They should help users in the reconstruction effort to glue cut edges together, as well as give a better indication of which edges should be glued together. Therefore a simpler approach to calculating unfoldings using a minimum spanning tree approached, optimized by simulated annealing.
 
 \section{Simulated Annealing}
 
-\begin{itemize}
-	\item Simmulated annealing is a process to find an global optimum as opposed to a local optimum in a greedy algorithm
-	\item Simple to implement and can yield results within a set range of iterations
-	\item Global optimum is needed for an unfolding, since no overlaps can be produced to find a result
-\end{itemize}
+Simulated Annealing is a well known optimization process~\cite{kirkpatrick1983optimization}. It can be used to solve combinatorial probelms, that central to computer science and engineering, like mesh unfolding. The main goal is to find a minimum or a maximum vlaue of a function, which is called the cost function, that has many independet variables. An usual examples for the application of this process is the traveling salesman problem, where the most effective route between different cities needs to be found. To solve NP-complete problems, like the traveling salesman problem, heuristic methods are used to solve them.
+Simulated Annealing is an iterative process that starts in a state $P$. For this state the cost function is calculated and saved. In each iteration the configuration of state $P$ will be rearranged to a state $P'$, for wich the cost function is calculated again. If the solution is to find a minimized cost, then if $P' < P$ then the next iteration will be calculated frorm the new state $P'$. If the new configuration has a worse cost than the old one, the new configuration is discarded, and a new configuration will be calculated from $P$. This process could lead to a the configuration getting stuck in a local minimum. The iterations are continued until a before chosen temperature $T$ reaches a defined minimum $T_{min}$, which simulates the cooling down of the material.
 
+To avoid such a deadlock in each iteration there is a chance that a worse configuration can be accepted. Let $\delta E = E - E'$ be the difference between the old cost and the cost of the new configuration. If $Delta E \leq 0$ the new configuration is accepted. If $Delta E > 0$ it is treated probabilistic, the chance of the new configuration to be accepted is $(\Delta E) = exp(-\Delta E / k_B T)$. $k_B$ is the Boltzmann constant and $T$ is the temperature. Now a uniformly distributed random number within the range of $(0,1)$ implements the random part of the algorithm. If it is less than $P(\Delta E)$ the new configuration is accepted, otherwise it is discarded. Since $T$ is decreasing on each iteration, it will become more unlikely to accept a worse configuration the closer the algorithm comes to an end.
+
+Summarising the concept of the simulated annealing process, to be able to solve a problem with it four important ingredients are needed. A concise description of the configuration of a system, a generator to generate random moves, which changes the configuration of the system, a quantitative function evaluating the trade offs fthat have been made and last but not least an annealing schedule of temperatures and length of times for the system to evolve needs to be developed.
 \chapter{Definitions}
 \label{chap:definitions}
 
@@ -255,37 +261,31 @@ The first face is treated as a special case, as the later triangles depend on th
 Now $b$ can be set to $(\overline{AB}, 0)$, with $y$ being set to $0$ as the original orientation of the triangle does not need to be retained. The last vertices $c$ is again a special case, as two positions are possible, which will be important for all vertices except the first. Two solutions are possible for $c$, as it can be placed on either side of the vector $(a-b)$. 
 
 \begin{equation}
-\label{eq:cxone}
-c_x = a_x + d(b_x - a_x) - s(b_y - a_y)
+\label{eq:cone}
+\begin{split}
+c_x &= a_x + d(b_x - a_x) - s(b_y - a_y)\\
+c_y &= a_y + d(b_y - a_y) + s(b_x - a_x)
+\end{split}
 \end{equation}
 
-\begin{equation}
-\label{eq:cyone}
-c_y = a_y + d(b_y - a_y) + s(b_x - a_x)
-\end{equation}
+$s$ and $d$ are defined by the formulas \ref{eq:s}.
 
-$s$ and $d$ are defined by the formulas \ref{eq:s} and \ref{eq:d}.
-
-\begin{equation}
+\begin{align}
 \label{eq:s}
-s = \frac{\|(B - A)\times(C - A)\|}{\overline{AB}^2}
-\end{equation}
+\begin{split}
+s &= \frac{\|(B - A)\times(C - A)\|}{\overline{AB}^2}\\
+d &= \frac{(B-A)\cdot(C-A)}{\overline{AB}^2}
+\end{split}
+\end{align}
+
+The first candidate solution for $c_1 = (c_x, c_y)$ is defined by the formulas \ref{eq:cone}. The second candidate solution for $c_2$ can be calculated by the formulas \ref{eq:ctwo}. 
 
 \begin{equation}
-\label{eq:d}
-d = \frac{(B-A)\cdot(C-A)}{\overline{AB}^2}
-\end{equation}
-
-The first candidate solution for $c_1 = (c_x, c_y)$ is defined by the formulas \ref{eq:cxone} and \ref{eq:cyone}. The second candidate solution for $c_2$ can be calculated by the formulas \ref{eq:cxtwo} and \ref{eq:cytwo}. 
-
-\begin{equation}
-\label{eq:cxtwo}
-c_x = a_x + d(b_x - a_x) + s(b_y - a_y)
-\end{equation}
-
-\begin{equation}
-\label{eq:cytwo}
-c_y = a_y + d(b_y - a_y) - s(b_x - a_x)
+\label{eq:ctwo}
+\begin{split}
+c_x &= a_x + d(b_x - a_x) + s(b_y - a_y)\\
+c_y &= a_y + d(b_y - a_y) - s(b_x - a_x)
+\end{split}
 \end{equation}
 
 For the first triangle any of the two solutions can be chosen. For all other triangles a check needs to be performed, so that $c$ is not on the same side as it is for the previous triangle.
@@ -320,13 +320,15 @@ Let an edge of a triangle be $e_1 = (p_1, p_2)$ and a edge of the other triangle
 
 
 \begin{align}
-a_1 = y_{p_2} - y_{p_1}\\
-b_1 = x_{p_1} - x_{p_2}\\
-c_1 = (y_{p_2} - y_{p_1}) * x_{p_1} + (x_{p_1} - x_{p_2}) * y_{p_1}\\
-a_2 = y_{p_4} - y_{p_3}\\
-b_2 = x_{p_3} - x_{p_4}\\
-c_2 = (y_{p_4} - y_{p_3}) * x_{p_3} + (x_{p_3} - x_{p_4}) * y_{p_3}\\
-det(p_1, p_2, p_3, p_4) = (a_1*b_2 - a_2*b_1)
+\begin{split}
+a_1 &= y_{p_2} - y_{p_1}\\
+b_1 &= x_{p_1} - x_{p_2}\\
+c_1 &= (y_{p_2} - y_{p_1}) * x_{p_1} + (x_{p_1} - x_{p_2}) * y_{p_1}\\
+a_2 &= y_{p_4} - y_{p_3}\\
+b_2 &= x_{p_3} - x_{p_4}\\
+c_2 &= (y_{p_4} - y_{p_3}) * x_{p_3} + (x_{p_3} - x_{p_4}) * y_{p_3}\\
+det(p_1, p_2, p_3, p_4) &= (a_1*b_2 - a_2*b_1)
+\end{split}
 \label{eq:deter}
 \end{align}
 
@@ -338,7 +340,6 @@ point_{intersection} = ((b_2*c_1 - b_1*c_2)/det(p_1, p_2, p_3),(a_1*c_2 - a_2*c_
 \end{equation}
 
 This list of points is then ordered counter clockwise and the overlapping area can be calculated using the shoelace formula, which is left to the reader as an exercise.
-
 
 \chapter{Implementation}
 \label{chap:Implementation}
