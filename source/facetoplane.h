@@ -18,7 +18,7 @@ public:
     QVector2D b;
     QVector2D c;
 
-    QVector3D color;
+    bool _overlaps;
 
     long parent;
     long self;
@@ -29,4 +29,7 @@ public:
 
     double overlaps(FaceToPlane& other);
     void drawproperties(std::vector<QVector3D>& vertices, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colors);
+private:
+    static QVector3D _color;
+    static QVector3D _colorOverlap;
 };

@@ -17,13 +17,12 @@ public:
     int _tFace;
     Facet _sFacetHandle;
     Facet _tFacetHandle;
-    double _length;
     Halfedge _halfedge;
     QVector3D _middle;
 
     double _weight;
 
-    Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
+    Edge(int sFace, int tFace, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
     Edge(int sFace, int tFace);
     Edge();
     ~Edge();
@@ -32,5 +31,4 @@ public:
     bool is(int A, int B);
     bool operator==(const Edge& other) const;
     bool operator<(const Edge& other) const;
-    Facet operator[] (int i) const;
 };

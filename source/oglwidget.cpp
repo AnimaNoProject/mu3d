@@ -51,7 +51,7 @@ void OGLWidget::initializeGL()
 
     // if context gets destroyed, cleanup before initializeGL is called again
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OGLWidget::cleanup);
-    glClearColor(0.5, 0.5, 0.5, 1);
+    glClearColor(1.0, 1.0, 1.0, 1);
 
     // create new shader program
     _program = new QOpenGLShaderProgram();

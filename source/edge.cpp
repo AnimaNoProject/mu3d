@@ -1,9 +1,8 @@
 #include "edge.h"
 
-Edge::Edge(int sFace, int tFace, double length, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle)
+Edge::Edge(int sFace, int tFace, QVector3D middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle)
     :  _sFace(sFace), _tFace(tFace),
-      _sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle),
-      _length(length),  _halfedge(halfedge),
+      _sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle),  _halfedge(halfedge),
       _middle(middle),  _weight(double(std::rand()) / RAND_MAX)
 {
 }
@@ -44,14 +43,4 @@ bool Edge::operator==(const Edge& other) const
 bool Edge::operator<(const Edge& other) const
 {
     return _weight < other._weight;
-}
-
-Facet Edge::operator[] (int i) const
-{
-    if(i == _sFace)
-        return _sFacetHandle;
-    else if (i == _tFace)
-        return _tFacetHandle;
-    else
-        throw std::invalid_argument("parameter value matches neither source face id, nor target face id");
 }
