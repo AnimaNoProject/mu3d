@@ -14,22 +14,6 @@ FaceToPlane::FaceToPlane() : _overlaps(false)
 
 double FaceToPlane::overlaps(FaceToPlane& other)
 {
-   if (Utility::intersects(a, b, other.a, other.b)
-     || Utility::intersects(a, b, other.b, other.c)
-     || Utility::intersects(a, b, other.c, other.a)
-     || Utility::intersects(b, c, other.a, other.b)
-     || Utility::intersects(b, c, other.b, other.c)
-     || Utility::intersects(b, c, other.c, other.a)
-     || Utility::intersects(c, a, other.a, other.b)
-     || Utility::intersects(c, a, other.b, other.c)
-     || Utility::intersects(c, a, other.c, other.a))
-    {
-        return Utility::intersectionArea(a, b, c, other.a, other.b, other.c);
-    }
-    else
-    {
-        return 0;
-    }
     return Utility::intersectionArea(a, b, c, other.a, other.b, other.c);
 }
 

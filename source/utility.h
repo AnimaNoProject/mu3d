@@ -15,6 +15,20 @@
 
 #include "graph.h"
 
+struct shEdge
+{
+public:
+
+    shEdge(QVector2D& from, QVector2D& to)
+    {
+        _from = from;
+        _to = to;
+    }
+
+    QVector2D _from;
+    QVector2D _to;
+};
+
 class Utility
 {
 public:

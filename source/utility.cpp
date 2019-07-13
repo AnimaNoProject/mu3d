@@ -49,88 +49,39 @@ QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& 
     return QVector3D(float(point.x()), float(point.y()), float(point.z()));
 }
 
-double Utility::intersectionArea(QVector2D& p1, QVector2D& q1, QVector2D& r1, QVector2D& p2, QVector2D& q2, QVector2D& r2)
+double Utility::intersectionArea(QVector2D& a, QVector2D& b, QVector2D& c, QVector2D& p, QVector2D& q, QVector2D& r)
 {
-    std::vector<QVector2D> newpoints;
-
-    if(pointInTriangle(p1, p2, q2, r2))
-    {
-        newpoints.push_back(p1);
-    }
-    if(pointInTriangle(q1, p2, q2, r2))
-    {
-        newpoints.push_back(q1);
-    }
-    if(pointInTriangle(r1, p2, q2, r2))
-    {
-        newpoints.push_back(r1);
-    }
-    if(pointInTriangle(p2, p1, q1, r1))
-    {
-        newpoints.push_back(p1);
-    }
-    if(pointInTriangle(q2, p1, q1, r1))
-    {
-        newpoints.push_back(q2);
-    }
-    if(pointInTriangle(r2, p1, q1, r1))
-    {
-        newpoints.push_back(r2);
-    }
-
-    QVector2D ip;
-
-    if(intersectionPoint(p1, q1, p2, q2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-    if(intersectionPoint(q1, r1, p2, q2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-    if(intersectionPoint(r1, p1, p2, q2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-
-    if(intersectionPoint(p1, q1, q2, r2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-    if(intersectionPoint(q1, r1, q2, r2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-    if(intersectionPoint(r1, p1, q2, r2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-
-    if(intersectionPoint(p1, q1, r2, p2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-    if(intersectionPoint(q1, r1, r2, p2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-    if(intersectionPoint(r1, p1, r2, p2, ip))
-    {
-        newpoints.push_back(ip);
-    }
-
-    double area = 0;
+    std::vector<QVector2D> output;
+    output.push_back(p);
+    output.push_back(q);
+    output.push_back(r);
+    std::sort(output.begin(), output.end(), getcounterclockwise);
 
 
-    std::sort(newpoints.begin(), newpoints.end(), compareVector2D);
+    std::vector<QVector2D> polylist;
+    polylist.push_back(a);
+    polylist.push_back(b);
+    polylist.push_back(c);
+    std::sort(polylist.begin(), polylist.end(), getcounterclockwise);
 
-    for(size_t i = 0; i < newpoints.size(); i++)
+    std::vector<shEdge> clipPoly;
+    clipPoly.push_back(shEdge(polylist[0], polylist[1]));
+    clipPoly.push_back(shEdge(polylist[1], polylist[2]));
+    clipPoly.push_back(shEdge(polylist[2], polylist[0]));
+
+    for(shEdge& edge : clipPoly)
     {
-        size_t j = (i + 1) % newpoints.size();
-        area += double((newpoints.at(j).x() + newpoints.at(i).x()) * (newpoints.at(j).y() - newpoints.at(i).y()));
-    }
+        std::vector<QVector2D> inputlist = output;
 
-    return std::abs(area / 2.0);
+        if (inputlist.size() == 0)
+        {
+            break;
+        }
+
+        QVector2D point = inputlist[inputlist.size() -1];
+
+
+    }
 }
 
 float Utility::getcounterclockwise(const QVector2D& p)
@@ -142,53 +93,6 @@ float Utility::getcounterclockwise(const QVector2D& p)
 bool Utility::compareVector2D(const QVector2D& p1, const QVector2D& p2)
 {
     return Utility::getcounterclockwise(p1) < Utility::getcounterclockwise(p2);
-}
-
-
-bool Utility::intersectionPoint(QVector2D& p1, QVector2D& p2, QVector2D& p3, QVector2D& p4, QVector2D& ip)
-{
-    if(p1 == p3 || p2 == p4 || p2 == p3 || p1 == p4)
-        return false;
-
-    float a1 = p2.y() - p1.y();
-    float b1 = p1.x() - p2.x();
-    float c1 = a1*p1.x() + b1*p1.y();
-
-    float a2 = p4.y() - p3.y();
-    float b2 = p3.x() - p4.x();
-    float c2 = a2*p3.x() + b2*p3.y();
-
-    float determinant = a1*b2 - a2*b1;
-
-    if(std::abs(determinant) < 0.001f)
-    {
-        return false;
-    }
-    else
-    {
-        ip = QVector2D((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
-        std::cout << ip.x() << "," << ip.y() << std::endl;
-        return true;
-    }
-}
-
-bool Utility::pointInTriangle(QVector2D& p, QVector2D& v1, QVector2D& v2, QVector2D& v3)
-{
-    if(p == v1 || p == v2 || p == v3)
-        return false;
-
-    float d1, d2, d3;
-    bool hasNeg;
-    bool hasPos;
-
-    d1 = sign(p, v1, v2);
-    d2 = sign(p, v2, v3);
-    d3 = sign(p, v3, v1);
-
-    hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-    hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-    return !(hasNeg && hasPos);
 }
 
 float Utility::sign(QVector2D& p1, QVector2D& p2, QVector2D& p3)
