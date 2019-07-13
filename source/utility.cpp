@@ -1,5 +1,49 @@
 #include "utility.h"
 
+void Utility::planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c)
+{
+    float lengthAB = (A - B).length();
+
+    a = QVector2D(0, 0);
+    b = QVector2D(lengthAB, 0);
+
+    float s = QVector3D::crossProduct(B - A, C - A).length() / float(std::pow(lengthAB, 2));
+    float cl = QVector3D::dotProduct(B - A, C - A) / float(std::pow(lengthAB, 2));
+
+    c = QVector2D(a.x() + cl * (b.x() - a.x()) - s * (b.y() - a.y()),
+                  a.y() + cl * (b.y() - a.y()) + s * (b.x() - a.x()));
+}
+
+void Utility::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu)
+{
+    float length = (p1 - p2).length();
+
+    float s = QVector3D::crossProduct((P2 - P1), (Pu - P1)).length() / float(std::pow(length, 2));
+    float unkown = QVector3D::dotProduct((P2 - P1), (Pu - P1)) / float(std::pow(length, 2));
+
+    QVector2D pu1 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) + s * (p2.y() - p1.y()),
+                              p1.y() + unkown * (p2.y() - p1.y()) - s * (p2.x() - p1.x()));
+
+    QVector2D pu2 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) - s * (p2.y() - p1.y()),
+                              p1.y() + unkown * (p2.y() - p1.y()) + s * (p2.x() - p1.x()));
+
+    // the points that are not shared by the triangles need to be on opposite sites
+    if (((((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) < 0)
+     && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) > 0)))
+    ||
+    (
+    (((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) > 0)
+             && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
+                ))
+    {
+        pu = pu1;
+    }
+    else
+    {
+        pu = pu2;
+    }
+}
+
 QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& point)
 {
     return QVector3D(float(point.x()), float(point.y()), float(point.z()));
@@ -77,17 +121,35 @@ double Utility::intersectionArea(QVector2D& p1, QVector2D& q1, QVector2D& r1, QV
 
     double area = 0;
 
+
+    std::sort(newpoints.begin(), newpoints.end(), compareVector2D);
+
     for(size_t i = 0; i < newpoints.size(); i++)
     {
         size_t j = (i + 1) % newpoints.size();
-        area += (newpoints.at(j).x() + newpoints.at(i).x()) * (newpoints.at(j).y() - newpoints.at(i).y());
+        area += double((newpoints.at(j).x() + newpoints.at(i).x()) * (newpoints.at(j).y() - newpoints.at(i).y()));
     }
 
     return std::abs(area / 2.0);
 }
 
+float Utility::getcounterclockwise(const QVector2D& p)
+{
+    return std::atan2(p.x(),-p.y());;
+}
+
+
+bool Utility::compareVector2D(const QVector2D& p1, const QVector2D& p2)
+{
+    return Utility::getcounterclockwise(p1) < Utility::getcounterclockwise(p2);
+}
+
+
 bool Utility::intersectionPoint(QVector2D& p1, QVector2D& p2, QVector2D& p3, QVector2D& p4, QVector2D& ip)
 {
+    if(p1 == p3 || p2 == p4 || p2 == p3 || p1 == p4)
+        return false;
+
     float a1 = p2.y() - p1.y();
     float b1 = p1.x() - p2.x();
     float c1 = a1*p1.x() + b1*p1.y();
@@ -98,19 +160,23 @@ bool Utility::intersectionPoint(QVector2D& p1, QVector2D& p2, QVector2D& p3, QVe
 
     float determinant = a1*b2 - a2*b1;
 
-    if(determinant == 0)
+    if(std::abs(determinant) < 0.001f)
     {
         return false;
     }
     else
     {
         ip = QVector2D((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
+        std::cout << ip.x() << "," << ip.y() << std::endl;
         return true;
     }
 }
 
 bool Utility::pointInTriangle(QVector2D& p, QVector2D& v1, QVector2D& v2, QVector2D& v3)
 {
+    if(p == v1 || p == v2 || p == v3)
+        return false;
+
     float d1, d2, d3;
     bool hasNeg;
     bool hasPos;

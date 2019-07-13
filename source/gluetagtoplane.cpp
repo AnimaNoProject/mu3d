@@ -1,5 +1,8 @@
 #include "gluetagtoplane.h"
 
+QVector3D GluetagToPlane::_colorOverlap = QVector3D(0.9f, 0.0f, 0.0f);
+QVector3D GluetagToPlane::_color = QVector3D(0.0f,0.5f,1.0f);
+
 GluetagToPlane::GluetagToPlane(Gluetag* gluetag) : _gluetag(gluetag)
 {
 }
@@ -28,35 +31,24 @@ void GluetagToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vecto
     verticesLines.push_back(QVector3D(d, 0));
     verticesLines.push_back(QVector3D(c, 0));
 
-    if(!overlapping)
+    // color
+    if(_overlaps)
     {
-        /*
-        colors.push_back(_gluetag->_color);
-        colors.push_back(_gluetag->_color);
-        colors.push_back(_gluetag->_color);
-
-        colors.push_back(_gluetag->_color);
-        colors.push_back(_gluetag->_color);
-        colors.push_back(_gluetag->_color);
-        */
-
-        colors.push_back(QVector3D(0,0.5,1));
-        colors.push_back(QVector3D(0,0.5,1));
-        colors.push_back(QVector3D(0,0.5,1));
-
-        colors.push_back(QVector3D(0,0.5,1));
-        colors.push_back(QVector3D(0,0.5,1));
-        colors.push_back(QVector3D(0,0.5,1));
+        colors.push_back(_colorOverlap);
+        colors.push_back(_colorOverlap);
+        colors.push_back(_colorOverlap);
+        colors.push_back(_colorOverlap);
+        colors.push_back(_colorOverlap);
+        colors.push_back(_colorOverlap);
     }
     else
     {
-        colors.push_back(QVector3D(1,0,0));
-        colors.push_back(QVector3D(1,0,0));
-        colors.push_back(QVector3D(1,0,0));
-
-        colors.push_back(QVector3D(1,0,0));
-        colors.push_back(QVector3D(1,0,0));
-        colors.push_back(QVector3D(1,0,0));
+        colors.push_back(_color);
+        colors.push_back(_color);
+        colors.push_back(_color);
+        colors.push_back(_color);
+        colors.push_back(_color);
+        colors.push_back(_color);
     }
 }
 
