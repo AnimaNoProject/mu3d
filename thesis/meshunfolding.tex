@@ -246,7 +246,7 @@ Entering the simulated annealing loop the first step is to calculate the minimum
 Furthermore for each iteration we save the information which face has been discovered, so we can assure that the graph is a connected graph as well as acyclic, which is necessary. As a result the adjacence list defines a minimum spanning tree.
 
 \section{Unfolding}
-
+\label{sec:unfold}
 Following the calculation of the minimum spanning tree, as shown in Figure \ref{fig:overview}, an unfolding of the mesh is calculated. The adjacence list of the last step can be used to determine the order of the faces for unfolding.
 
 Let $T = (A,B,C)$ be a triangle defined by three vertices $A(x_A, y_A, z_A)$, $B(x_B, y_B, z_B)$ and $C(x_C, y_C, z_C)$, where $x_N$, $y_N$ and $z_N$, with $N \in \{A,B,C\}$, are the coordinates of each vertex. Let $T_p = (a, b, c)$ be the planar representation of the given triangle, defined by $a(x_a, y_a)$, $b(x_b, y_b)$ and $c(x_c, y_c)$, where again $x_n$, $y_n$, with $n \in \{a,b,c\}$, are the defining coordinates of each vertex.
@@ -260,21 +260,13 @@ The first face is treated as a special case, as the later triangles depend on th
 
 Now $b$ can be set to $(\overline{AB}, 0)$, with $y$ being set to $0$ as the original orientation of the triangle does not need to be retained. The last vertices $c$ is again a special case, as two positions are possible, which will be important for all vertices except the first. Two solutions are possible for $c$, as it can be placed on either side of the vector $(a-b)$. 
 
-\begin{equation}
+\begin{align}
 \label{eq:cone}
 \begin{split}
+s &= \frac{\|(B - A)\times(C - A)\|}{(\overline{AB})^2}\\
+d &= \frac{(B-A)\cdot(C-A)}{(\overline{AB})^2}\\
 c_x &= a_x + d(b_x - a_x) - s(b_y - a_y)\\
 c_y &= a_y + d(b_y - a_y) + s(b_x - a_x)
-\end{split}
-\end{equation}
-
-$s$ and $d$ are defined by the formulas \ref{eq:s}.
-
-\begin{align}
-\label{eq:s}
-\begin{split}
-s &= \frac{\|(B - A)\times(C - A)\|}{\overline{AB}^2}\\
-d &= \frac{(B-A)\cdot(C-A)}{\overline{AB}^2}
 \end{split}
 \end{align}
 
@@ -304,42 +296,13 @@ Unfolding of gluetags works in an analouge way, as the gluetag consists of two t
 
 \section{Overlap Detection}
 
-The last step of the simulated annealing loop, as shown in Figure \ref{fig:overview}, is to determine the quality of the unfolding. As a meassurement for the quality simply the sum of the overlapping areas is used. Overlaps can happen between triangles, triangles and gluetags or between gluetags. The detection is a two step process, first only the triangles are checked if they overlap each other. In a second step, if no triangles overlap each other, the gluetags are checked if they overlap each other or a triangle.
+The last step of the simulated annealing loop, as shown in Figure \ref{fig:overview}, is to determine the quality of the unfolding. As a meassurement for the quality simply the sum of the overlapping areas is used. Overlaps can happen between triangles, triangles and gluetags or between gluetags. The detection is a two step process, first only the triangles are checked if they overlap each other. In a second step, if no triangles overlap each other, the gluetags are checked if they overlap each other or a triangle. To find out if triangles overlap each other we can check if any of their lines intersect with each other.
 
-An overlap of two triangles can occur, if any of the edges of the triangles intersect with each other, or if one or multiple points of one triangle are within the other triangle. Let $T = (a,b,c)$ be a triangle defined by the vertices $a = (x_a, y_a)$, $b = (x_b, y_b)$ and $c = (x_c, y_c)$ and a vertices $v = (x_v, y_v)$ of another triangle.
+Let $T = (A,B,C)$ and $S = (P,Q,R)$ be two triangles that might be overlapping each other, defined by their points $A$, $B$, $C$, $P$, $Q$, $R$. Therefore we check the lines $\overline{AB}$ and $\overline{PQ}$ if they intersect with each other. For two line segments we can define a general case for overlaps and a special case. In general the lines intersect only if the points $(A,B,P)$ and $(A,B,Q)$ have differrent orientations and $(P,Q,A)$ and $(P,Q,B)$ have different orientations.
 
-\begin{equation}
-\label{eq:sign}
-sign(p, a, b) = (x_p - x_b) * (y_a - y_b) - (x_a - x_b) * (y_p - y_b);
-\end{equation}
+For the special case the lines intersect, if all four point triplets are collinear and the x-projections of $(A,B)$ and $(P,Q)$ intersect and the y-projections of $(A,B)$ and $(P,Q)$ intersect as well.
 
-The function $sign$, see formula \ref{eq:sign}, is then called for each edge-pair of the triangle $sign(v, a, b)$, $sign(v, b, c)$ and $sign(v, c, a)$. The vertices $v$ is inside the triangle if all results are higher than zero or all results are lower than zero, otherwise the vertices is outside of the triangle.
-Any vertices that is within the other triangle is saved into a list, as they are needed to calculate the overlapping area.
-
-Let an edge of a triangle be $e_1 = (p_1, p_2)$ and a edge of the other triangle be $e_2 = (p_3, p_4)$. We can calculate the intersection point between the edges of the triangles if the determinant $det(p_1, p_2, p_3, p_4) \neq 0$, see formula \ref{eq:deter}.
-
-
-\begin{align}
-\begin{split}
-a_1 &= y_{p_2} - y_{p_1}\\
-b_1 &= x_{p_1} - x_{p_2}\\
-c_1 &= (y_{p_2} - y_{p_1}) * x_{p_1} + (x_{p_1} - x_{p_2}) * y_{p_1}\\
-a_2 &= y_{p_4} - y_{p_3}\\
-b_2 &= x_{p_3} - x_{p_4}\\
-c_2 &= (y_{p_4} - y_{p_3}) * x_{p_3} + (x_{p_3} - x_{p_4}) * y_{p_3}\\
-det(p_1, p_2, p_3, p_4) &= (a_1*b_2 - a_2*b_1)
-\end{split}
-\label{eq:deter}
-\end{align}
-
-Then the determinant can be used to calculate the point of the intersection, see formula \ref{eq:ipoint}. Therefore if the determinant is $0$ then no intersection occurrs, otherwise we add the intersection point to the list.
-
-\begin{equation}
-\label{eq:ipoint}
-point_{intersection} = (\frac{(b_2*c_1 - b_1*c_2)}{det(p_1, p_2, p_3)},\frac{(a_1*c_2 - a_2*c_1)}{det(p_1, p_2, p_3)})
-\end{equation}
-
-This list of points is then ordered counter clockwise and the overlapping area can be calculated using the shoelace formula, which is left to the reader as an exercise.
+These calculations need to be done for every line pair of the two triangles and if any of the line pairs intersect, it means that the triangles intersect each other. The overlap detection does not need to be done with the child of another triangle as they share an edge and therefore cannot overlap, as the child is unfolded onto the other side of the shared edge, as explained in section \ref{sec:unfold}.
 
 \chapter{Implementation}
 \label{chap:Implementation}
@@ -358,20 +321,27 @@ The four important ingredients to use a simulated annealing process, explained i
 	\item \textbf{Annealing Schedule} The temperature is set to 50.000 as a standard, but can be configured and the cooling rate is set to 1.0, therefore the temperature equals the amount of iterations.
 \end{itemize}
 
-After reading in the mesh into the CGAL Polyhedron\_3 datastructure.
+After reading in the mesh into the CGAL Polyhedron\_3 datastructure perperations are necessary to be able to describe the system. First a dual graph is calculated and gluetags are calculated for each edge of the dual graph, as each edge could be a possible cut edge. Furthermore the temperature and the cooling rate are set to 40.000 and 1.0 per iteration, defining the runtime of the annealing process.
+
+An initial configuration of the system is calculated. This happens by assigning each edge of the dual graph a random weight and then sorting the edge list by weight. Using this edge list a initial minimum spanning tree is calculated. Now using the information which edges will be cut, the gluetgas can be calculated. Therefore we iterate through all possible gluetags and choose a gluetag if the following conditions are fulfilled:
 
 \begin{itemize}
-	\item simmulated annealing is the process that combines previous explained points
-	\item a temperature is defined that will be lowered in each iteration until the minimum temperature is reached
-	\item before iterating a starting state is calculated by random, the energy of the state should be minimized in the process, as the energy is the sum of the overlap area
-	\item first a random neighborhood state is calculated for the state s
-	\item then the faces are unfolded and their overlaps are calculated
-	\item if no faces overlap, the gluetags are unfolded and the overlaps are calculated
-	\item anyways the energy of the overlaps is calculated	
-	\item if it is smaller than the previous, it is used for future calculations, else the old state will be used
-	\item but for a small chance ;INSERT FORMULA;, a worse move is taken to lessen the probability of getting stuck in a local minimum
-	\item if the energy of the state is zero, an unfolding was found and the loop ends
+	\item The edge the gluetag is attached to is a cut edge
+	\item The opposite gluetag was not already added to this edge
+	\item The number of cut edges, that have no gluetag yet is higher than 1 or neither the source face for the gluetag nor the the face the gluetag targets have a gluetag yet
 \end{itemize}
+
+If these conditions are not fulfilled the gluetag this gluetag will not be considered for this unfolding. These conditions ensure that the reconstructed model will be stable when glued together without faces being loose, but also reducing the number of gluetags to the absolutely necessary amount, to reduce time and effort on reconstruction.
+
+After these two calculations have been made, the triangles and the gluetags will be unfolded. The area of both triangle-triangle overlaps, gluetag-triangle overlaps and gluetag-gluetag overlaps will be calculated. Triangle-triangle overlaps are weighted 100 times higher than gluetag-caused overlaps, since a triangle-triangle overlap-free unfolding is necessary to even pay attention to the overlaps caused by gluetags.
+
+The calculated area is then used as the energy of the graph, which we try to minimize in this process. This initial configuration is then saved as the best configuration. For each following iteration before these steps are repeated a random edge will be chosen and assigned to a new random weight, which possibly changes the outcoming minimum spanning tree. In the iterative generations and evaluation of configurations also the calculation of the energy differs. First the triangles are unfolded and evaluated, if they do not unfold without overlaps, the gluetags are not calculated as no matter if they unfold without errors, the unfolding will already not be overlap free, doing this saves computation time.
+
+If the energy of the new configuration is smaller or equal to the energy of the previous configuration, the new generation will be set as the best configuration. If not the configuration is treated probabilistic. If a uniformly distributed random number is smaller than $P(\Delta E) = e^{-(T + E)/(T_{max})}$, which is calculated for this configuration, therefore decreasing over time as $T$ gets smaller, then the new configuration will be accepted as the best configuration. This condition should ensure that the algorithm cannot get stuck in a local minimum, which would mean that it would not find an optimal global solution.
+
+At the end of every iteration, if a new best configuration was found the new configuration will be visualized using OpenGL, which means that it only changes and impacts calculation time of each iteration, if a better configuration was found. This gives users a better understanding of how the algorithm finds a global solution for the problem.
+
+The annealing process ends if either no overlaps are found or if the temperature reaches the minimum, which means that it ends without finding a solution for this problem. Advantages and Disadvantages using this random walk approach will be discussed in section \ref{sec:limitations}.
 
 \chapter{Results and Evaluation}
 \label{chap:reseval}
@@ -394,7 +364,7 @@ After reading in the mesh into the CGAL Polyhedron\_3 datastructure.
 \end{itemize}
 
 \section{Limitations}
-
+\label{sec:limitations}
 \begin{itemize}
 	\item random walk in annealing can be problematic, especially for big and complex meshes - sometimes finds fast solution, sometimes doesn't, the bigger the mesh the unliklier a global optimum with an energy of 0 can be found
 	\item bigger meshes need far more iterations and computation time in each iteration -> more sophisticated algorithm needed to scale better
