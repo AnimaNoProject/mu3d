@@ -429,8 +429,14 @@ double Graph::findTriangleOverlaps()
 
     for(size_t i = 0; i < _planarFaces.size(); i++)
     {
+        if(_planarFaces[i]._overlaps)
+            continue;
+
         for(size_t j = i + 1; j < _planarFaces.size(); j++)
         {
+            if(_planarFaces[j]._overlaps)
+                continue;
+
             if(_planarFaces[i].self == _planarFaces[j].self || _planarFaces[i].parent == _planarFaces[j].self
                     || _planarFaces[i].self == _planarFaces[j].parent || _planarFaces[i].parent == _planarFaces[j].parent)
                 continue;
@@ -440,6 +446,7 @@ double Graph::findTriangleOverlaps()
             {
                 overlaps += area * 100;
                 _planarFaces[j]._overlaps = true;
+                _planarFaces[i]._overlaps = true;
                 break;
             }
         }

@@ -49,27 +49,99 @@ QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& 
     return QVector3D(float(point.x()), float(point.y()), float(point.z()));
 }
 
+float getclockwise(const QVector2D& p)
+{
+    return -std::atan2(p.x(),-p.y());;
+}
+
+bool orderclockwise(const QVector2D& p1, const QVector2D& p2)
+{
+    return getclockwise(p1) < getclockwise(p2);
+}
+
+int isLeftOf(shEdge edge, QVector2D test)
+{
+    QVector2D tmp1 = edge._from;
+    QVector2D tmp2 = edge._to;
+
+    double x = (tmp1.x() * tmp2.y()) - (tmp1.y() * tmp2.x());
+
+    if(x < 0)
+    {
+        return 0;
+    }
+    else if (x > 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+bool isNearZero(double testValue)
+{
+    return std::abs(testValue) <= .000000001;
+}
+
+bool isInside(shEdge clipedge, QVector2D point)
+{
+    int s = isLeftOf(clipedge, point);
+    if(s == -1)
+    {
+        return true;
+    }
+    else if( s == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool getintersect(QVector2D line1from, QVector2D line1to, QVector2D line2from, QVector2D line2to, QVector2D& out)
+{
+    QVector2D dir1 = line1to - line1from;
+    QVector2D dir2 = line2to - line2from;
+
+    double dotPerp = (dir1.x() * dir2.y()) - (dir1.y() * dir2.x());
+
+    if(isNearZero(dotPerp))
+    {
+        return false;
+    }
+
+    QVector2D c = line2from - line1from;
+    double t = (c.x() * dir2.y() - c.y() * dir2.x()) / dotPerp;
+
+    out = line1from + (t * dir1);
+
+    return true;
+}
+
 double Utility::intersectionArea(QVector2D& a, QVector2D& b, QVector2D& c, QVector2D& p, QVector2D& q, QVector2D& r)
 {
     std::vector<QVector2D> output;
     output.push_back(p);
     output.push_back(q);
     output.push_back(r);
-    std::sort(output.begin(), output.end(), getcounterclockwise);
-
+    std::sort(output.begin(), output.end(), orderclockwise);
 
     std::vector<QVector2D> polylist;
     polylist.push_back(a);
     polylist.push_back(b);
     polylist.push_back(c);
-    std::sort(polylist.begin(), polylist.end(), getcounterclockwise);
+    std::sort(polylist.begin(), polylist.end(), orderclockwise);
 
     std::vector<shEdge> clipPoly;
     clipPoly.push_back(shEdge(polylist[0], polylist[1]));
     clipPoly.push_back(shEdge(polylist[1], polylist[2]));
     clipPoly.push_back(shEdge(polylist[2], polylist[0]));
 
-    for(shEdge& edge : clipPoly)
+    for(shEdge& clipEdge : clipPoly)
     {
         std::vector<QVector2D> inputlist = output;
 
@@ -78,17 +150,51 @@ double Utility::intersectionArea(QVector2D& a, QVector2D& b, QVector2D& c, QVect
             break;
         }
 
-        QVector2D point = inputlist[inputlist.size() -1];
+        QVector2D S = inputlist[inputlist.size() -1];
 
+        for(QVector2D E : inputlist)
+        {
+            if(isInside(clipEdge, E))
+            {
+                if(!isInside(clipEdge, S))
+                {
+                    QVector2D p;
+                    if(getintersect(S,E,clipEdge._from, clipEdge._to, p))
+                    {
+                       output.push_back(p);
+                    }
+                }
 
+                output.push_back(E);
+            }
+            else if (isInside(clipEdge, S))
+            {
+                QVector2D p;
+                if(getintersect(S, E, clipEdge._from, clipEdge._to, p))
+                {
+                   output.push_back(p);
+                }
+            }
+
+            S = E;
+        }
     }
+
+    double area = 0;
+
+    for(size_t i = 0; i < output.size(); i++)
+    {
+        size_t j = (i + 1) % output.size();
+        area += double((output.at(j).x() + output.at(i).x()) * (output.at(j).y() - output.at(i).y()));
+    }
+
+    return std::abs(area / 2.0);
 }
 
 float Utility::getcounterclockwise(const QVector2D& p)
 {
     return std::atan2(p.x(),-p.y());;
 }
-
 
 bool Utility::compareVector2D(const QVector2D& p1, const QVector2D& p2)
 {
