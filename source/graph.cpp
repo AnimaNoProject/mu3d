@@ -20,11 +20,6 @@ int Graph::initBruteForce()
 
     _Cenergy = 1000000000000;
 
-    //std::cout << "n: " << n << std::endl;
-    //std::cout << "r: " << r << std::endl;
-    //int max = factorial(int(n)) / (factorial(int(r)) * factorial(int(n-r)));
-    //std::cout << "maximum: " << max << std::endl;
-
     return 10000000;
 }
 
@@ -273,50 +268,6 @@ void Graph::oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& 
     center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
 }
 
-void Graph::planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c)
-{
-    float lengthAB = (A - B).length();
-
-    a = QVector2D(0, 0);
-    b = QVector2D(lengthAB, 0);
-
-    float s = QVector3D::crossProduct(B - A, C - A).length() / float(std::pow(lengthAB, 2));
-    float cl = QVector3D::dotProduct(B - A, C - A) / float(std::pow(lengthAB, 2));
-
-    c = QVector2D(a.x() + cl * (b.x() - a.x()) - s * (b.y() - a.y()),
-                  a.y() + cl * (b.y() - a.y()) + s * (b.x() - a.x()));
-}
-
-void Graph::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu)
-{
-    float length = (p1 - p2).length();
-
-    float s = QVector3D::crossProduct((P2 - P1), (Pu - P1)).length() / float(std::pow(length, 2));
-    float unkown = QVector3D::dotProduct((P2 - P1), (Pu - P1)) / float(std::pow(length, 2));
-
-    QVector2D pu1 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) + s * (p2.y() - p1.y()),
-                              p1.y() + unkown * (p2.y() - p1.y()) - s * (p2.x() - p1.x()));
-
-    QVector2D pu2 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) - s * (p2.y() - p1.y()),
-                              p1.y() + unkown * (p2.y() - p1.y()) + s * (p2.x() - p1.x()));
-
-    // the points that are not shared by the triangles need to be on opposite sites
-    if (((((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) < 0)
-     && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) > 0)))
-    ||
-    (
-    (((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) > 0)
-             && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
-                ))
-    {
-        pu = pu1;
-    }
-    else
-    {
-        pu = pu2;
-    }
-}
-
 void Graph::unfoldTriangles()
 {
     std::vector<bool> discovered;
@@ -339,7 +290,7 @@ void Graph::unfoldTriangles(int index, std::vector<bool>& discovered, int parent
         _planarFaces[ulong(index)].B = Utility::pointToVector(facet->facet_begin()->next()->vertex()->point());
         _planarFaces[ulong(index)].C = Utility::pointToVector(facet->facet_begin()->next()->next()->vertex()->point());
 
-        planar(_planarFaces[ulong(index)].A, _planarFaces[ulong(index)].B, _planarFaces[ulong(index)].C, _planarFaces[ulong(index)].a, _planarFaces[ulong(index)].b, _planarFaces[ulong(index)].c);
+        Utility::planar(_planarFaces[ulong(index)].A, _planarFaces[ulong(index)].B, _planarFaces[ulong(index)].C, _planarFaces[ulong(index)].a, _planarFaces[ulong(index)].b, _planarFaces[ulong(index)].c);
 
         _planarFaces[ulong(index)].parent = index;
         _planarFaces[ulong(index)].self = index;
@@ -370,7 +321,7 @@ void Graph::unfoldTriangles(int index, std::vector<bool>& discovered, int parent
                 _planarFaces[ulong(index)].self = int(index);
                 _planarFaces[ulong(index)].parent = int(parent);
 
-                planar(P1, P2, Pu, p1, p2, p3prev, _planarFaces[ulong(index)].c);
+                Utility::planar(P1, P2, Pu, p1, p2, p3prev, _planarFaces[ulong(index)].c);
                 break;
             }
         } while (++hfc != _facets[int(index)]->facet_begin());
@@ -422,11 +373,10 @@ void Graph::unfoldGluetags()
                     tmp.a = p2;
                 }
 
-                planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
+                Utility::planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
+                Utility::planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
 
-                planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
-
-                tmp.overlapping = false;
+                tmp._overlaps = false;
                 tmp.faceindex = index;
 
                 _planarGluetags.push_back(tmp);
@@ -450,7 +400,7 @@ double Graph::findGluetagOverlaps()
             if(area > 0)
             {
                 overlaps += area;
-                gt.overlapping = true;
+                gt._overlaps = true;
                 break;
             }
         }
@@ -464,7 +414,7 @@ double Graph::findGluetagOverlaps()
             if(area > 0)
             {
                 overlaps += area;
-                _planarGluetags[j].overlapping = true;
+                _planarGluetags[j]._overlaps = true;
                 break;
             }
         }
@@ -479,8 +429,14 @@ double Graph::findTriangleOverlaps()
 
     for(size_t i = 0; i < _planarFaces.size(); i++)
     {
+        if(_planarFaces[i]._overlaps)
+            continue;
+
         for(size_t j = i + 1; j < _planarFaces.size(); j++)
         {
+            if(_planarFaces[j]._overlaps)
+                continue;
+
             if(_planarFaces[i].self == _planarFaces[j].self || _planarFaces[i].parent == _planarFaces[j].self
                     || _planarFaces[i].self == _planarFaces[j].parent || _planarFaces[i].parent == _planarFaces[j].parent)
                 continue;
@@ -489,7 +445,8 @@ double Graph::findTriangleOverlaps()
             if(area > 0)
             {
                 overlaps += area * 100;
-                _planarFaces[j].color = QVector3D(1, 0, 0);
+                _planarFaces[j]._overlaps = true;
+                _planarFaces[i]._overlaps = true;
                 break;
             }
         }
@@ -527,13 +484,10 @@ void Graph::calculateDual()
             // get the opposing face
             int oppositeFaceId = find(hfc->opposite()->facet());
 
-            // use distance as meassurement
-            double distance = sqrt(CGAL::squared_distance(hfc->prev()->vertex()->point(), hfc->vertex()->point()));
-
             // center of the edge
             QVector3D center = (Utility::pointToVector(hfc->prev()->vertex()->point()) + Utility::pointToVector(hfc->vertex()->point())) / 2;
 
-            Edge edge = Edge(faceId, oppositeFaceId, distance, center, hfc, _facets[faceId], _facets[oppositeFaceId]);
+            Edge edge = Edge(faceId, oppositeFaceId, center, hfc, _facets[faceId], _facets[oppositeFaceId]);
 
             // if this edge doesn't exist already, add it (don't consider direction)
             if(!find(edge))

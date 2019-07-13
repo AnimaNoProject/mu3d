@@ -16,16 +16,11 @@ public:
     QVector3D _br;
     QVector3D _tl;
     QVector3D _tr;
-    QVector3D _color;
 
     double _probability;
-
-    bool overlaps;
 
     void getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors);
     bool operator<(const Gluetag& other) const;
 private:
-    QVector3D hex2rgb(std::string hex);
-
-    static size_t id;
+    static QVector3D _color;
 };
