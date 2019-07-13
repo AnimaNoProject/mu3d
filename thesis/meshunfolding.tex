@@ -176,7 +176,7 @@ Chang et al.~\cite{xi2016learning} have focused their work to unfold orthogonal 
 There are also a lot of other papers mostly exploring a theoretical approach of unfolding meshes with focuses on different areas, deploying sophisticated algorithms with the focus. Other papers focus on different kind of models. Yet the focus on the reconstruction experience has been neglected. In this thesis I want to focus on explorin the addition of gluetags to triangulated polyhedral meshes. They should help users in the reconstruction effort to glue cut edges together, as well as give a better indication of which edges should be glued together. Therefore a simpler approach to calculating unfoldings using a minimum spanning tree approached, optimized by simulated annealing.
 
 \section{Simulated Annealing}
-
+\label{sec:sa}
 Simulated Annealing is a well known optimization process~\cite{kirkpatrick1983optimization}. It can be used to solve combinatorial probelms, that central to computer science and engineering, like mesh unfolding. The main goal is to find a minimum or a maximum vlaue of a function, which is called the cost function, that has many independet variables. An usual examples for the application of this process is the traveling salesman problem, where the most effective route between different cities needs to be found. To solve NP-complete problems, like the traveling salesman problem, heuristic methods are used to solve them.
 Simulated Annealing is an iterative process that starts in a state $P$. For this state the cost function is calculated and saved. In each iteration the configuration of state $P$ will be rearranged to a state $P'$, for wich the cost function is calculated again. If the solution is to find a minimized cost, then if $P' < P$ then the next iteration will be calculated frorm the new state $P'$. If the new configuration has a worse cost than the old one, the new configuration is discarded, and a new configuration will be calculated from $P$. This process could lead to a the configuration getting stuck in a local minimum. The iterations are continued until a before chosen temperature $T$ reaches a defined minimum $T_{min}$, which simulates the cooling down of the material.
 
@@ -336,7 +336,7 @@ Then the determinant can be used to calculate the point of the intersection, see
 
 \begin{equation}
 \label{eq:ipoint}
-point_{intersection} = ((b_2*c_1 - b_1*c_2)/det(p_1, p_2, p_3),(a_1*c_2 - a_2*c_1)/det(p_1, p_2, p_3))
+point_{intersection} = (\frac{(b_2*c_1 - b_1*c_2)}{det(p_1, p_2, p_3)},\frac{(a_1*c_2 - a_2*c_1)}{det(p_1, p_2, p_3)})
 \end{equation}
 
 This list of points is then ordered counter clockwise and the overlapping area can be calculated using the shoelace formula, which is left to the reader as an exercise.
@@ -346,13 +346,19 @@ This list of points is then ordered counter clockwise and the overlapping area c
 
 \section{Specifications}
 
-\begin{itemize}
-	\item computer specs
-	\item programming language
-	\item libraries
-\end{itemize}
+The prototype system is implemented on an Laptop with an Intel Core i7 CPU (3.3 GHz, 4MB Cache) and 8GB RAM. The source code is written in C++17. The OpenGL Library library is used for the visualization of the algorithms step as well as the results. The CGAL library is used to read in off-Files as well as the basic datastructure. The Graphical User Interface (GUI) is developed using the Qt Library. CMake is used to manage the build process and it is compiled on an Ubuntu 18.04.02 LTS operating system.
 
 \section{Simmulated Annealing}
+
+The four important ingredients to use a simulated annealing process, explained in section \ref{sec:sa}, are defined for the following way.
+\begin{itemize}
+	\item \textbf{System Description} The system configuration is described as a list of edges that will be bent and the complementary list of edges that are cut. Furthermore the facets attached to the edges, as well as the gluetags attached to some of the cut edges.
+	\item \textbf{Random Move} To alter the configuration randomly, a random edge of the full eedge list has its weight changed, therefore the minimum spanning tree that is calculated changes.
+	\item \textbf{Quantitive Function} To evaluate the system configuration the sum of the overlapping areas is used.
+	\item \textbf{Annealing Schedule} The temperature is set to 50.000 as a standard, but can be configured and the cooling rate is set to 1.0, therefore the temperature equals the amount of iterations.
+\end{itemize}
+
+After reading in the mesh into the CGAL Polyhedron\_3 datastructure.
 
 \begin{itemize}
 	\item simmulated annealing is the process that combines previous explained points
