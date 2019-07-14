@@ -21,6 +21,8 @@
 \usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
 \usepackage{todonotes} % Provides tooltip-like todo notes.
 
+\usepackage{subcaption} 
+
 \usepackage{color}
 %%%%%%%%%%%%%%%%%%%%% needed for tikz figures
 \usepackage{standalone}
@@ -337,7 +339,7 @@ After these two calculations have been made, the triangles and the gluetags will
 
 The calculated area is then used as the energy of the graph, which we try to minimize in this process. This initial configuration is then saved as the best configuration. For each following iteration before these steps are repeated a random edge will be chosen and assigned to a new random weight, which possibly changes the outcoming minimum spanning tree. In the iterative generations and evaluation of configurations also the calculation of the energy differs. First the triangles are unfolded and evaluated, if they do not unfold without overlaps, the gluetags are not calculated as no matter if they unfold without errors, the unfolding will already not be overlap free, doing this saves computation time.
 
-If the energy of the new configuration is smaller or equal to the energy of the previous configuration, the new generation will be set as the best configuration. If not the configuration is treated probabilistic. If a uniformly distributed random number is smaller than $P(\Delta E) = e^{-(T + E)/(T_{max})}$, which is calculated for this configuration, therefore decreasing over time as $T$ gets smaller, then the new configuration will be accepted as the best configuration. This condition should ensure that the algorithm cannot get stuck in a local minimum, which would mean that it would not find an optimal global solution.
+If the energy of the new configuration is smaller or equal to the energy of the previous configuration, the new generation will be set as the best configuration. If not the configuration is treated probabilistic. If a uniformly distributed random number smaller than $P(\Delta E) = 1 - e^{-(T + E)/(T_{max})}$, which is calculated for each configuration, therefore decreasing over time as $T$ gets smaller, then the new configuration will be accepted as the best configuration. This condition should ensure that the algorithm cannot get stuck in a local minimum, which would mean that it would not find an optimal global solution.
 
 At the end of every iteration, if a new best configuration was found the new configuration will be visualized using OpenGL, which means that it only changes and impacts calculation time of each iteration, if a better configuration was found. This gives users a better understanding of how the algorithm finds a global solution for the problem.
 
@@ -347,13 +349,90 @@ The annealing process ends if either no overlaps are found or if the temperature
 \label{chap:reseval}
 
 \section{Results}
+The algorithm yields good results for models with a lower amount of triangles, where unfoldings can be found fast. The unfolding time can vary for each model due to the random walk in the simulated annealing process. For bigger models like seen in Figure ??, take more time to unfold and depending of the maximum number of iterations unfoldings might not be found.
+Figure \ref{fig:tiger} to Figure Last show some examples of resulting unfoldings that have been achieved. The models have different number of triangles, more detail can be found in section \ref{sec:performance} regarding the exact number of faces and the time it takes for each unfolding.
 
-\begin{itemize}
-	\item pictures of unfoldings vs. original meshes
-\end{itemize}
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_tiger"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_tiger"}
+  \end{subfigure}
+  
+  \caption{3D Model of a tiger head and its unfolding.}
+  \label{fig:tiger}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_sqrt3"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3"}
+  \end{subfigure}
+  
+  \caption{3D Model and its unfolding.}
+  \label{fig:sqrt3}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_pnsplit"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_pnsplit"}
+  \end{subfigure}
+  
+  \caption{3D Model of a star-like object and its unfolding.}
+  \label{fig:pnsplit}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_loop"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_loop"}
+  \end{subfigure}
+  
+  \caption{3D Model of a star-like object and its unfolding.}
+  \label{fig:loop}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_butterfly"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_butterfly"}
+  \end{subfigure}
+  
+  \caption{3D Model of a star-like object and its unfolding.}
+  \label{fig:butterfly}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_star"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_star"}
+  \end{subfigure}
+  
+  \caption{3D Model of a star and its unfolding.}
+  \label{fig:star}
+\end{figure}
+
 
 \section{Performance}
-
+\label{sec:performance}
 \begin{itemize}
 	\item TABLE that evaluates the performance for different meshes
 	\item pictures of unfoldings vs. original meshes
