@@ -1,0 +1,17 @@
+\documentclass{standalone}
+\usepackage{tikz}
+
+\begin{document}
+\begin{tikzpicture}
+
+\draw (1,0) -- (9,0) -- (3,2) -- cycle;
+\draw (9,0) -- (3,2) -- (7,2) -- cycle;
+\draw (1,0) -- node[below, yshift=-0.2cm] {Triangle} (9,0);
+
+\draw[fill=black] (3,2)  circle (.5ex);
+\draw[fill=black] (7,2)  circle (.5ex);
+
+\draw[fill=black] (1,0)  circle (.5ex) -- (2,-1) ;
+\draw[fill=black] (9,0) circle (.5ex) -- (8,-1);
+\end{tikzpicture}
+\end{document}
