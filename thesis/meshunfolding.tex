@@ -121,19 +121,29 @@
 \addstatementpage
 
 \begin{danksagung*}
-\todo{Ihr Text hier.}
+Ich möchte mich bei meiner Beraterin Ph.D. Hsiang-Yun Wu bedanken, dass sie mich in das Thema 3D-Netzfaltung eingeführt hat und mir unermüdlich mit Rat, Tat und Anleitung zur Seite stand. Insbesondere möchte ich ihr auch dafür danken, dass sie mir 3D-Modelle zur Verfügung gestellt hat, um meinen in dieser Arbeit beschriebenen Ansatz zu evaluieren. 
+
+Außerdem möchte ich mich bei meinen Eltern, Ingrid und Horst Korpitsch, sowie bei meiner Großmutter Erna Kaiper und meiner Freundin Valentina Bone bedanken, dass sie mich auch in schwierigen Zeiten immer unterstützt und ermutigt haben. Ohne ihre ewige Geduld, Unterstützung und Motivation wäre diese Arbeit nicht möglich gewesen.
+
+Ich möchte auch Nils Voß MSc für das Korrekturlesen dieser Arbeit danken.
 \end{danksagung*}
 
 \begin{acknowledgements*}
-\todo{Enter your text here.}
+I want to thank my addvisor Ph.D. Hsiang-Yun Wu for introducing me to the topic of 3D-Mesh Unfolding and tirelessly providing me with advice, action and guidance. I especially also want to thank her for providing me with prepared 3D-Models to evaluate my approach described in this thesis. 
+
+Furthermore I want to thank my parents, Ingrid and Horst Korpitsch, as well as my grandmother Erna Kaiper and my girlfriend Valentina Bone for always supporting and ecouraging me even in hard times. Without their everlasting patience, support and motivation this thesis would not have been possible.
+
+I also want to thank Nils Voß MSc for proofreading this thesis.
 \end{acknowledgements*}
 
 \begin{kurzfassung}
-\todo{Ihr Text hier.}
+3D Mesh Unfolding ist der Prozess der Transformation des 3D Netzes in eine planare Form. Ein Einsatzgebiet für diesen Prozess ist die Kunst des Papierhandwerks. Während des Prozesses können zwei große Probleme auftreten. Erstens können sich aufgefaltene Flächen überlappen, was es unmöglich macht, es in einem Stück auszuschneiden und zu rekonstruieren. Zweitens dürfen die Flächen beim Entfalten nicht verzerrt werden, denn das würde die Rekonstruktion des originalen Modells unmöglich machen. Diese Arbeit konzentriert sich auf das Hinzufügen von Klebstellen an den Begrenzungskanten, die die Rekonstruktion erleichtern, da sie dem Benutzer Platz zum Auftragen von Klebstoff bietet. 
+Ein minimaler Spannbaum, des Dualgraphen, des ursprünglichen Netzes wird berechnet, um das Netz zu entfalten und eine Entfaltung zu finden. Vorberechnete Gluetags werden dann auch für einen Teil der Begrenzungskanten entfaltet, um die Menge der benötigten Gluetags zu minimieren. Mit dem Hinzufügen von Klebstellen werden Überlappungen zwischen Klebstellen, Überlappungen zwischen Flächen und Klebstellen, wahrscheinlicher und es müssen mehr Fälle von Überlappungen erkannt und gelöst werden. Ein simulierter Glühalgorithmus optimiert die Entfaltung, um eine überlappungsfreie Entfaltung zu finden.
 \end{kurzfassung}
 
 \begin{abstract}
-\todo{Enter your text here.}
+3D Mesh Unfolding is the process of transforming the 3D Mesh into a 2D planar patch. A field of use for this process is the art of papercraft. During the process, two major problems can arise. Firstly unfolded faces overlap each other, which makes it impossible to create a single cutout. Secondly, during unfolding, the faces must not be distorted, because that would defeat the purpose of reconstructing the original model. This thesis focuses on the addition of glue tags at boundary edges making the reconstruction easier, as it gives users space to apply glue. 
+A spanning tree of the dual graph of the original mesh is calculated to unfold the mesh to find an unfolding. Precalculated gluetags are then also unfolded for some of the boundary edges to minimize the amount of gluetags needed. With the addition of glue tags overlaps between glue tags, overlaps between faces and glue tags, become more likely and more cases of overlaps need to be detected and resolved. A simmulated annealing process optimizes the unfolding, to find an unfolding without any overlaps.
 \end{abstract}
 
 % Select the language of the thesis, e.g., english or naustrian.
@@ -182,7 +192,7 @@ There are also a lot of other papers mostly exploring a theoretical approach of 
 Simulated Annealing is a well known optimization process~\cite{kirkpatrick1983optimization}. It can be used to solve combinatorial probelms, that central to computer science and engineering, like mesh unfolding. The main goal is to find a minimum or a maximum vlaue of a function, which is called the cost function, that has many independet variables. An usual examples for the application of this process is the traveling salesman problem, where the most effective route between different cities needs to be found. To solve NP-complete problems, like the traveling salesman problem, heuristic methods are used to solve them.
 Simulated Annealing is an iterative process that starts in a state $P$. For this state the cost function is calculated and saved. In each iteration the configuration of state $P$ will be rearranged to a state $P'$, for wich the cost function is calculated again. If the solution is to find a minimized cost, then if $P' < P$ then the next iteration will be calculated frorm the new state $P'$. If the new configuration has a worse cost than the old one, the new configuration is discarded, and a new configuration will be calculated from $P$. This process could lead to a the configuration getting stuck in a local minimum. The iterations are continued until a before chosen temperature $T$ reaches a defined minimum $T_{min}$, which simulates the cooling down of the material.
 
-To avoid such a deadlock in each iteration there is a chance that a worse configuration can be accepted. Let $\delta E = E - E'$ be the difference between the old cost and the cost of the new configuration. If $Delta E \leq 0$ the new configuration is accepted. If $Delta E > 0$ it is treated probabilistic, the chance of the new configuration to be accepted is $(\Delta E) = exp(-\Delta E / k_B T)$. $k_B$ is the Boltzmann constant and $T$ is the temperature. Now a uniformly distributed random number within the range of $(0,1)$ implements the random part of the algorithm. If it is less than $P(\Delta E)$ the new configuration is accepted, otherwise it is discarded. Since $T$ is decreasing on each iteration, it will become more unlikely to accept a worse configuration the closer the algorithm comes to an end.
+To avoid such a deadlock in each iteration there is a chance that a worse configuration can be accepted. Let $\Delta E = E - E'$ be the difference between the old cost and the cost of the new configuration. If $\Delta E \leq 0$ the new configuration is accepted. If $Delta E > 0$ it is treated probabilistic, the chance of the new configuration to be accepted is $(\Delta E) = exp(-\Delta E / k_B T)$. $k_B$ is the Boltzmann constant and $T$ is the temperature. Now a uniformly distributed random number within the range of $(0,1)$ implements the random part of the algorithm. If it is less than $P(\Delta E)$ the new configuration is accepted, otherwise it is discarded. Since $T$ is decreasing on each iteration, it will become more unlikely to accept a worse configuration the closer the algorithm comes to an end.
 
 Summarising the concept of the simulated annealing process, to be able to solve a problem with it four important ingredients are needed. A concise description of the configuration of a system, a generator to generate random moves, which changes the configuration of the system, a quantitative function evaluating the trade offs fthat have been made and last but not least an annealing schedule of temperatures and length of times for the system to evolve needs to be developed.
 \chapter{Definitions}
@@ -204,7 +214,7 @@ The data is read from a file and saved into the CGAL datastructure Polyhedron\_3
 
 \begin{figure}
 \includestandalone[width=\textwidth]{"graphics/figdualgraph"}
-\caption{(black) Shows a graph with undirected edges. (green solid and dotted) Shows the graphs complete dual graph. (green solid) Shows a minimum spanning tree of the dual graph.}
+\caption{(black) Shows a graph with undirected edges. (green solid and dotted) Shows the graphs complete dual graph. (green solid) Shows a minimum spanning tree of the dual graph.}{Graph, Dualgraph and Minimum-Spanning-Tree visualized}
 \label{fig:dualgraph}
 \end{figure}
 
@@ -349,8 +359,7 @@ The annealing process ends if either no overlaps are found or if the temperature
 \label{chap:reseval}
 
 \section{Results}
-The algorithm yields good results for models with a lower amount of triangles, where unfoldings can be found fast. The unfolding time can vary for each model due to the random walk in the simulated annealing process. For bigger models like seen in Figure ??, take more time to unfold and depending of the maximum number of iterations unfoldings might not be found.
-Figure \ref{fig:tiger} to Figure Last show some examples of resulting unfoldings that have been achieved. The models have different number of triangles, more detail can be found in section \ref{sec:performance} regarding the exact number of faces and the time it takes for each unfolding.
+The following figures show the resulting unfolding of the implementation. The gluetags are visualized in the 3D-Model and in the unfolding, furthermore the minimum spanning tree (green lines) and cut-edges (red lines) are visualized in the 3D-Model.
 
 \begin{figure}
   \begin{subfigure}[b]{0.5\textwidth}
@@ -361,7 +370,7 @@ Figure \ref{fig:tiger} to Figure Last show some examples of resulting unfoldings
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_tiger"}
   \end{subfigure}
   
-  \caption{3D Model of a tiger head and its unfolding.}
+  \caption{3D Model of a tiger head with 112 faces and the coresponding unfolding.}
   \label{fig:tiger}
 \end{figure}
 
@@ -374,7 +383,7 @@ Figure \ref{fig:tiger} to Figure Last show some examples of resulting unfoldings
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3"}
   \end{subfigure}
   
-  \caption{3D Model and its unfolding.}
+  \caption{3D Model with 72 faces and the coresponding unfolding.}
   \label{fig:sqrt3}
 \end{figure}
 
@@ -387,7 +396,7 @@ Figure \ref{fig:tiger} to Figure Last show some examples of resulting unfoldings
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_pnsplit"}
   \end{subfigure}
   
-  \caption{3D Model of a star-like object and its unfolding.}
+  \caption{3D Model of a star with 216 faces and the coresponding unfolding.}
   \label{fig:pnsplit}
 \end{figure}
 
@@ -400,7 +409,7 @@ Figure \ref{fig:tiger} to Figure Last show some examples of resulting unfoldings
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_loop"}
   \end{subfigure}
   
-  \caption{3D Model of a star-like object and its unfolding.}
+  \caption{3D Model of a star with 96 faces and the coresponding unfolding.}
   \label{fig:loop}
 \end{figure}
 
@@ -413,69 +422,148 @@ Figure \ref{fig:tiger} to Figure Last show some examples of resulting unfoldings
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_butterfly"}
   \end{subfigure}
   
-  \caption{3D Model of a star-like object and its unfolding.}
+  \caption{3D Model of a star with 96 faces and the coresponding unfolding.}
   \label{fig:butterfly}
 \end{figure}
 
 \begin{figure}
   \begin{subfigure}[b]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_star"}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_dragon"}
   \end{subfigure}
   %
   \begin{subfigure}[b]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_star"}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_dragon"}
   \end{subfigure}
   
-  \caption{3D Model of a star and its unfolding.}
-  \label{fig:star}
+  \caption{3D Model of a dragon with 344 faces and the coresponding unfolding.}
+  \label{fig:dragon}
 \end{figure}
 
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_horse"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_horse"}
+  \end{subfigure}
+  
+  \caption{3D Model of a horse with 312 faces and the coresponding unfolding.}
+  \label{fig:horse}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_hand"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_hand"}
+  \end{subfigure}
+  
+  \caption{3D Model of a hand with 336 faces and the coresponding unfolding.}
+  \label{fig:hand}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_armadillo"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_armadillo"}
+  \end{subfigure}
+  
+  \caption{3D Model of an armadillo with 386 faces and the coresponding unfolding.}
+  \label{fig:armadillo}
+\end{figure}
+
+%\newpage
 
 \section{Performance}
 \label{sec:performance}
-\begin{itemize}
-	\item TABLE that evaluates the performance for different meshes
-	\item pictures of unfoldings vs. original meshes
-	\item graph depicting performance vs. mesh size
-	\item Performance degrades the bigger the mesh gets
-	\item optimal performance is below 200 faces
-	\item Over 700 faces solution space gets so small and random walk is unlikely to find an unfolding
-\end{itemize}
+
+To evaluate the algorithm and its implementation tests were run with a variety of models. The results in table \ref{tbl:performance} were observed using a gluetag that is defined as a trapezoid with the base being the edge of the to-glue triangles and the top being one half of the base with a maximum height of one fifth of the size of the triangle being targeted by the gluetag. The iterations were capped at a maximum of 100000.
+
+\begingroup
+\centering
+\begin{tabular}{|ll|r|r|}
+\hline
+Model & & Faces & Time to Unfold (s) \\
+\hline
+Octa & & 8 & 0 \\
+Icosa & & 20 & 0 \\
+Star & & 24 & 8 \\
+%Sphere-42 & & 42 & - \\
+Star-Sqrt3 & (Fig. \ref{fig:sqrt3}) & 72 & 31 \\
+Star-4Split & & 96 & 435 \\
+Star-Loop & (Fig. \ref{fig:loop}) & 96 & 137 \\
+Star-Butterfly & (Fig. \ref{fig:butterfly}) & 96 & 1047 \\
+Tiger & (Fig. \ref{fig:tiger}) & 112 & 65 \\
+Kitten & & 122 & 48 \\
+Moneybox-128 & & 128 & 160 \\
+Bunny-128 & & 128 & 103 \\
+%Sphere-162 & & 162 & - \\
+Moneybox-196 & & 196 & 324 \\
+%Star-9Split & & 216 & - \\
+Star-PNsplit & (Fig. \ref{fig:pnsplit}) & 216 & 625 \\
+Snail-286 & & 286 & 1315 \\
+Horse & (Fig. \ref{fig:horse}) & 312 & 946 \\
+Hand & (Fig. \ref{fig:hand}) & 336 & 1377 \\
+Dragon & (Fig. \ref{fig:dragon}) & 344 & 1292 \\
+Bunny-348 & & 348 & 976 \\
+Luigi & & 356 & 686 \\
+Armadillo & (Fig. \ref{fig:armadillo}) & 386 & 730 \\
+Pooh & & 392 & 957 \\
+Moneybox-392 & & 392 & 2200 \\
+%Seagull & & 462 & - \\
+%Knot & & 480 & - \\
+%Chess & & 496 & - \\
+%Gear & & 508 & - \\
+%Bumpy & & 528 & - \\
+%Snail-574 & & 574 & - \\
+%Cat & & 702 & - \\
+%Fish & & 950 & - \\
+%Mannequin & & 1376 & - \\
+\hline
+\end{tabular}
+\captionof{table}{Table showing the unfolding performance for different models}\label{tbl:performance}
+\endgroup
+
+The performance is not only influced by the number of faces for a model, but also by the size of gluetags. The bigger the gluetags are the more iterations are necessary to find an unfolding, or an unfolding might no longer be possible. Due to the random walk the time to find an unfolding, is not depending on the amount of faces, which can be seen in tabel \ref{tbl:performance} but also depends how and which edges are changed.
 
 \section{Limitations}
 \label{sec:limitations}
-\begin{itemize}
-	\item random walk in annealing can be problematic, especially for big and complex meshes - sometimes finds fast solution, sometimes doesn't, the bigger the mesh the unliklier a global optimum with an energy of 0 can be found
-	\item bigger meshes need far more iterations and computation time in each iteration -> more sophisticated algorithm needed to scale better
-	\item amount of gluetags cannot be calculated in advance - unfolding decides how many gluetags are needed, same unfolding can have a different amount of gluetags depending on their position, bruteforcing of gluetags takes too long; insert formula and example
-\end{itemize}
+
+There are multiple factors that are limitting the presented approach. The target of the approach is to solve the problem only considering the global optimum, disregarding local overlaps, therefore the latter are tough to resolve, as they are not targeted specifically.
+Another limitation is that the gluetags that are necessary cannot be calculated beforehand. Neither the amount nor the position of the gluetags can be calculated, without using a heuristic approach or bruteforce, whereas bruteforce is not feasible as the performance even with small models is abysmall.
+
+Another limitation, that can also be helpfull in some cases is the random-walk approach used in the simulated annealing. A random edge is chosen and changed in each iteration, which might not change the minimum spanning tree that is generated. It can happen that an edge that is causing an overlap does not change for many iteration.
 
 \section{Parameterization}
 
-\begin{itemize}
-	\item tune parameters
-	\item annealing vs bruteforce
-	\item mesh size influences time
-\end{itemize}
+To be able to optimize the algorithm there are multiple parameters that can be tuned, without changing the approach itself.
+
+\textbf{Gluetag size} is the most influential parameter that can be changed. Depending on the size of the gluetag the solution space is widened or made smaller if the gluetags get bigger.
+
+\textbf{Probabilistic treatment of worse iterations} can also be changed to either favor taking a worse iteration more or less often. If the probability is too high to take a worse iteration, the algorithm will not find a solution and might not even get close to a solution. If the probability is too low, the chance of getting stuck in a local optimum increases.
+
+\textbf{Number of iteration} can be controlled by changing the cooling down rate as well as the maximum and minimum temperature, therefore changing the time the algorithm has to find a solution.
+
+By tuning these parameters the results can be influenced to get better performance or make finding an unfolding possible.
 
 \chapter{Conclusion}
 \label{chap:conclusion}
 
 \section{Summary}
-
-\begin{itemize}
-	\item ???? overall it works fast for smaller meshes, but has its limitations as discussed before
-\end{itemize}
+Calculating an unfolding using a minimum spanning tree approach is possible and can yield good performance for smaller meshes. As meshes grow in size and gluetags get bigger the worse the algorithm is performing. The reconstruction is almost impossible without any visual cues on which edges should be folded or glued first, but disregarding this factor as it can be added with this approach too, a bigger setback is that the unfolding is more or less random and structures of the 3D-Model might not be well conserved into the unfolding. All in all the approach is simple to implement as no sophisticated algorithms are needed and it yields results in an okay amount of time for models with less than 200 faces.
 
 \section{Future Work}
+The quality of the unfolding could be improved, by not only meassuring the unfolding by the overlap area but also considering other factors, like keeping structures of the mesh together to help users with reconstructing the models.
 
-\begin{itemize}
-	\item determine unfolding quality
-	\item post process gluetags to resolve very small overlap areas to cut down computation time
-	\item change minimum spanning tree to more sophisticated calculation to get an unfolding faster than with a random walk
-	\item find a way to make search space smaller for gluetags to improve performance
-\end{itemize}
+To improve performance gluetags could be post processed to change their shape if the overlap area is small. With this improvement the computation time can be reduced significantly, without impacting other parts of the approach.
 
+Once an unfolding with gluetags for a model is found a greedy algorithm could be used to minimize the amount of gluetags necessary. Currently the amount of gluetags is determined by the order the gluetags are added, therefore it can result in using more gluetags than necessary for the particular unfolding.
 \backmatter
 
 % Use an optional list of figures.
