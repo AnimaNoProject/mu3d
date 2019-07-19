@@ -1,0 +1,57 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\begin{document}
+
+\begin{tikzpicture}
+\draw [arrows={-Stealth[harpoon]}] (0.05,0.05) -- (2,0.05) node[above, yshift=0.025cm] {\tiny opposite halfedge} --(3.95,0.05);
+\draw [arrows={-Stealth[harpoon]}, draw=red!90] (3.95,0) -- (2,0) node[below, yshift=-0.025cm, text=red!90] {\tiny halfedge} --(0.05,0);
+
+\draw [arrows={-Stealth[harpoon]}] (0.05,0.025) -- (-1.5,-1) node [midway, below, sloped] (TextNode) {\tiny next halfedge};
+\draw [arrows={-Stealth[harpoon]}, draw=gray] (-1.55,-0.95) -- (-0.05,0.025);
+
+\draw[draw=gray] (-0.05,0.025) -- (-1, 0.5);
+\draw[arrows={-Stealth[harpoon]}, draw=gray] (-0.9, 0.5) -- (0.00,0.05);
+
+\draw [arrows={-Stealth[harpoon]}, draw=gray] (4.05,0.05) -- (4.5,-1.7) node [midway, below, sloped, xshift=0.025cm, yshift=-0.025cm] (TextNode) {\tiny prev. halfedge};
+\draw [arrows={-Stealth[harpoon]}, draw=black] (4.4,-1.7) -- (4,-0.025);
+
+\draw [draw=gray] (3.95,0.05) -- (4.8, 0.5);
+\draw [arrows={-Stealth[harpoon]}, draw=gray] (4.9, 0.5) -- (4.025,0.035);
+
+\draw[fill=black] (0,0.025) circle (.5ex) node[left, xshift=-0.2cm, yshift=0.05cm] {\tiny incident vertex};
+\draw[fill=black] (4,0.025) circle (.5ex);
+
+\draw[fill=white] (4.45,-1.705) circle (.5ex) ;
+\draw[fill=white] (-1.55,-1.025) circle (.5ex);
+
+\draw[fill=black] (2,-1) node {\tiny incident facet};
+
+
+
+
+
+\end{tikzpicture}
+
+\end{document}
+
+
+%\draw [arrows={-Stealth[harpoon]}] (0.05,0.05) -- (2,0.05) node[above, yshift=0.025cm] {\tiny opposite halfedge} --(3.95,0.05);
+%\draw [arrows={-Stealth[harpoon]}, draw=red!90] (3.95,0) -- (2,0) node[below, yshift=-0.025cm] {\tiny halfedge} --(0.05,0);
+
+%\draw [arrows={-Stealth[harpoon]}] (0.05,0.025) node[below, xshift=0.025cm, yshift=-0.5cm] {\tiny next halfedege} --(-1.5,-1);
+%\draw [arrows={-Stealth[harpoon]}, draw=gray] (-1.55,-0.95) -- (-0.05,0.025);
+
+%\draw[draw=gray] (-0.05,0.025) -- (-1, 0.5);
+%\draw[arrows={-Stealth[harpoon]}, draw=gray] (-0.9, 0.5) -- (0.00,0.05);
+
+%\draw [arrows={-Stealth[harpoon]}, draw=gray] (4.05,0.05) node[right, xshift=0.25cm, yshift=-0.75cm] {\tiny previous halfedege} -- (4.5,-1.5);
+%\draw [arrows={-Stealth[harpoon]}, draw=black] (4.4,-1.5) -- (4,-0.025);
+
+%\draw [draw=gray] (3.95,0.05) -- (4.8, 0.5);
+%\draw [arrows={-Stealth[harpoon]}, draw=gray] (4.9, 0.5) -- (4.025,0.035);
+
+%\draw[fill=black] (0,0.025) circle (.5ex) node[left, xshift=-0.2cm, yshift=0.05cm] {\tiny incident vertex};
+%\draw[fill=black] (4,0.025) circle (.5ex);
+
+%\draw[fill=black] (2,-1) node {\tiny incident facet};
