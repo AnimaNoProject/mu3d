@@ -4,14 +4,17 @@
 \begin{document}
 \begin{tikzpicture}
 
-\draw (1,0) -- (9,0) -- (3,2) -- cycle;
-\draw (9,0) -- (3,2) -- (7,2) -- cycle;
-\draw (1,0) -- node[below, yshift=-0.2cm] {Triangle} (9,0);
+\draw (1,1) -- (4,1) -- (4, 6) -- cycle;
 
-\draw[fill=black] (3,2)  circle (.5ex);
-\draw[fill=black] (7,2)  circle (.5ex);
 
-\draw[fill=black] (1,0)  circle (.5ex) -- (2,-1) ;
-\draw[fill=black] (9,0) circle (.5ex) -- (8,-1);
+\draw[green] (4,1) -- (5,2) -- (4,6) -- cycle;
+\draw[green] (4,6) -- (5, 5) -- (5,2);
+
+\draw (6,1) -- (6,6) -- (8, 4) -- cycle;
+
+
+\draw[red] (6,1) -- (6,6)  node [midway, below, sloped] (TextNode) {destination edge};
+\draw[blue] (4,1) -- (4,6)  node [midway, above, sloped] (TextNode) {source edge} node [midway, below, sloped, text=green] (TextNode) {gluetag};
+
 \end{tikzpicture}
 \end{document}

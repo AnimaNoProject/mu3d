@@ -142,7 +142,7 @@ I also want to thank Nils Voß MSc for proofreading this thesis.
 \end{kurzfassung}
 
 \begin{abstract}
-3D Mesh Unfolding is the process of transforming the 3D mesh into a 2D planar patch. A field of use for this process is the art of papercraft. During the procedure, two significant problems can arise. Firstly unfolded faces may overlap each other, which makes it impossible to create a single cutout. Secondly, during unfolding, the faces must not be distorted, because that would defeat the purpose of reconstructing the original model. Secondly, during unfolding, the faces must not be distorted, because that would defeat the purpose of reconstructing the original model. This thesis focuses on the addition of glue tags on boundary edges to make reconstruction easier for users, as it gives users space to apply glue. A spanning tree of the dual graph of the original mesh is calculated to unfold the mesh and the calculated glue tags. With the addition of glue tags not only face overlaps need to be treated but also overlaps between faces and glue tags and glue tags with each other. A simulated annealing process optimizes the unfolding and resolves any overlaps.
+3D Mesh Unfolding is the process of transforming a 3D mesh into a 2D planar patch. A field of use for this process is the art of papercraft. During the procedure, two significant problems can arise. Firstly unfolded faces may overlap each other, which makes it impossible to create a single cutout. Secondly, during unfolding, the faces must not be distorted, because that would defeat the purpose of reconstructing the original model. This thesis focuses on the addition of glue tags on boundary edges to make reconstruction easier for users, as it gives users space to apply glue. A spanning tree of the dual graph of the original mesh is calculated to unfold the mesh and the calculated glue tags. With the addition of glue tags not only face overlaps need to be treated but also overlaps between faces and glue tags and glue tags with each other. A simulated annealing process optimizes the unfolding and resolves any overlaps.
 \end{abstract}
 
 % Select the language of the thesis, e.g., english or naustrian.
@@ -157,43 +157,49 @@ I also want to thank Nils Voß MSc for proofreading this thesis.
 \chapter{Introduction}
 
 \section{Background}
-The focus in papercraft lies within the creation of 3D models from paper or paper-like material. The models that are created range from simple ones, like paper aeroplanes, to elaborate models of buildings or districts for planning. Further, it can be used in combination with self-folding materials to form structures after printing the planar patch. It is a complex task due to two kinds of conflicts that appear in the unfolding process. Distortion of the model, as well as faces overlapping each other, are problems that occur when unfolding a 3D Mesh whereas both should be avoided to allow authentic reconstruction.
+\textit{Papercraft} is a widely popular art of creating two or three-dimensional objects from cardboard or paper. The models that are created range from simple ones, like paper aeroplanes, to elaborate models of buildings or districts for planning. Further, it can be used in combination with self-folding materials to form structures after printing the planar patch. In order to build papercraft models a 3D mesh representing the object needs to be unfolded into a 2D mesh, then this mesh can for example be printed onto paper and then reconstructed into the 3D model. It is a complex task due to two kinds of conflicts that appear in the unfolding process. Distortion of the model, as well as faces overlapping each other, are problems that occur when unfolding a 3D mesh whereas both should be avoided to allow authentic reconstruction.
 
 \section{Motivation}
 As the reconstruction of a model can be quite tricky, even with indicators helping with glueing the right faces together, like the solution presented by Takahashi et al.
 ~\cite{takahashi2011optimized}, glueing the faces together if they are tiny is still a hard task.
-Adding glue tags, which can improve the reconstruction experience, has not been well explored as most of the previous work focused on finding ways to get highly qualitative unfoldings. Attaching glue tags makes the problem more difficult as the solution space for a solution without overlaps shrinks, whereas the search space of possible unfoldings and possible glue tag positions grows.
+To make reconstruction easier this paper introduces \textit{glue tags}. These glue tags add small faces on edges that are cut and give user space to apply glue to. Adding glue tags, which can improve the reconstruction experience, has not been well explored as most of the previous work focused on finding ways to get highly qualitative unfoldings. Attaching glue tags makes the problem more difficult as the solution space for a solution without overlaps shrinks, whereas the search space of possible unfoldings and possible glue tag positions increases.
 
 \section{Goal}
-The goal of this thesis is to explore the addition of glue tags to the cut Edges. This thesis proposes the calculation of glue tags in advance for the 3D-Model before the unfolding process starts. During the unfolding glue tags are treated as part of the original mesh. Hence there is no need for additional calculations. This thesis proposes a simple spanning tree approach to find unfoldings of the mesh. A simulated annealing process is optimizing the search for an overlap free unfolding by finding an optimal global layout. Steps of the process are visualized and allow users to interact with both the 3D-Model and the final planar patch. At last, the author evaluates the performance and limitations of the proposed approach.
+The goal of this thesis is to explore the addition of glue tags to the cut Edges. This thesis proposes the calculation of glue tags in advance for the 3D-Model before the unfolding process starts. During the unfolding glue tags are treated as part of the original mesh. Hence there is no need for additional calculations. This thesis proposes a simple spanning tree approach to find unfoldings of the mesh. A simulated annealing process is optimizing the search for an overlap free unfolding by finding an optimal global layout. Steps of the process are visualized and allow users to interact with both the 3D-Model and the final planar patch. At last, the performance and limitations of the proposed approach are evaluated.
 
 \section{Results}
-The suggested approach generates good results in a limited amount of time. Experiments strongly suggest extending the time frame for finding unfoldings as meshes increase in their number of faces. Meshes with less than 200 triangles are unfolded consistently without any overlaps remaining. Another limiting factor is the size of glue tags, which makes finding overlap free unfoldings less likely as glue tags increase in size.
+The suggested approach generates results in a limited amount of time. Experiments strongly suggest that the time frame for finding unfoldings increases as meshes increase their number of faces, but also the layout of faces influences the time to find unfoldings. Meshes with less than 200 triangles are unfolded consistently without any overlaps remaining, whereas meshes with up to 400 triangles can be unfolded with an increased timeframe and meshes over 700 faces cannot be resolved. Another limiting factor is the size of glue tags, which makes finding overlap free unfoldings less likely as glue tags increase in size. To counteract the increase in time needed for a greater amount of faces, the glue tag size can be adjusted.
 
 \section{Structure}
-First chapter \ref{chap:relatedwork} provides an overview of previous findings related to 3D Mesh Unfolding and highlights differences to the proposed approach in this thesis. It also provides the theoretical background and related work for simulated annealing, that optimizes the search for unfoldings. Chapter \ref{chap:definitions} defines the concepts of dual graphs and minimum spanning trees and further describes the data structure for this approach. The next chapter, \ref{chap:methodology}, gives an overview of the processing pipeline, that calculates an unfolding and describes necessary steps in detail. The next chapter, \ref{chap:Implementation}, brings insight into the implementation of the previously explained approach. It focuses on the simulated annealing process. Chapter \ref{chap:reseval} shows the results of the implemented approach and discusses and evaluates its performance and limitations. The last chapter \ref{chap:conclusion} summarises the findings and gives an outlook on future work to improve.
+First chapter \ref{chap:relatedwork} provides an overview of previous findings related to 3D Mesh Unfolding and highlights differences to the proposed approach in this thesis. It also provides the theoretical background and related work for simulated annealing, that optimizes the search for unfoldings. Chapter \ref{chap:definitions} defines the concepts of dual graphs and minimum spanning trees and further describes the data structure for this approach. The next chapter, \ref{chap:methodology}, gives an overview of the processing pipeline, that calculates an unfolding and describes necessary steps in detail. The next chapter, \ref{chap:Implementation}, brings insight into the implementation of the previously explained approach and focuses on the simulated annealing process. Chapter \ref{chap:reseval} shows the results of the implemented approach and discusses and evaluates its performance and limitations. The last chapter \ref{chap:conclusion} summarises the findings and gives an outlook on future work.
 
 \chapter{Related Work}
 \label{chap:relatedwork}
 
 \section{3D-Mesh Unfolding}
-According to Takahashi et al.~\cite{takahashi2011optimized} unfolding 3D-Meshes, more concrete polyhedron models, into a single patch is still a well-known open problem. In their paper they have proposed a heuristic approach using a genetic-based algorithm to find distortion free unfoldings. The key concept is to use topological surgerry to construct models through stitch together boundary edges of the unfolded mesh.
+According to Takahashi et al.~\cite{takahashi2011optimized} unfolding 3D-Meshes, more concrete polyhedron models, into a single patch is still a well-known open problem. They have proposed a heuristic approach using a genetic-based algorithm to find distortion free unfoldings. The key concept is to use topological surgery to construct models by stitching together boundary edges of the unfolded mesh.
 
-Straub et al.~\cite{straubcreating} explored the unfolding and calculating gluetags to an unfolded mesh, in which they also explorer the removal of overlaps introducing new subdivisions to the mesh. As in the previous mentioned paper, a heuristic approach is used to calculate possible unfoldings. They use a greedy algorithm to optimize the cut out and to resolve overlaps. Gluetags that have been calculated to an unfolding are optimized after an unfolding is found.
+Straub et al.~\cite{straubcreating} explored the unfolding and calculating gluetags to an unfolded mesh, in which they also explore the removal of overlaps by introducing new subdivisions to the mesh. As in the previously mentioned paper, a heuristic approach is used to calculate possible unfoldings. They use a greedy algorithm to optimize the cut out and to resolve overlaps. Gluetags that have been calculated to an unfolding are optimized after an unfolding is found.
+
+A different approach is proposed by Jun Mitani and Hirosama Suzuki~\cite{mitani2004making}. In their paper, they describe producing unfoldings by using strip-based approximation. They propose segmenting meshes into parts of easily reconstructible segments, which can be done with feature extraction. They add internal cut lines whenever a feature, like a dent in the mesh, is detected on a triangle strip, to make it reconstructible. Due to this simplification they produce a rather large error compared to other simplification methods. Their solution mostly focused on large mesh models where they merged regions between 60 and 250 triangles.
 
 Chang et al.~\cite{xi2016learning} have focused their work to unfold orthogonal polyhedra. They propose algorithms to unfold 1-layer orthogonal polyhedra by introducing additional cuts depending on their genus. Their main concept is to find a subset of faces, that traverses the surface of the polyhedron, to unfold it along its line. 
 
-There are also a lot of other papers mostly exploring a theoretical approach of unfolding meshes with focuses on different areas, deploying sophisticated algorithms with the focus. Other papers focus on different kind of models. Yet the focus on the reconstruction experience has been neglected. In this thesis I want to focus on explorin the addition of gluetags to triangulated polyhedral meshes. They should help users in the reconstruction effort to glue cut edges together, as well as give a better indication of which edges should be glued together. Therefore a simpler approach to calculating unfoldings using a minimum spanning tree approached, optimized by simulated annealing.
+Theoretical approaches for unfolding meshes have been intensively explored~\cite{shephard1975convex}, while other papers focus on different kind of meshes, for example a lot of papers focus on the unfolding of orthogonal polyhedra \cite{xi2016learning}\cite{damian2007epsilon}\cite{damian2014unfolding}. Yet the focus on the reconstruction experience has been neglected. This thesis focuses on exploring the addition of glue tags to triangulated polyhedral meshes. They should help users in the reconstruction effort to glue cut edges together, as well as give a better indication of which edges should be glued together. Therefore a simpler approach to calculating unfoldings using a minimum spanning tree approached, optimized by simulated annealing was selected.
 
 \section{Simulated Annealing}
 \label{sec:sa}
-Simulated annealing is a well-known optimization process~\cite{kirkpatrick1983optimization} that is widely applicable in problems found in computer science~\cite{goffe1994global}~\cite{dekkers1991global}~\cite{brooks1995optimization} and other scientific fields~\cite{pannetier1990prediction}~\cite{sutter1995automated}. The main goal is to find an optimal value of a function, which is called the cost function, which has many independent variables. A typical example that simulated annealing is applied to is the travelling salesman problem~\cite{malek1989serial}, where the most effective route between different cities needs to be found. 
+Simulated annealing is a well-known optimization process~\cite{kirkpatrick1983optimization} that is widely applicable in problems found in computer science~\cite{goffe1994global}~\cite{dekkers1991global}~\cite{brooks1995optimization} and other scientific fields~\cite{pannetier1990prediction}~\cite{sutter1995automated}. This process tries to emulate the annealing of metal that is being processed.
+
+The main goal is to find an optimal value of a function, which is called the cost function, which has many independent variables. A typical example that simulated annealing is applied to is the travelling salesman problem~\cite{malek1989serial}, where the most effective route between different cities needs to be found. 
 
 Simulated annealing is an iterative process that starts with a system and its configuration $P$. For this configuration, the cost function calculates a value, which is called the energy of the configuration $E$. In each iteration, the configuration $P$ is rearranged to a configuration $P'$, for which the cost function calculates the value $E'$. Let $E' \leq E$ be true, then the new configuration $P'$ replaces $P$ as the base configuration, from which new configurations are arranged. This iteration repeats until a temperature $T$ reaches a defined minimum temperature $T_{min}$, as $T$ cools down in each iteration. When $T$ reaches $T_{min}$ the cost $E$ of configuration $P$ is minimized.
 
-A problem that arises during this process is a deadlock, that happens when a configuration $P$ reaches a local minimum, instead of the global one. To avoid such situations, let $\Delta E = E - E'$ be the difference between the energy of the old configuration and the energy of the new configuration. If $\Delta E \leq 0$ holds true  the new configuration is accepted, otherwise if $\Delta E > 0$ the new configuration is treated probabilistic, where the chance of accepting it is $(\Delta E) = exp(-\Delta E / k_B T)$, where $k_B$ is the Boltzmann constant. Now a uniformly distributed random number $R$ within the range of $(0,1)$ implements the random part of the algorithm. If $R < P(\Delta E)$ then the new configuration is accepted. Otherwise, it discards the new configuration. As $T$ decreases over time, it gets more unlikely to accept worse configurations as time passes on and the algorithm nears its end.
+The process has to be extended with another step to counterackt the problem of deadlocking, which happens when a configuration $P$ reaches a local minimum, instead of the global one. To avoid such situations, let $\Delta E = E - E'$ be the difference between the energy of the old configuration and the energy of the new configuration. If $\Delta E \leq 0$ holds true  the new configuration is accepted, otherwise if $\Delta E > 0$ the new configuration is treated probabilistic, where the chance of accepting it is $(\Delta E) = exp(-\Delta E / k_B T)$, where $k_B$ is the Boltzmann constant. Now a uniformly distributed random number $R$ within the range of $(0,1)$ implements the random part of the algorithm. If $R < P(\Delta E)$ then the new configuration is accepted. Otherwise, it discards the new configuration. As $T$ decreases over time, it gets more unlikely to accept worse configurations as time passes on and the algorithm nears its end.
 
-To summarize simulated annealing, four essential ingredients are necessary. First, a concise description of the configuration of a system is required. Second, a generator, which generates random moves, that changes the configuration of a system is needed. A quantitive function that evaluates the trade-offs for each iteration needs to be defined. Last but not least, the system can only evolve with an annealing schedule of temperatures and length of times.
+To summarize simulated annealing, four essential ingredients are necessary. First, a concise description of the configuration of a system is required. Second, a generator, which generates random moves, that changes the configuration of a system is needed. A quantitive function that evaluates the trade-offs for each iteration needs to be defined. Last but not least, the system can only evolve with an annealing schedule of temperatures and length of times. This evolving process can be stopped with a cooling-rate, which tries to emulate the cooling down of metal, because metal can only be formed while it is hot.
+
+
 \chapter{Definitions}
 \label{chap:definitions}
 
@@ -215,21 +221,26 @@ The original data has to meet the following requirements to be applicable.
 \label{fig:cgal}
 \end{figure}
 
-The data is read from a file and saved into the CGAL data structure Polyhedron\_3~\cite{cgal:eb-19a}. The data structure consists of vertices, edges and facets and an incidence relation on them, as shown in Figure \ref{fig:cgal}. An halfedge and an opposite halfedge, that points into the opposite direction, represent each edge of the mesh. These halfedges consist of vertex pairs that can be accessed. The opposite halfedge links each face to its neighbouring face, also the halfedges are also linked together, therefore enabling iterating through all halfedges of a face. With this data structure, all information is available to apply the approach suggested in this thesis.
+The data is read from a file and saved into the CGAL data structure Polyhedron\_3~\cite{cgal:eb-19a}. A Polyhedron\_3 object consists of vertices, edges and facets and an incidence relation on them, as shown in Figure \ref{fig:cgal}. An halfedge and an opposite halfedge, that points into the opposite direction, represent each edge of the mesh. These halfedges consist of vertex pairs that can be accessed. The opposite halfedge links each face to its neighbouring face, also the halfedges are also linked together, therefore enabling iterating through all halfedges of a face. With this data structure, all information is available to apply the approach suggested in this thesis.
 
 \section{Dual Graph}
 
-Let $G_M$ be the graph representation of a mesh, which is defined by its vertices $V$ and undirected edges $E$ between the vertices. $G_{M_d} = (V_d, E_d)$ is called the dual graph of a graph $G_{M_d} = (V,E)$, which can be obtained by calculating a dual vertex $V_d$ in each enclosed facet and an dual-edge $E_d$ for every two facets separated by an edge in $E$ \cite{gross2004handbook}, as seen in Figure \ref{fig:dualgraph}. The dual graph can then be used to find an unfolding, as a dual-edge connects each neighbouring facets. These dual-edges can either represent an edge that is cut or an edge that is used for bending. One can calculate exactly one dual graph for any graph.
+Let $G_M$ be the graph representation of a mesh, which is defined by its vertices $V$ and undirected edges $E$ between the vertices. $G_{M_d} = (V_d, E_d)$ is called the dual graph of a graph $G_{M_d} = (V,E)$, which can be obtained by calculating a dual vertex $V_d$ in each enclosed facet and an dual-edge $E_d$ for every two facets separated by an edge in $E$ \cite{gross2004handbook}, as seen in Figure \ref{fig:dualgraph}. The dual graph can then be used to find an unfolding, as a dual-edge connects each neighbouring facets. These dual-edges can either represent an edge that is cut or an edge that is used for bending. Therefore the dual graph contains all edges that connects the faces in an unfolding, but also all edges that are cut. A graph has only one dual graph and as the calculation of it can be done very efficient, which makes it a good option to use in 3D mesh unfolding for finding an unfolding.
 
 \begin{figure}
 \includestandalone[width=\textwidth]{"graphics/figdualgraph"}
-\caption{(black) Shows a graph with undirected edges. (green solid and dotted) Shows the graphs complete dual graph. (green solid) Shows a minimum spanning tree of the dual graph.}{Graph, Dualgraph and Minimum-Spanning-Tree visualized}
+\caption{(black) Shows a graph with undirected edges. (green solid and dotted) Shows the graphs complete dual graph. (green solid) Shows a minimum spanning tree of the dual graph.}
 \label{fig:dualgraph}
 \end{figure}
 
 \section{Minimum Spanning Tree}
 
-Let $G = (V,E)$ be a connected undirected graph with $|V| = n$ vertices and $|E| = m$ edges. Given a value $c(v,w)$ for each edge $(v,w) \in E$, a spanning tree $T = (V,E'), E' \subseteq E$ such that $\sum_{\{v,w\}\in E'} c(v,w)$ is minimal~\cite{cheriton1976finding}. A minimum spanning tree is therefore acyclic by definition and can be used to find an unfolding, as an unfolding must not contain cycles. Many simple algorithms for computing minimum spanning trees are available~\cite{kruskal1956shortest}~\cite{ahuja1990faster}. To apply a minimum spanning tree algorithm to the mesh unfolding problem, the weights of the edges cannot be a constant value, as it would result in exactly one minimum spanning tree. If a minimum spanning tree does not result in an unfolding without faces overlapping each other, another spanning tree needs to be found.
+Let $G = (V,E)$ be a connected undirected graph with $|V| = n$ vertices and $|E| = m$ edges. Given a value $c(v,w)$ for each edge $(v,w) \in E$, a spanning tree $T = (V,E'), E' \subseteq E$ such that $\sum_{\{v,w\}\in E'} c(v,w)$ is minimal~\cite{cheriton1976finding}. A minimum spanning tree is therefore acyclic by definition and can be used to find an unfolding, as an unfolding must not contain cycles. Many simple algorithms for computing minimum spanning trees are available~\cite{kruskal1956shortest}~\cite{ahuja1990faster}. 
+
+If the minimum spanning tree is calculated from the dual graph the edges that are part of the minimum spanning tree are the edges that are bent when reconstructing. All other edges not in the minimum spanning tree arre edges that are cut. Therefore a minimum spanning tree is due to it's simple calculation a good combination with the dual graph to calculate possible unfoldings. 
+
+As a weighted graph, where no edges have the same weight, have exactly one minimum spanning tree. This is a problem, since the dual graph doesn't inherently have weights to begin with. Weights need to be assigned to each edge of the dual graph. But the weights cannot be constant values, as in the traveling salesman problem, because not all minimum spanning trees will yield an overlap without any overlaps. 
+As initial weights the length of the edges of the original graph, that connect the faces with each other, can be used as a weight.
 
 \chapter{Methodology}
 \label{chap:methodology}
@@ -242,7 +253,7 @@ Let $G = (V,E)$ be a connected undirected graph with $|V| = n$ vertices and $|E|
 \label{fig:overview}
 \end{figure}
 
-After loading a mesh, its dual graph is calculated as a first step, as seen in Figure \ref{fig:overview}, as it is necessary for all later calculations. After that for each edge, two glue tags are calculated, each targeting one facet of the edge and having its source on the other facet. Then the simulated annealing process starts. Each iteration calculates and unfolds a new minimum spanning tree. Afterwards overlaps are calculated, if overlaps are found a new minimum spanning tree is calculated. If no overlaps are found, the process ends, as an overlap-free solution has been found. In the following subchapters, each Step is described in more detail, whereas the simulated annealing process is explained in more detail in Chapter \ref{chap:Implementation}.
+After loading a mesh, its dual graph is calculated as a first step, as seen in Figure \ref{fig:overview}, as it is necessary for all later calculations. After that for each edge, two glue tags are calculated, each targeting one facet of the edge and having its source on the other facet, see Figure \ref{fig:gluetag}. Then the simulated annealing process starts. Each iteration calculates and unfolds a new minimum spanning tree. Afterwards overlaps are calculated, if overlaps are found a new minimum spanning tree is calculated. If no overlaps are found, the process ends, as an overlap-free solution has been found. In the following subchapters, each Step is described in more detail, whereas the simulated annealing process is explained in more detail in Chapter \ref{chap:Implementation}.
 
 \section{Calculate Dualgraph}
 
@@ -252,11 +263,11 @@ The dual graph is calculated by iterating through all facets of the mesh. For ea
 
 \section{Calculate Gluetag}
 
-The second step in the pipeline shown in Figure \ref{fig: overview} is to calculate glue tags. For each edge of the dual graph, a glue tag is calculated for both facets connected by this edge. The vertices of an edge are the base of a glue tag. As glue tags, an example shown in Figure \ref{fig:gluetag}, can vary in shape and size, this thesis proposes glue tags in the shape of a trapezoid as it brings a few advantages. 
+The second step in the pipeline shown in Figure \ref{fig:overview} is to calculate glue tags. For each edge of the dual graph, a glue tag is calculated for both facets connected by this edge. The vertices of an edge are the base of a glue tag. As glue tags, an example shown in Figure \ref{fig:gluetag}, can vary in shape and size, this thesis proposes glue tags in the shape of a trapezoid as it brings a few advantages. 
 
 \begin{figure}
-\includestandalone[width=\textwidth]{"graphics/figgluetag"}
-\caption{Exemplary trapezoid gluetag attached to a triangle edge.}
+\includestandalone[width=0.8\textwidth]{"graphics/figgluetag"}
+\caption{Exemplary trapezoid gluetag (green) attached to its source triangle edge (blue) and the triangle it will be glued to (red).}
 \label{fig:gluetag}
 \end{figure}
 
@@ -269,6 +280,8 @@ Glue tags are calculated once after the dual graph was calculated, as the edges 
 In the first step, as shown in Figure \ref{fig:overview}, the algorithm calculates a minimum spanning tree from the dual graph. This is done using Kruskal's Algorithm~\cite{kruskal1956shortest} to find the shortest spanning subtree.
 
 For this, the edges are sorted by their weight in ascending order. Then the algorithm iterates through all edges and adds each edge to an adjacency list. This list is used to check if the recently added edge causes the graph to be cyclic. If this is the case, the last edge is removed and added to a list containing the cut edges. Otherwise, the edge is added to a list containing the bend edges. Furthermore, for each iteration, we save the information which face is discovered, so we can assure that the graph is a connected graph besides being acyclic, which is necessary. As a result, the adjacency list defines a minimum spanning tree.
+
+To be able to calculate different minimum spanning trees the weights of an edge is changed on each iteration, which is part of the simulated annealing process. Fur further details see chapter \ref{chap:Implementation}.
 
 \section{Unfolding}
 \label{sec:unfold}
@@ -317,15 +330,25 @@ f = (c_x - a_x) * (b_y - a_y) - (c_y - a_y) * (b_x - a_x)
 
 In theory these formulas can yield three different results $f < 0$ for one side, $f > 0$ for the other side and $f = 0$ if it is on the line. But as we do not have any degenerate triangles in our mesh there are two cases. $f$ needs to be calculated for $c_{prev}$ and for the two solutions of the previous formula $c_1$ and $c_2$. Now we are left with two possibilities, if $f_{prev} < 0$ and $f_{c_1} > 0$ or if $f_{prev} > 0$ and $f_{c_1} < 0$ then we set $c = c_1$, otherwise $c = c_2$.
 
-The unfolding of glue tags works in an analogue way, as the glue tag consists of two triangles, it is left to the reader as an exercise.
+The unfolding of glue tags works in an analogue way, as the glue tag consists of two triangles, therefore it is left to the reader as an exercise.
 
 \section{Overlap Detection}
 
 The last step of the simulated annealing loop, as shown in Figure \ref{fig:overview}, is to determine the quality of the unfolding. As a measurement for the quality, merely the sum of the overlapping areas is used. Overlaps, as seen in Figure \ref{fig:overlap}, can happen between triangles, triangles and glue tags or between glue tags. The detection is a two-step process. First, only the triangles are checked if they overlap each other. In a second step, if no triangles overlap each other, the glue tags are checked if they overlap each other or a triangle. The algorithm checks if any of their lines intersect with each other to find out if triangles overlap each other.
 
 \begin{figure}
-\includestandalone[width=\textwidth]{"graphics/figoverlap"}
-\caption{Two triangles and their overlapping area marked in red.}
+\centering
+\begin{subfigure}[t]{.5\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figoverlap"}
+  \caption{Two triangles overrlap each other, resulting in a triangle describing the red overlap area.}
+	\label{fig:overlap1}
+\end{subfigure}%
+\begin{subfigure}[t]{.5\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figoverlap2"}
+	\caption{Two triangles overlap each other, resulting in a polygon describing the red overlap area.}
+	\label{fig:overlap2}
+\end{subfigure}
+\caption{Overlaps of triangles resulting in different overlapping areas.}
 \label{fig:overlap}
 \end{figure}
 
@@ -368,7 +391,7 @@ return output\;
 \label{alg:polyclip}
 \end{algorithm}
 
-After detecting that an overlap occurs, the algorithm calculates the area of the polygon, which describes the overlap, to determine the energy of the current configuration, the overlapping area is calculated using the Sutherland-Hodgman Clipping algorithm~\cite{sutherland1974reentrant}. This algorithm finds the vertices of the intersection polygon created by the two triangles. Algorithm \ref{alg:polyclip} shows the pseudocode for the Sutherland-Hodgman Clipping algorithm, where the input is two polygons, in our case, the two triangles that intersect. The vertices list resulting from this algorithm can be used to calculate the area using the shoelace formula~\cite{vslapak2017automated}, see formula \ref{eq:shoelace} where $x_i$ and $y_i$ are the coordinates of the $i$-th point in P. It is a mathematical algorithm to calculate the area of a simple polygon, that is described by ordered points $P$ in a plane.
+After detecting that an overlap occurs, the algorithm calculates the area of the polygon, which describes the overlap, to determine the energy of the current configuration, the overlapping area is calculated using the Sutherland-Hodgman Clipping algorithm~\cite{sutherland1974reentrant}. This algorithm finds the vertices of the intersection polygon created by the two triangles. The overlap can be described as a polygon, it can be either be defined at least as a triangle, see Figure \ref{fig:overlap1}, or a polygon with a degree, see Figure \ref{fig:overlap2}, depending on how the triangles overlap each otherr. Algorithm \ref{alg:polyclip} shows the pseudocode for the Sutherland-Hodgman Clipping algorithm, where the input is two polygons, in our case, the two triangles that intersect. The vertices list resulting from this algorithm can be used to calculate the area using the shoelace formula~\cite{vslapak2017automated}, see formula \ref{eq:shoelace} where $x_i$ and $y_i$ are the coordinates of the $i$-th point in P. It is a mathematical algorithm to calculate the area of a simple polygon, that is described by ordered points $P$ in a plane.
 
 \begin{equation}
 Area = \frac{1}{2} \left| \sum_{i=0}^{P-1} x_iy_{i+1} + x_ny_1 - \sum_{i=1}^{n-1} x_{i+1}y_i - x_1y_n \right|
@@ -392,7 +415,7 @@ The four important ingredients to use a simulated annealing process, explained i
 	\item \textbf{Annealing Schedule} The temperature is set to 50.000 as a standard, but can be configured and the cooling rate is set to 1.0, therefore the temperature equals the amount of iterations.
 \end{itemize}
 
-After reading in the mesh into the CGAL Polyhedron\_3 data structure preparations are necessary to be able to describe the system. First, the algorithm calculates a dual graph and glue tags, for each edge of the dual graph, as each edge could be a possible cut edge. Furthermore, it sets the temperature, and the cooling rate to 40.000 and 1.0 per iteration, defining the runtime of the annealing process.
+After reading in the mesh into the CGAL Polyhedron\_3 data structure preparations are necessary to be able to describe the system. First, the algorithm calculates a dual graph and glue tags, for each edge of the dual graph, as each edge could be a possible cut edge. Furthermore, it sets the temperature, and the cooling rate to 50.000 and 1.0 per iteration, defining the runtime of the annealing process.
 
 The algorithm assigns each edge of the dual graph a random weight and then sorts the list. Then it calculates an initial spanning tree using the edge list. Glue tags are calculated for all edges that will be cut, which are the edges not present in the minimum spanning tree. The algorithm iterates through all possible glue tags and chooses a glue tag if they fulfil the following conditions:
 
@@ -404,7 +427,7 @@ The algorithm assigns each edge of the dual graph a random weight and then sorts
 
 The algorithm discards all glue tags that do not fulfil these conditions, as they are not needed for this unfolding. These conditions ensure that the reconstructed model will be stable when glued together without faces being loose, but they also minimize the number of glue tags to reduce time and effort on reconstruction.
 
-After these steps, the algorithm starts unfolding the triangles and the glue tags alike. It calculates the area of both triangle-triangle overlaps, glue tag-triangle overlaps and glue tag-glue tag overlaps. This approach proposes to weigh triangle-triangle overlaps with a factor of 100, so the algorithm prefers to unfold triangles without overlaps first and afterwards solving glue tag related overlaps.
+After these steps, the algorithm starts unfolding the triangles and the glue tags alike. It calculates the area of both triangle-triangle overlaps, glue tag-triangle overlaps and glue tag-glue tag overlaps. This approach proposes to weigh triangle-triangle overlaps with a factor of 100, so the algorithm prefers to unfold triangles without overlaps first and afterwards solving glue tag related overlaps. This step is used to optimize the calculation time as well as to influence the evolving graph. The algorithm focuses more on the resolve of triangles, as their overlap area is higher weighted. It is done because a configuration that does not have any glue tag overlaps, but still has triangle overlaps is less optimal than the other way around. If no triangle-triangle overlaps occur in a configuration and only glue tags overlap are left, these have a chance to be resolved for example by changing which glue tags are used or by post processing the size of the gluetags.
 
 The calculated area is then used as the energy of the graph, which we try to minimize in this process. This initial configuration is saved as the best configuration. For each following iteration before these steps are repeated a random edge will be chosen and assigned to a new random weight, which possibly changes the outcoming minimum spanning tree. In the iterative generations and evaluation of configurations also the calculation of the energy differs. 
 
@@ -527,7 +550,7 @@ The following figures show the resulting unfolding of the implementation. The gl
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}w
+  \begin{subfigure}[b]{0.5\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_armadillo"}
   \end{subfigure}
   %
@@ -538,8 +561,6 @@ The following figures show the resulting unfolding of the implementation. The gl
   \caption{3D Model of an armadillo with 386 faces and the coresponding unfolding.}
   \label{fig:armadillo}
 \end{figure}
-
-%\newpage
 
 \section{Performance}
 \label{sec:performance}
@@ -580,18 +601,18 @@ Moneybox-392 & & 392 & 2200 \\
 %Seagull & & 462 & - \\
 %Knot & & 480 & - \\
 %Chess & & 496 & - \\
-%Gear & & 508 & - \\
+Gear & & 508 & - \\
 %Bumpy & & 528 & - \\
 %Snail-574 & & 574 & - \\
-%Cat & & 702 & - \\
-%Fish & & 950 & - \\
-%Mannequin & & 1376 & - \\
+Cat & & 702 & - \\
+Fish & & 950 & - \\
+Mannequin & & 1376 & - \\
 \hline
 \end{tabular}
 \captionof{table}{Table showing the unfolding performance for different models}\label{tbl:performance}
 \endgroup
 
-Performance is not only influenced by the number of faces, but also by the size of glue tags. The bigger the glue tags are, the more iterations are necessary to find an unfolding, or an unfolding might no longer be possible. Due to the random walk, the time to find an unfolding is not depending on the number of faces. Table \ref{tbl:performance} shows that not only the number of faces influence the time it takes to find a solution, but it also depends on how and which edges are changed.
+Performance is not only influenced by the number of faces, but also by the size of glue tags. The bigger the glue tags are, the more iterations are necessary to find an unfolding, or an unfolding might no longer be possible. Due to the random walk, the time to find an unfolding is not depending on the number of faces. Table \ref{tbl:performance} shows that not only the number of faces influence the time it takes to find a solution, but it also depends on how and which edges are changed. For models marked with a - in the table \ref{tbl:performance} no unfolding was found within 100000 iterations.
 
 \section{Limitations}
 \label{sec:limitations}

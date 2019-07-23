@@ -22,7 +22,7 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 40000.0
+#define TEMP_MAX 300000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
 

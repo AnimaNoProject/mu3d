@@ -127,12 +127,12 @@ bool Graph::neighbourState()
         gtoverlaps = findGluetagOverlaps();
     }
     else {
-        gtoverlaps = 25;
+        gtoverlaps = 40;
     }
 
     double newEnergy = trioverlaps + gtoverlaps;
 
-    double chance = (1 - std::pow(std::exp(1), -(temperature)/TEMP_MAX)) / 2000;
+    double chance = (1 - std::pow(std::exp(1), -(temperature)/TEMP_MAX)) / 2000 / 10;
     double random = (double(std::rand()) / RAND_MAX);
 
     // if it got better we take the new graph
@@ -444,7 +444,7 @@ double Graph::findTriangleOverlaps()
             double area = _planarFaces[j].overlaps(_planarFaces[i]);
             if(area > 0)
             {
-                overlaps += area * 100;
+                overlaps += area * 1000;
                 _planarFaces[j]._overlaps = true;
                 _planarFaces[i]._overlaps = true;
                 break;
