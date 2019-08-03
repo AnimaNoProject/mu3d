@@ -180,18 +180,21 @@ This chapter focuses on previous work that has been done on the topic of optimiz
 
 \section{Optimized Unfolding of 3D Meshes}
 
+Mesh Unfolding has different applications, like creating papercraft models~\cite{takahashi2011optimized,straubcreating} or it can be applied when creating models from self-folding materials~\cite{felton2013self,tibbits20144d}. Many different unfolding techniques have already been explored. Theoretical approaches for unfolding meshes have been intensively explored~\cite{shephard1975convex}, while other papers focus on different kind of meshes, for example a lot of papers focus on the unfolding of orthogonal polyhedra~\cite{xi2016learning,damian2007epsilon,damian2014unfolding}.
 
-According to Takahashi et al.~\cite{takahashi2011optimized} unfolding 3D-Meshes, more concrete polyhedron models, into a single patch is still a well-known open problem. They have proposed a heuristic approach using a genetic-based algorithm to find distortion free unfoldings. The key concept is to use topological surgery to construct models by stitching together boundary edges of the unfolded mesh.
+Takahashi et al.~\cite{takahashi2011optimized} use a genetic-based algorithm to find unfoldings. They unfold 3D Meshes, more concrete polyhedron models, into a single patch, which is still a well-known open problem. Their heuristic approach tries to find distortion free unfoldings. The key concept is to use topological surgery to construct models by stitching together boundary edges of the unfolded mesh.
+
+This thesis on the other hand does not use a heuristic approach, but a random walk utilizing simulated annealing to find unfoldings. Further in this thesis the key concept is to find unfoldings based on minimum spanning trees that can be calculated from dual graph of the mesh.
 
 Straub et al.~\cite{straubcreating} explored the unfolding and calculating Gluetags to an unfolded mesh, in which they also explore the removal of overlaps by introducing new subdivisions to the mesh. As in the previously mentioned paper, a heuristic approach is used to calculate possible unfoldings. They use a greedy algorithm to optimize the cut out and to resolve overlaps. Gluetags that have been calculated to an unfolding are optimized, i.e. changed in size to fit and non-overlap, after an unfolding is found.
 
+In this thesis the proposed algorithm computes all possible Gluetags beforehand and unfolds them depending of the unfolding of the original mesh. Only necessary Gluetags are considered for each unfolding. Furthermore the Gluetags are not treated special, but as part of the mesh and they are therefore not post-processed and changed.
+
 A different approach is proposed by Mitani and Suzuki~\cite{mitani2004making}. In their paper, they describe producing unfoldings by using strip-based approximation. They propose segmenting meshes into parts of easily reconstructible segments, which can be done with feature extraction. They add internal cut lines whenever a feature, like a dent in the mesh, is detected on a triangle strip, to make it reconstructible. Due to this simplification they produce a rather large error compared to other simplification methods. Their solution mostly focuses on large mesh models where they merged regions between 60 and 250 triangles.
 
-Chang et al.~\cite{xi2016learning} have focused their work to unfold orthogonal polyhedra. They propose algorithms to unfold 1-layer orthogonal polyhedra by introducing additional cuts depending on their genus. Their main concept is to find a subset of faces, that traverses the surface of the polyhedron, to unfold it along its line. 
+In this thesis we suggest that the mesh is not changed, therefore also not simplified to allow an authentic reconstruction of the original model. 
 
-Theoretical approaches for unfolding meshes have been intensively explored~\cite{shephard1975convex}, while other papers focus on different kind of meshes, for example a lot of papers focus on the unfolding of orthogonal polyhedra \cite{xi2016learning,damian2007epsilon,damian2014unfolding}.
-
-Yet the focus on the reconstruction experience has been neglected. This thesis focuses on exploring the addition of Gluetags to triangulated polyhedral meshes. They should help users in the reconstruction effort to glue cut edges together, as well as give a better indication of which edges should be glued together. Therefore a simpler approach to calculating unfoldings using a minimum spanning tree approached, optimized by simulated annealing was selected.
+In contrary to Chang et al.~\cite{chang2017improved}, where they propose to introduce additional cuts into the polyhedra, the suggested approach in this thesis only cuts along edges that are later glued together again, therefore not changing the original model during unfolding.
 
 \section{Optimization Techniques}
 \label{sec:sa}
@@ -237,6 +240,9 @@ The data is read from a file and saved into the CGAL~\cite{cgal:eb-19a} data str
 
 Let $G_M$ be the graph representation of a mesh, which is defined by its vertices $V$ and undirected edges $E$ between the vertices. $G_{M_d} = (V_d, E_d)$ is called the dual graph of a graph $G_{M_d} = (V,E)$, which can be obtained by calculating a dual vertex $V_d$ in each enclosed facet and an dual-edge $E_d$ for every two facets separated by an edge in $E$ \cite{gross2004handbook}, as seen in Figure \ref{fig:dualgraph}. The dual graph can then be used to find an unfolding, as a dual-edge connects each neighbouring facets. These dual-edges can either represent an edge that is cut or an edge that is used for bending, which means the dual graph contains all edges, whether they are cut or bent, of the mesh model. A graph has only one dual graph and as the calculation of it can be done very efficient, which makes it a good option to use in 3D mesh unfolding for finding an unfolding.
 
+\section{Cut- and Bend Edges}
+In this thesis each edge of the dual graph can have the purpose of being a cut edge or a bend edge. A cut edge is an edge that is an edge that is cut to be able to unfold and can later be glued back together. Contrary to that a bend edge is not cut, but bent in the process of reconstruction.
+
 \begin{figure}
 \includestandalone[width=\textwidth]{"graphics/figdualgraph"}
 \caption{(black) Shows a graph with undirected edges. (green solid and dotted) Shows the graphs complete dual graph. (green solid) Shows a minimum spanning tree of the dual graph.}
@@ -247,7 +253,7 @@ Let $G_M$ be the graph representation of a mesh, which is defined by its vertice
 
 Let $G = (V,E)$ be a connected undirected graph with $|V| = n$ vertices and $|E| = m$ edges. Given a value $c(v,w)$ for each edge $(v,w) \in E$, a spanning tree $T = (V,E'), E' \subseteq E$ such that $\sum_{\{v,w\}\in E'} c(v,w)$ is minimal~\cite{cheriton1976finding}. To compute a minimum spanning tree the edges are sorted by their weight, then one edge after another is added. If an edge makes the graph cyclic, this edge is then removed. After this process the minimum spanning tree is defined by the edges that are not discarded. Many simple algorithms for computing minimum spanning trees are available~\cite{kruskal1956shortest,ahuja1990faster}. A minimum spanning tree is therefore acyclic by definition and can be used to find an unfolding, as an unfolding must not contain cycles. 
 
-If the minimum spanning tree is calculated from the dual graph the edges that are part of the minimum spanning tree are the edges that are bent when reconstructing. All other edges not in the minimum spanning tree are edges that are cut. Therefore a minimum spanning tree is due to it's simple calculation a good combination with the dual graph to calculate possible unfoldings. 
+If the minimum spanning tree is calculated from the dual graph the edges that are part of the minimum spanning tree are bend edges. All other edges not in the minimum spanning tree are cut edges. Therefore a minimum spanning tree is due to it's simple calculation a good combination with the dual graph to calculate possible unfoldings. 
 
 As a weighted graph, where no edges have the same weight, have exactly one minimum spanning tree. This is a problem, since the dual graph doesn't inherently have weights to begin with. Weights need to be assigned to each edge of the dual graph. But the weights cannot be constant values, as in the traveling salesman problem, because not all minimum spanning trees will yield an overlap without any overlaps. 
 As initial weights the length of the edges of the original graph, that connect the faces with each other, can be used as a weight.
@@ -259,7 +265,7 @@ As initial weights the length of the edges of the original graph, that connect t
 \label{fig:Gluetag}
 \end{figure}
 
-A Gluetag is a space that users can use to apply glue. It can have different forms, for example, a trapezoid shape, as seen in figure \ref{fig:Gluetag}. A Gluetag has two positions for each edge, as seen in figure \ref{fig:Gluetag}, having one source and one destination edge that can be swapped to point into the other direction, therefore switching the source and target edge. In this thesis, we propose trapezoid-shaped Gluetags that are put on one side of a cut edge at maximum.
+A Gluetag is a space that users can use to apply glue. It can have different forms, for example, a trapezoid shape, as seen in figure \ref{fig:Gluetag}. A Gluetag has two positions for each edge, as seen in figure \ref{fig:Gluetag}, having one source and one destination edge that can be swapped to point into the other direction, therefore switching the source and target edge. In this thesis, we propose trapezoid-shaped Gluetags that are put on one side of a cut edge at maximum. Another advantage of the trapezoid shape is, that the Gluetags are treated the same way as the triangles of the original mesh.
 
 \section{Unfolding}
 An unfolding is defined as the 2D representation of the 3D Model, after unfolding. It is created by unfolding faces after each other, according to the minimum spanning tree. The exact order of which face is unfolded first can be neglected as the minimum spanning tree defines exactly one unfolding. The quality of an unfolding in this thesis is defined by the overlapping area since distortion cannot appear due to the algorithm used. In this thesis an optimal or correct unfolding is therefore defined as an unfolding without distortion of faces and no overlapping areas. The suggested approach in this thesis avoids distorting faces to make an accurate reconstruction possible, whereas no overlapping areas are necessary to be able to create a cut-out of a single piece of paper.
@@ -301,9 +307,26 @@ To be able to calculate different minimum spanning trees the weights of an edge 
 \label{sec:unfold}
 Following the calculation of the minimum spanning tree, as shown in Figure \ref{fig:overview}, an unfolding of the mesh is calculated. The adjacency list of the last step can be used to determine the order of the faces for unfolding.
 
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figunfold3d"}
+  \caption{3D Mesh of a box.}
+	\label{fig:unfold3d}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figunfold2d"}
+	\caption{Unfolding of the first two triangles.}
+	\label{fig:unfold2d}
+\end{subfigure}
+\caption{3D model of a box and the unfolding of the first two triangles.}
+\label{fig:unfoldexample}
+\end{figure}
+
 Let $T = (A,B,C)$ be a triangle defined by three vertices $A(x_A, y_A, z_A)$, $B(x_B, y_B, z_B)$ and $C(x_C, y_C, z_C)$, where $x_N$, $y_N$ and $z_N$, with $N \in \{A,B,C\}$, are the coordinates of each vertex. Let $T_p = (a, b, c)$ be the planar representation of the given triangle, defined by $a(x_a, y_a)$, $b(x_b, y_b)$ and $c(x_c, y_c)$, where again $x_n$, $y_n$, with $n \in \{a,b,c\}$, are the defining coordinates of each vertex.
 
-The first face that is unfolded is treated as a particular case, as the later triangles depend on the position of the vertices of the first triangle. Let $A$ be the vertices of the first triangle, and it is set to $(0,0)$ disregarding the position of $A$ as it is not relevant. The algorithm calculates $b$ by calculating the distance $\overline{AB}$ as it is equal to $\overline{ab}$, which can be calculated as $\overline{AB} = \overline{ab} = \sqrt{(x_A - x_B)^2 + (y_A - y_B)^2 + (z_A - z_B)^2}$.
+The first face, which is on index zero of the adjacency list, the green triangle $(A,B,C)$ in figure \ref{fig:unfoldexample}, that is unfolded is treated as a particular case, as the later triangles depend on the position of the vertices of the first triangle. Let $A$ be the vertices of the first triangle, and it is set to $(0,0)$ disregarding the position of $A$ as it is not relevant. The algorithm calculates $b$ by calculating the distance $\overline{AB}$ as it is equal to $\overline{ab}$, which can be calculated as $\overline{AB} = \overline{ab} = \sqrt{(x_A - x_B)^2 + (y_A - y_B)^2 + (z_A - z_B)^2}$.
 
 Now $b$ can be set to $(\overline{AB}, 0)$, with $y$ being set to $0$ as the original orientation of the triangle does not need to be retained. The last vertices $c$ is again a particular case. Two solutions are possible for $c$, as it can be placed on either side of the edge $(a-b)$. 
 
@@ -329,44 +352,79 @@ c_y &= a_y + d(b_y - a_y) - s(b_x - a_x)
 
 For the first triangle, either $c_1$ or $c_2$ can be chosen, as it only changes in which direction the other vertices are unfolded. For all other triangles a check needs to be performed, so that $c$ is not on the same side as it is for the previous triangle.
 
-
-Now let $c_{prev} = (c_{x_{prev}},c_{y_{prev}})$ be the vertex of the previous triangle that it does not share with the current triangle. To calculate the side on which the vertex $c$ has to be put can be determined by the formula \ref{eq:side}.
+Now let $c_{prev} = (a_{x_{prev}},a_{y_{prev}})$ be the vertex of the previous triangle that it does not share with the current triangle, as seen in figure \ref{fig:unfoldexample}. To calculate the side on which the vertex $c$ has to be put can be determined by the formula \ref{eq:side}.
 
 \begin{equation}
 \label{eq:side}
 f = (c_x - a_x) * (b_y - a_y) - (c_y - a_y) * (b_x - a_x)
 \end{equation}
 
-In theory these formulas can yield three different results $f < 0$ for one side, $f > 0$ for the other side and $f = 0$ if it is on the line. But as we do not have any degenerate triangles in our mesh there are two cases. $f$ needs to be calculated for $c_{prev}$ and for the two solutions of the previous formula $c_1$ and $c_2$. Now we are left with two possibilities, if $f_{prev} < 0$ and $f_{c_1} > 0$ or if $f_{prev} > 0$ and $f_{c_1} < 0$ then we set $c = c_1$, otherwise $c = c_2$.
+In theory these formulas can yield three different results $f < 0$ for one side, $f > 0$ for the other side and $f = 0$ if it is on the line. But as we do not have any degenerate triangles in our mesh there are two cases. $f$ needs to be calculated for $c_{prev}$ and for the two solutions of the previous formula $c_1$ and $c_2$. Now we are left with two possibilities, if $f_{prev} < 0$ and $f_{c_1} > 0$ or if $f_{prev} > 0$ and $f_{c_1} < 0$ then we set $c = c_1$, otherwise $c = c_2$. In case of figure \ref{fig:unfoldexample} the previous vertices that is not shared is left of the shared edge, therefore the vertices $c$ is set on the right side.
 
 The unfolding of Gluetags works in an analogue way, as the Gluetag consists of two triangles.
-
-\section{Detecting Overlaps}
-\label{sec:overlaps}
-The last step of the simulated annealing loop, as shown in Figure \ref{fig:overview}, is to determine the quality of the unfolding. As a measurement for the quality, merely the sum of the overlapping areas is used. Overlaps, as seen in Figure \ref{fig:overlap}, can happen between triangles, triangles and Gluetags or between Gluetags. The detection is a two-step process. First, only the triangles are checked if they overlap each other. In the second step, if no triangles overlap each other, the Gluetags are checked if they overlap each other or a triangle. The algorithm checks if any of their lines intersect with each other to find out if triangles overlap with each other.
 
 \begin{figure}
 \centering
 \begin{subfigure}[t]{.4\textwidth}
-	\includestandalone[width=\textwidth]{"graphics/figoverlap"}
-  \caption{Two triangles overrlap each other, resulting in a triangle describing the red overlap area.}
-	\label{fig:overlap1}
+	\includestandalone[width=\textwidth]{"graphics/figoverlaptriangles"}
+  \caption{Two triangles $T = (A,B,C)$ and $S = (P,Q,R)$ overlapping each other.}
+	\label{fig:figtrioverlap}
 \end{subfigure}%
 \hspace{.1\textwidth}
 \begin{subfigure}[t]{.4\textwidth}
-	\includestandalone[width=\textwidth]{"graphics/figoverlap2"}
-	\caption{Two triangles overlap each other, resulting in a polygon describing the red overlap area.}
-	\label{fig:overlap2}
+	\includestandalone[width=\textwidth]{"graphics/figlineintersection"}
+	\caption{$\overline{AB}$ and $\overline{PQ}$ intersecting each other.}
+	\label{fig:figlineintersection}
 \end{subfigure}
 \caption{Overlaps of triangles resulting in different overlapping areas.}
 \label{fig:overlap}
 \end{figure}
 
-Let $T = (A,B,C)$ and $S = (P,Q,R)$ be two triangles that might be overlapping each other, defined by their points $A$, $B$, $C$, $P$, $Q$, $R$. Therefore we check the lines $\overline{AB}$ and $\overline{PQ}$ if they intersect with each other. For two line segments we can define a general case for overlaps and a special case. In general the lines intersect only if the points $(A,B,P)$ and $(A,B,Q)$ have differrent orientations and $(P,Q,A)$ and $(P,Q,B)$ have different orientations.
+\section{Detecting Overlaps}
+\label{sec:overlaps}
+The last step of the simulated annealing loop, as shown in Figure \ref{fig:overview}, is to determine the quality of the unfolding. As a measurement for the quality, merely the sum of the overlapping areas is used. Overlaps, as seen in Figure \ref{fig:overlap}, can happen between triangles, triangles and Gluetags or between Gluetags. The detection is a two-step process. First, only the triangles are checked if they overlap each other. In the second step, if no triangles overlap each other, the Gluetags are checked if they overlap each other or a triangle. The algorithm checks if any of their lines intersect with each other to find out if triangles overlap with each other.
 
-For the special case, the lines intersect, if all four point-triplets are collinear and the x-projections of $(A,B)$ and $(P,Q)$ intersect and the y-projections of $(A,B)$ and $(P,Q)$ intersect as well.
+Let $T = (A,B,C)$ and $S = (P,Q,R)$ be two triangles that might be overlapping each other, defined by their points $A$, $B$, $C$, $P$, $Q$, $R$, as seen in figure \ref{fig:figtrioverlap}. Therefore we check the lines $\overline{AB}$ and $\overline{PQ}$, as seen in figure \ref{fig:figlineintersection}, if they intersect with each other. For two line segments we can define a general case for overlaps and a special case. In general the lines intersect only if the points $(A,B,P)$ (dotted green line) and $(A,B,Q)$ (solid green line) have different orientations and $(P,Q,A)$ (dotted red line) and $(P,Q,B)$ (solid red line) have different orientations. In figure \ref{fig:overlap} it can be seen that the green lines have different orientations and the red lines too, therefore the lines intersect, which means that the triangles overlap each other. This test is repeated for every pair of lines.
+
+Figure \ref{fig:nooverlap} shows two triangles that do not intersect each other, as $(A,B,Q)$ and $(A,B,P)$ have different orientations, but $(P,Q,A)$ and $(P,Q,B)$ have the same orientation, therefore the triangles do not intersect.
+
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/fignooverlaptriangles"}
+  \caption{Two triangles $T = (A,B,C)$ and $S = (P,Q,R)$ not overlapping each other.}
+	\label{fig:fignotrioverlap}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/fignolineintersection"}
+	\caption{$\overline{AB}$ and $\overline{PQ}$ not intersecting each other.}
+	\label{fig:fignolineintersection}
+\end{subfigure}
+\caption{Overlaps of triangles resulting in different overlapping areas.}
+\label{fig:nooverlap}
+\end{figure}
+
+For the special case, the lines intersect, if all four point-triplets are col-linear and the x-projections of $(A,B)$ and $(P,Q)$ intersect and the y-projections of $(A,B)$ and $(P,Q)$ intersect as well, which can be seen in figure \ref{fig:colinearoverlap}.
 
 The proposed solution calculates for every pair of lines of the two triangles if they intersect. If at least one pair of lines intersect with each other, it means that the triangles intersect. The overlap detection does not need to be done with the child of another triangle as they share an edge and therefore cannot overlap, as the child is unfolded onto the other side of the shared edge, as explained in section \ref{sec:unfold}.
+
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figcolineartri"}
+  \caption{Two triangles $T = (A,B,C)$ and $S = (P,Q,R)$ overlapping each other.}
+	\label{fig:figcolineartri}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figcolinearline"}
+	\caption{$\overline{AB}$ and $\overline{PQ}$ are colinear and intersect each other.}
+	\label{fig:figcolinearline}
+\end{subfigure}
+\caption{Two triangles overlapping each other, due to colinear lines.}
+\label{fig:colinearoverlap}
+\end{figure}
 
 \begin{algorithm}
 \KwData{Clipping Polygon, Subject Polygon}
@@ -401,7 +459,24 @@ return output\;
 \label{alg:polyclip}
 \end{algorithm}
 
-After detecting that an overlap occurs, the algorithm calculates the area of the polygon, which describes the overlap, to determine the energy of the current configuration, the overlapping area is calculated using the Sutherland-Hodgman Clipping algorithm~\cite{sutherland1974reentrant}. This algorithm finds the vertices of the intersection polygon created by the two triangles. The overlap can be described as a polygon, it can be either be defined at least as a triangle, see Figure \ref{fig:overlap1}, or a polygon with a degree, see Figure \ref{fig:overlap2}, depending on how the triangles overlap each other. Algorithm \ref{alg:polyclip} shows the pseudocode for the Sutherland-Hodgman Clipping algorithm, where the input is two polygons, in our case, the two triangles that intersect. The vertices list resulting from this algorithm can be used to calculate the area using the shoelace formula~\cite{vslapak2017automated}, see formula \ref{eq:shoelace} where $x_i$ and $y_i$ are the coordinates of the $i$-th point in P. It is a mathematical algorithm to calculate the area of a simple polygon, that is described by ordered points $P$ in a plane.
+After detecting that an overlap occurs, the algorithm calculates the area of the polygon, which describes the overlap, to determine the energy of the current configuration, the overlapping area is calculated using the Sutherland-Hodgman Clipping algorithm~\cite{sutherland1974reentrant}. This algorithm finds the vertices of the intersection polygon created by the two triangles. The overlap can be described as a polygon, it can be either be defined at least as a triangle, see Figure \ref{fig:overlap1}, or a polygon with a degree, see Figure \ref{fig:overlap2}, depending on how the triangles overlap each other. Algorithm \ref{alg:polyclip} shows the pseudo code for the Sutherland-Hodgman Clipping algorithm, where the input is two polygons, in our case, the two triangles that intersect. The vertices list resulting from this algorithm can be used to calculate the area using the shoelace formula~\cite{vslapak2017automated}, see formula \ref{eq:shoelace} where $x_i$ and $y_i$ are the coordinates of the $i$-th point in P. It is a mathematical algorithm to calculate the area of a simple polygon, that is described by ordered points $P$ in a plane.
+
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figoverlap"}
+  \caption{Two triangles overlap each other, resulting in a triangle describing the red overlap area.}
+	\label{fig:overlap1}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figoverlap2"}
+	\caption{Two triangles overlap each other, resulting in a polygon describing the red overlap area.}
+	\label{fig:overlap2}
+\end{subfigure}
+\caption{Overlaps of triangles resulting in different overlapping areas.}
+\label{fig:overlap}
+\end{figure}
 
 \begin{equation}
 Area = \frac{1}{2} \left| \sum_{i=0}^{P-1} x_iy_{i+1} + x_ny_1 - \sum_{i=1}^{n-1} x_{i+1}y_i - x_1y_n \right|
@@ -439,7 +514,7 @@ The algorithm discards all Gluetags that do not fulfil these conditions, as they
 
 After these steps, the algorithm starts unfolding the triangles and the Gluetags alike. It calculates the area of triangle-triangle overlaps, Gluetag-triangle overlaps and Gluetag-Gluetag overlaps. This approach proposes to weigh triangle-triangle overlaps with a factor of 100, so the algorithm prefers to unfold triangles without overlaps first and afterwards solving Gluetag related overlaps. This step is used to optimize the calculation time as well as to influence the evolving graph. The algorithm focuses more on the resolve of triangles, as their overlap area is higher weighted. It is done because a configuration that does not have any Gluetag overlaps, but still has triangle overlaps is less optimal than the other way around. If no triangle-triangle overlaps occur in a configuration and only Gluetags overlap are left, these have a chance to be resolved for example by changing which Gluetags are used or by post processing the size of the Gluetags.
 
-The calculated area is then used as the energy of the graph, which we try to minimize in this process. This initial configuration is saved as the best configuration. For each following iteration before these steps are repeated a random edge will be chosen and assigned to a new random weight, which possibly changes the outcoming minimum spanning tree. In the iterative generations and evaluation of configurations also the calculation of the energy differs. 
+The calculated area is then used as the energy of the graph, which we try to minimize in this process. This initial configuration is saved as the best configuration. For each following iteration before these steps are repeated a random edge will be chosen and assigned to a new random weight, which possibly changes the upcoming minimum spanning tree. In the iterative generations and evaluation of configurations also the calculation of the energy differs. 
 
 First, the algorithm unfolds the triangles and evaluates the energy of the graph based on the sum of the overlapping area. If and only if the triangles are unfolded without overlaps, it unfolds the Gluetags next. This approach saves computation time, as if the triangles do not unfold without overlaps, no solution is found.
 
@@ -467,41 +542,53 @@ In this chapter results are presented and their specifics are discussed. A quant
 \section{Results}
 The following figures show the resulting unfolding of the implementation. The Gluetags are visualized in the 3D-Model and the unfolding, furthermore, the minimum spanning tree (green lines) and cut-edges (red lines) are visualized in the 3D-Model.
 
-Figure \ref{fig:sqrt3} and \ref{fig:loop} are sphere-like objects with a low count of faces which is optimal for the proposed algorithm, as a solution can be found fast. The unfoldings are also more compact compared to stretched out solutions for bigger models.
+Figure \ref{fig:sqrt3} and \ref{fig:loop} are sphere-like objects with a low count of faces which is optimal for the proposed algorithm, as a solution can be found fast. For figure \ref{fig:sqrt3} three different unfoldings were generated, each having a different shape while it was reached in a different amount of time. This is due to the non determinism of the algorithm, as well as the random walk when searching an unfolding.
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_sqrt3"}
   \end{subfigure}
-  %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \hfill
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3"}
+    \caption{Unfolding of the model in 31 seconds.}
+  \end{subfigure}
+  \vskip\baselineskip
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3_18"}
+    \caption{Unfolding of the model in 18 seconds.}
+  \end{subfigure}
+    \quad
+    \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3_77"}
+    \caption{Unfolding of the model in 77 seconds.}
   \end{subfigure}
   
-  \caption{3D Model with 72 faces and the corresponding unfolding.}
+  \caption{3D Model with 72 faces and three possible unfoldings.}
   \label{fig:sqrt3}
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_loop"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_loop"}
   \end{subfigure}
   
   \caption{3D Model of a star with 96 faces and the corresponding unfolding.}
   \label{fig:loop}
 \end{figure}
-Contrary to the previous two figures figure \ref{fig:pnsplit} and \ref{fig:butterfly} are star like-like objects with \ref{fig:pnsplit} having a higher amount of faces. Both of them are harder to solve as they lose their spherical properties, that make unfolding easier. Figure \ref{fig:butterfly} also shows the stretching of the unfolding that happens due to the structure of the model, which can also be observed in figure \ref{fig:horse}.
+
+Contrary to the previous two figures figure \ref{fig:pnsplit} and \ref{fig:butterfly} are star like-like objects with \ref{fig:pnsplit} having a higher amount of faces. Both of them are harder to solve as they lose their spherical properties, that make unfolding easier. Figure \ref{fig:butterfly} also shows the stretching of the unfolding that happens due to the structure of the model, which can also be observed in figure \ref{fig:horse}. It has very steep angles, which would result are likely to produce overlapping faces when unfolded more compact. This makes it harder to compute an unfolding, as the random walk takes more time to stretch out the unfolding.
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_pnsplit"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_pnsplit"}
   \end{subfigure}
   
@@ -510,11 +597,11 @@ Contrary to the previous two figures figure \ref{fig:pnsplit} and \ref{fig:butte
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_butterfly"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_butterfly"}
   \end{subfigure}
   
@@ -527,11 +614,11 @@ Contrary to the previous two figures figure \ref{fig:pnsplit} and \ref{fig:butte
 Figures \ref{fig:tiger} to \ref{fig:moneybox392} are organic-like meshes with an increasing face count. The average time to find an unfolding increases, as can be seen in table \ref{tbl:performance}, but still results are produced. Most of the higher face-count models produce stretched-out unfoldings, as the Gluetags make compact solutions less likely due to their need for space between faces.
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_tiger"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_tiger"}
   \end{subfigure}
   
@@ -540,11 +627,11 @@ Figures \ref{fig:tiger} to \ref{fig:moneybox392} are organic-like meshes with an
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_dragon"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_dragon"}
   \end{subfigure}
   
@@ -553,11 +640,11 @@ Figures \ref{fig:tiger} to \ref{fig:moneybox392} are organic-like meshes with an
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_horse"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_horse"}
   \end{subfigure}
   
@@ -566,11 +653,11 @@ Figures \ref{fig:tiger} to \ref{fig:moneybox392} are organic-like meshes with an
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_hand"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_hand"}
   \end{subfigure}
   
@@ -579,11 +666,11 @@ Figures \ref{fig:tiger} to \ref{fig:moneybox392} are organic-like meshes with an
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_armadillo"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_armadillo"}
   \end{subfigure}
   
@@ -592,11 +679,24 @@ Figures \ref{fig:tiger} to \ref{fig:moneybox392} are organic-like meshes with an
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_pooh"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_pooh"}
+  \end{subfigure}
+  
+  \caption{3D Model of Winnie Pooh with 392 faces and the corresponding unfolding.}
+  \label{fig:pooh}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_moneybox392"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_moneybox392"}
   \end{subfigure}
   
@@ -639,7 +739,7 @@ Dragon & (Fig. \ref{fig:dragon}) & 172& 344& 514 & 1292  &-\\
 Bunny-348 & & 176& 348& 522 & 976  &-\\
 Luigi & & 180& 356& 534 & 686  &-\\
 Armadillo & (Fig. \ref{fig:armadillo}) & 195& 386& 579 & 730  &-\\
-Pooh & & 198& 392& 588 & 957 &- \\
+Pooh & (Fig. \ref{fig:pooh}) & 198& 392& 588 & 957 &- \\
 Moneybox-392 & (Fig. \ref{fig:moneybox392}) & 196& 392& 586 & 2200  &-\\
 Meister & (Fig. \ref{fig:meister_failed}) & 200& 394& 592 & 3900 & - \\
 %Seagull & & 462 & -  &-\\
@@ -664,11 +764,11 @@ Performance is not only influenced by the number of faces, but also by the size 
 \label{sec:limitations}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/model_meister"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_meister_failed"}
   \end{subfigure}
   
@@ -677,11 +777,11 @@ Performance is not only influenced by the number of faces, but also by the size 
 \end{figure}
 
 \begin{figure}
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_meister"}
   \end{subfigure}
   %
-  \begin{subfigure}[b]{0.5\textwidth}
+  \begin{subfigure}[b]{0.475\textwidth}
     \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_meister_comparison"}
   \end{subfigure}
   
