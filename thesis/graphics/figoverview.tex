@@ -10,12 +10,12 @@
 
 \begin{document}
 \begin{tikzpicture}[node distance=2cm]
-	\node (load) 	[io]									{Load 3DModel};
-	\node (cd) 		[block, below of=load] 					{Calculate Dualgraph};
-	\node (cgt)	 	[block, right of=cd, xshift=2cm] 		{Calculate Gluetags};
-	\node (msp) 	[block, right of=cgt, xshift=2cm] 		{Calculate MSP};
-	\node (unfold) 	[block, below of=msp] 					{Unfold};
-	\node (od)		[block, right of=unfold, xshift=2cm] 	{Detect Overlaps};
+	\node (load) 	[io]									{Load 3D Model};
+	\node (cd) 		[block, below of=load] 					{Calculate Dualgraph (\ref{sec:calcdual})};
+	\node (cgt)	 	[block, right of=cd, xshift=2cm] 		{Calculate Gluetags (\ref{sec:calcgluetag})};
+	\node (msp) 	[block, right of=cgt, xshift=2cm] 		{Calculate MSP (\ref{sec:calcmsp})};
+	\node (unfold) 	[block, below of=msp] 					{Unfold  (\ref{sec:unfold})};
+	\node (od)		[block, right of=unfold, xshift=2cm] 	{Detect Overlaps  (\ref{sec:overlaps})};
 	\node (finish) 	[io, below of=cd, yshift=-2cm]			{Visualize Unfolded Model};
 	
 	\draw [arrow] (load) 	-- (cd);	
@@ -28,6 +28,6 @@
 	\draw [arrow] (od) 		|- node[anchor=north] {No Overlaps Found} 	(finish);
 	\draw [arrow] (od) 		|- node[anchor=south] {Overlaps Found} 		(msp);
 	
-	\draw[red,thick,dotted] ($(msp.north west)+(-0.3,0.6)$) node[right, yshift=0.2cm, xshift=2cm] {Simulated Annealing Loop} rectangle ($(od.south east)+(0.3,-0.6)$);
+	\draw[red,thick,dotted] ($(msp.north west)+(-0.3,0.6)$) node[right, yshift=0.2cm, xshift=2cm] {Simulated Annealing Loop (\ref{sec:annealing})} rectangle ($(od.south east)+(0.3,-0.6)$);
 \end{tikzpicture}
 \end{document}

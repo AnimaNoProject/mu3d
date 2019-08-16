@@ -1,0 +1,26 @@
+\documentclass{standalone}
+\usepackage{tikz}
+
+\begin{document}
+\begin{tikzpicture}
+
+\draw (2,0.5) -- (0,2) -- (2,3) -- cycle;
+\draw (0,2) -- (1,4) -- (2,3) -- cycle;
+\draw (1,4) -- (2,3) -- (4,4) -- cycle;
+\draw (2,3) -- (4,4) -- (4,1) -- cycle;
+\draw (1.5, 1) -- (2,3) -- (4,1) -- cycle;
+\draw (4,1) -- (4,4) -- (6,2.5) -- cycle;
+
+\draw[fill=red] (2,1) -- (1.5, 1) -- (2,3) -- cycle;
+
+\draw[fill=black] (2,3) circle (.5ex);
+\draw[fill=black] (1.5, 1) circle (.5ex);
+\draw[fill=black] (4,1) circle (.5ex);
+\draw[fill=black] (4,4) circle (.5ex);
+\draw[fill=black] (0,2) circle (.5ex);
+\draw[fill=black] (2,0.5) circle (.5ex);
+\draw[fill=black] (1,4) circle (.5ex);
+\draw[fill=black] (6,2.5) circle (.5ex);
+
+\end{tikzpicture}
+\end{document}

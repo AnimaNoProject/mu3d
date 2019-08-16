@@ -1,0 +1,22 @@
+\documentclass{standalone}
+\usepackage{tikz}
+
+\begin{document}
+\begin{tikzpicture}
+
+\draw (0,1) node[anchor=east] {P}  -- (3,6) node[anchor=south] {R} -- (6,1) node[anchor=north] {Q} -- cycle;
+\draw (3,0) node[anchor=north] {A} -- (6,4) node[anchor=south] {B} -- (7,0) node[anchor=west] {C}-- cycle;
+
+\draw[green] (0,1) -- (6,1) node[midway, sloped, above] {$\overline{PQ}$};
+\draw[red] (3,0) -- (6,4) node[midway, sloped, above] {$\overline{AB}$};
+
+\draw[fill=black] (0,1) circle (.5ex);
+\draw[fill=black] (3,6) circle (.5ex);
+\draw[fill=black] (6,1) circle (.5ex);
+
+\draw[fill=black] (3,0) circle (.5ex);
+\draw[fill=black] (6,4) circle (.5ex);
+\draw[fill=black] (7,0) circle (.5ex);
+
+\end{tikzpicture}
+\end{document}

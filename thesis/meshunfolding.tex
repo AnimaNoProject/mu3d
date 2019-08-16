@@ -21,11 +21,14 @@
 \usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
 \usepackage{todonotes} % Provides tooltip-like todo notes.
 
+\usepackage{subcaption} 
+
 \usepackage{color}
 %%%%%%%%%%%%%%%%%%%%% needed for tikz figures
 \usepackage{standalone}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}
+\usetikzlibrary{arrows.meta}
 \usetikzlibrary{calc}
 \usepackage{rotating}
 
@@ -40,7 +43,7 @@
 
 % Define convenience functions to use the author name and the thesis title in the PDF document properties.
 \newcommand{\authorname}{Thorsten Korpitsch} % The author name without titles.
-\newcommand{\thesistitle}{3D Mesh Unfolding} % The title of the thesis. The English version should be used, if it exists.
+\newcommand{\thesistitle}{Optimising 3D Mesh Unfoldings with Additional Gluetags using Simulated Annealing} % The title of the thesis. The English version should be used, if it exists.
 
 % Set PDF document properties
 \hypersetup{
@@ -48,8 +51,8 @@
     linkbordercolor = {Melon},                % The color of the borders of boxes around crosslinks (optional).
     pdfauthor       = {\authorname},          % The author's name in the document properties (optional).
     pdftitle        = {\thesistitle},         % The document's title in the document properties (optional).
-    pdfsubject      = {Subject},              % The document's subject in the document properties (optional).
-    pdfkeywords     = {unfolding, 3d meshunfolding} % The document's keywords in the document properties (optional).
+    pdfsubject      = {unfolding, 3d mesh, meshunfolding, simulated annealiing, Gluetags, bachelor thesis},              % The document's subject in the document properties (optional).
+    pdfkeywords     = {unfolding, 3d mesh, meshunfolding, simulated annealing, Gluetags} % The document's keywords in the document properties (optional).
 }
 
 \setpnumwidth{2.5em}        % Avoid overfull hboxes in the table of contents (see memoir manual).
@@ -83,7 +86,7 @@
 % Required data.
 \setregnumber{01529243}
 \setdate{01}{03}{2019} % Set date with 3 arguments: {day}{month}{year}.
-\settitle{\thesistitle}{3D Mesh Unfolding} % Sets English and German version of the title (both can be English or German). If your title contains commas, enclose it with additional curvy brackets (i.e., {{your title}}) or define it as a macro as done with \thesistitle.
+\settitle{\thesistitle}{\thesistitle} % Sets English and German version of the title (both can be English or German). If your title contains commas, enclose it with additional curvy brackets (i.e., {{your title}}) or define it as a macro as done with \thesistitle.
 \setsubtitle{}{} % Sets English and German version of the subtitle (both can be English or German).
 
 % Select the thesis type: bachelor / master / doctor / phd-school.
@@ -119,19 +122,27 @@
 \addstatementpage
 
 \begin{danksagung*}
-\todo{Ihr Text hier.}
+Ich möchte mich bei meiner Beraterin Ph.D. Hsiang-Yun Wu bedanken, dass sie mich in das Thema 3D-Mesh Unfolding eingeführt hat und mir unermüdlich mit Rat, Tat und Anleitung zur Seite stand. Insbesondere möchte ich ihr auch dafür danken, dass sie mir 3D-Modelle zur Verfügung gestellt hat, um meinen in dieser Arbeit beschriebenen Ansatz zu evaluieren. 
+
+Außerdem möchte ich mich bei meinen Eltern, Ingrid und Horst Korpitsch, sowie bei meiner Großmutter Erna Kaiper und meiner besseren Hälfte Valentina Bone bedanken, dass sie mich auch in schwierigen Zeiten immer unterstützt und ermutigt haben. Ohne ihre ewige Geduld, Unterstützung und Motivation wäre diese Arbeit nicht möglich gewesen.
+
+Ich möchte auch Nils Voß MSc für das Korrekturlesen dieser Arbeit danken.
 \end{danksagung*}
 
 \begin{acknowledgements*}
-\todo{Enter your text here.}
+I want to thank my advisor, Ph.D. Hsiang-Yun Wu for introducing me to the topic of 3D-Mesh Unfolding and tirelessly providing me with advice, action and guidance. I especially also want to thank her for providing me with prepared 3D-Models to evaluate my approach described in this thesis. 
+
+Furthermore, I want to thank my parents, Ingrid and Horst Korpitsch, as well as my grandmother Erna Kaiper and my better half Valentina Bone for always supporting and encouraging me even in hard times. Without their everlasting patience, support and motivation, this thesis would not have been possible.
+
+I also want to thank Nils Voß MSc for proofreading this thesis.
 \end{acknowledgements*}
 
 \begin{kurzfassung}
-\todo{Ihr Text hier.}
+3D mesh unfolding ist der Prozess der Transformation eines 3D Netze in ein 2D Netze. Diese Technik kann verwendet werden, um Papercraft-Modelle zu erstellen, dabei werden 3D-Objekte mit einem Papier oder papierähnlichem Material rekonstruiert. Da die Rekonstruktion von Modellen schwer sein kann, benötigen Anwender Indikatoren, welche Flächen miteinander verklebt werden sollen. In dieser Arbeit werden sogenannte Gluetags vorgestellt, die Anwendern Platz geben, um Klebstoff aufzutragen, um die Rekonstruktion zu erleichtern. Das Hinzufügen dieser Gluetags erhöht die Schwierigkeit überlappungsfreie Entfaltungen zu finden, die aus einem einzigen Stück Papier ausgeschnitten werden können. Dabei erhöht sich die Anzahl der möglichen Entfaltungen, während der Lösungsraum schrumpft. Ein Minimum Spanning Tree Ansatz wird verwendet, um mögliche Entfaltungen zu berechnen, während simuliertes Glühen verwendet wird, um die Entfaltung zu optimieren und eine Lösung ohne Überlappungen zu finden. Quantitative Experimente deuten darauf hin, dass der vorgeschlagene Ansatz schnelle Ergebnisse für kleinere Netze. Für größere Netze werden Ergebnisse innerhalb eines größeren Zeitrahmens geliefert, bei diesen zeigen aber auch eindeutige zeitliche Beschränkungen auf.
 \end{kurzfassung}
 
 \begin{abstract}
-\todo{Enter your text here.}
+3D Mesh Unfolding is the process of transforming a 3D mesh into a 2D planar patch. This technique can be used to create papercraft models, where 3D objects get reconstructed from planar paper or paper-like material. As the reconstruction of unfolded models can be very hard, users need indicators of which faces have to be glued together. In this thesis, Gluetags are introduced to give users extra space to apply glue to ease the reconstruction. The addition of these Gluetags increases the difficulty of finding overlap-free unfoldings that can be cut out of a single piece of paper to reconstruct the model. The amount of possible unfoldings increases while the solution space shrinks when Gluetags are added. A minimum spanning tree approach is used to compute possible unfoldings, whereas simulated annealing is used to find an unfolding with no overlaps. Quantitative experiments suggest that the proposed method can yield fast results for smaller meshes. Results for larger meshes are achievable within an increased timeframe, but they also show time limitations for this approach.
 \end{abstract}
 
 % Select the language of the thesis, e.g., english or naustrian.
@@ -144,61 +155,99 @@
 \mainmatter
 
 \chapter{Introduction}
+This chapter gives a brief overview of what papercraft is, and insights into the background of this work. Furthermore, it explains the motivation and goals of this thesis. Lastly, it discusses shortly the results and describes how the remainder of this thesis structured.
 
 \section{Background}
-The focus in papercraft lies within the creation of 3D models from paper or paper-like material. The models that are created range from simple ones, like paper aeroplanes, to elaborate models of buildings or districts for planning. Further it can be used in combination with self-folding materials to form structures after printing the planar patch. It is a complex task due to two kinds of conflicts that appear in the unfolding process. Distortion of the model, as well as faces overlapping each other, are problems that occur when unfolding a 3D Mesh whereas both should be avoided to allow authentic reconstruction.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{"graphics/papercraft"}
+    \caption{Two papercraft models.}
+    \label{fig:papercraft}.
+\end{figure}
+
+\textit{Papercraft} is a widely popular art of creating two or three-dimensional objects from cardboard or paper, as seen in figure \ref{fig:papercraft}. The models that are created range from simple ones, like paper aeroplanes, to elaborate models of buildings or districts for city planning. Further, it can be used in combination with self-folding materials to form structures after printing the planar patch. In order to build papercraft models a 3D mesh representing the object needs to be unfolded into a 2D patch. The resulting mesh can, for example, be printed onto paper and then reconstructed into the 3D model. Due to two main problems occurring during the process during the process of unfolding this task is highly complex. Distortion of the model, as well as faces overlapping each other, are problems that occur when unfolding a 3D mesh whereas both should be avoided to allow authentic reconstruction.
 
 \section{Motivation}
-As the reconstruction of a model can be quite tricky, even with indicators helping with glueing the right faces together, like the solution presented by Takahashi et al.
-~\cite{takahashi2011optimized}, glueing the faces together if they are tiny is still a hard task.
-The task of adding Gluetags, which can improve the reconstruction experience, has not been well explored as most of the previous work focused on finding ways to get qualitative unfoldings. The addition of Gluetags makes the problem more difficult as the solution space for a solution without overlaps gets smaller, whereas the search space of possible unfoldings and possible Gluetag positions grows.
+The reconstruction of a model can be very hard, even with indicators that show which faces should be glued together, like the solution presented by Takahashi et al.
+~\cite{takahashi2011optimized}. Glueing the faces together if they are tiny is still a hard task, because there is almost no space to apply glue to.
+This thesis introduces \textit{Gluetags} to make the reconstruction of models easier. These Gluetags add small faces on edges that are cut and give users space to apply glue. Adding Gluetags, which can improve the reconstruction experience, has not been well explored as most of the previous work focused on finding ways to get highly qualitative unfoldings. The inclusion of Gluetags makes the problem more difficult as the solution space for an unfolding without overlaps shrinks, whereas the search space of possible unfoldings and possible Gluetag positions increases.
 
 \section{Goal}
-The goal of this thesis is to explore the viability of adding Gluetags to the cut Edges. Glue tags are to be calculated for the 3D-Model and will be unfolded in the same way as triangles of the Mesh. An simple algorithm will be suggested that can find an overlap-free unfolding for the 3D-Model with Gluetags attached. To find an overlap-free Unfolding, an algorithm to detect Overlaps will be constructed, to detect Overlaps between Faces of the triangles and Gluetags, as well as Faces and other Faces or Gluetags and other Gluetags.
-The Overlaps will be resolved by using simulated annealing to find a global optimum. Each step of the Unfolding Process will be visualized. Users will be able to interact with the 3D-Model and the final planar Patch. Furthermore, the performance and the limitations of the approach will be evaluated.
+The goal of this thesis is to explore the addition of Gluetags to cut edges. This thesis proposes the addition of Gluetags in advance to the 3D-Model before the unfolding process starts. During the unfolding Gluetags are treated as part of the original mesh. Hence the same unfolding algorithms can be used without further changes. This thesis proposes a simple spanning tree approach to find unfoldings of a mesh. A simulated annealing process is optimising the search for an overlap free unfolding by finding an optimal global layout. Steps of the process are visualised and allow users to interact with both the 3D-Model and the final planar patch.
 
 \section{Results}
-The suggested approach can generate good results, but is limited by the number of triangles that a model consists of. Meshes with lower than 200 triangles are unfolded consistently without any overlaps remaining. Experiments have shown clear constraints if meshes have more than 700 triangles, which sharply increase of iterations necessary to find an unfolding, which are also not achieved consistently.
+The suggested approach generates results in a limited amount of time. Experiments strongly suggest that the time frame for finding unfoldings increases as meshes increase in size. Additionally the layout of faces influences the time to find unfoldings. Meshes with less than 200 triangles are unfolded consistently without any overlaps remaining, whereas meshes with up to 400 triangles can be unfolded within an increased timeframe. Meshes over 700 faces cannot be consistently resolved. Another factor impacting the time to solution and quality of the result is the size of Gluetags. An increased Gluetag size makes finding overlap free unfolding less likely. The size of Gluetags can be adjusted to counteract the increase in time needed for unfolding meshes with a higher face count.
 
 \section{Structure}
-In Chapter \ref{chap:relatedwork} previous findings related to 3D-Mesh unfolding are discussed and the differences to this approach are highlighted. Also the optimization approach of simulated annealing will be introduced. Chapter \ref{chap:definitions} defines the concepts of Dualgraphs and Minimum Spanning Trees and furthermore will describe the way the data is structured, once it is loaded into the program. Chapter \ref{chap:methodology} will explain the theoretical approach of the steps necessary to unfold 3D-Meshes. Chapter \ref{chap:Implementation} will bring more detail into the implementation of the before explained approach. In Chapter \ref{chap:reseval} the detailed results of this thesis will be discussed. Also the performance, its limitations and tuning of parameters will be explained in detail. Chapter \ref{chap:conclusion} summarises the findings and gives an outlook on future work to improve.
+The remainder of this thesis is structured as follows.
+In chapter \ref{chap:relatedwork}, we provide an overview of previous findings related to 3D Mesh Unfolding and highlights differences to the proposed approach in this thesis. It also discusses the theoretical background and related work for simulated annealing, that optimises the search for unfoldings. Chapter \ref{chap:definitions} describes the concepts of dual graphs and minimum spanning trees, and further describes the data structure for the suggested approach. The next chapter, \ref{chap:methodology}, gives an overview of the processing pipeline, that computes an unfolding and describes necessary steps in detail. Chapter \ref{chap:Implementation} brings insight into the implementation of the previously explained approach and focuses on the simulated annealing process. Chapter \ref{chap:reseval} shows the results of the implemented approach and evaluates its performance and limitations. Finally, chapter \ref{chap:conclusion} summarises the findings and provides an outlook on future work.
 
 \chapter{Related Work}
 \label{chap:relatedwork}
+This chapter focuses on previous work done on the topic of optimising the unfolding of 3D Meshes but also points out the key differences to the approach proposed in this thesis. Furthermore, it presents the optimisation technique of simulated annealing.
 
-\section{3D-Mesh Unfolding}
-According to Takahashi et al.~\cite{takahashi2011optimized} unfolding 3D-Meshes, more concrete polyhedron models, into a single patch is still a well-known open problem. In their paper they have proposed a heuristic approach using a genetic-based algorithm to find distortion free unfoldings. The key concept is to use topological surgerry to construct models through stitch together boundary edges of the unfolded mesh.
+\section{Optimised Unfolding of 3D Meshes}
+Mesh Unfolding has different applications, like creating papercraft models~\cite{takahashi2011optimized,straubcreating} and the creation of models from self-folding materials~\cite{felton2013self,tibbits20144d}. Many different unfolding techniques have been explored. Theoretical approaches for unfolding meshes have been intensively explored~\cite{shephard1975convex}, while other authors focus on different kind of meshes, for example, orthogonal polyhedra~\cite{xi2016learning,damian2007epsilon,damian2014unfolding}.
 
-Straub et al.~\cite{straubcreating} explored the unfolding and calculating gluetags to an unfolded mesh, in which they also explorer the removal of overlaps introducing new subdivisions to the mesh. As in the previous mentioned paper, a heuristic approach is used to calculate possible unfoldings. They use a greedy algorithm to optimize the cut out and to resolve overlaps. Gluetags that have been calculated to an unfolding are optimized after an unfolding is found.
+Takahashi et al.~\cite{takahashi2011optimized} use a genetic-based algorithm to find unfoldings. They unfold 3D Meshes based on polyhedron models into a single patch, which is still a well-known open problem. Their heuristic approach tries to find distortion-free unfoldings. The key concept is to use topological surgery to construct models by stitching together boundary edges of the unfolded mesh.
 
-Chang et al.~\cite{xi2016learning} have focused their work to unfold orthogonal polyhedra. They propose algorithms to unfold 1-layer orthogonal polyhedra by introducing additional cuts depending on their genus. Their main concept is to find a subset of faces, that traverses the surface of the polyhedron, to unfold it along its line. 
+This thesis, on the other hand, does not use a heuristic approach, but a random walk utilising simulated annealing to find unfoldings. Furthermore, the key concept of the proposed approach is to find unfoldings based on minimum spanning trees that can be calculated from the dual graph of the mesh.
 
-There are also a lot of other papers mostly exploring a theoretical approach of unfolding meshes with focuses on different areas, deploying sophisticated algorithms with the focus. Other papers focus on different kind of models. Yet the focus on the reconstruction experience has been neglected. In this thesis I want to focus on explorin the addition of gluetags to triangulated polyhedral meshes. They should help users in the reconstruction effort to glue cut edges together, as well as give a better indication of which edges should be glued together. Therefore a simpler approach to calculating unfoldings using a minimum spanning tree approached, optimized by simulated annealing.
+Straub et al.~\cite{straubcreating} explored the unfolding and adding Gluetags to an unfolded mesh. They also explore the removal of overlaps by introducing new subdivisions to the mesh. As in the previously mentioned paper, a heuristic approach is used to calculate possible unfoldings. They use a greedy algorithm to optimise the cutout and to resolve overlaps. Gluetags that have been added to an unfolding are optimised, i.e. changed in size to fit and non-overlap, after an unfolding is found.
 
-\section{Simulated Annealing}
+In this thesis, the proposed algorithm computes all possible Gluetags beforehand and unfolds them together with the original mesh. Only necessary Gluetags are considered for each unfolding. Furthermore, the Gluetags are not treated special, but as part of the mesh and they are therefore not post-processed and changed.
+
+Mitani and Suzuki~\cite{mitani2004making} propose a different approach. In their paper, they describe the production of unfoldings by using strip-based approximation. They propose to segment meshes into parts of easily reconstructible segments. This is achieved using feature extraction. They add internal cut lines whenever a feature, like a dent in the mesh, is detected on a triangle strip, to make it reconstructible. Due to this simplification, they produce a rather large error compared to other simplification methods. Their solution mostly focuses on large mesh models where they merge regions between 60 and 250 triangles.
+
+In this thesis, we suggest an authentic reconstruction of the original model. 
+
+In contrary to Chang et al.~\cite{chang2017improved}, where the introduction of additional cuts into the polyhedra is proposed, the suggested approach in this thesis only cuts along edges that are later glued together again, therefore the original model is not changed during unfolding.
+
+\section{Optimization Techniques}
 \label{sec:sa}
-Simulated Annealing is a well known optimization process~\cite{kirkpatrick1983optimization}. It can be used to solve combinatorial probelms, that central to computer science and engineering, like mesh unfolding. The main goal is to find a minimum or a maximum vlaue of a function, which is called the cost function, that has many independet variables. An usual examples for the application of this process is the traveling salesman problem, where the most effective route between different cities needs to be found. To solve NP-complete problems, like the traveling salesman problem, heuristic methods are used to solve them.
-Simulated Annealing is an iterative process that starts in a state $P$. For this state the cost function is calculated and saved. In each iteration the configuration of state $P$ will be rearranged to a state $P'$, for wich the cost function is calculated again. If the solution is to find a minimized cost, then if $P' < P$ then the next iteration will be calculated frorm the new state $P'$. If the new configuration has a worse cost than the old one, the new configuration is discarded, and a new configuration will be calculated from $P$. This process could lead to a the configuration getting stuck in a local minimum. The iterations are continued until a before chosen temperature $T$ reaches a defined minimum $T_{min}$, which simulates the cooling down of the material.
+As the unfolding of 3D Meshes is considered an NP-complete problem\cite{haenselmann2012optimal} optimisation techniques are necessary to minimise the time needed to find a solution. Many optimisation techniques are well explored, like greedy algorithms\cite{devore1996some} or heuristic optimisation techniques\cite{lee2008modern}. This thesis proposes to use simulated annealing as the optimisation technique for the problem of finding optimal unfoldings. Compared to hill climbers, simulated annealing is less likely to get stuck in local optimums, which often appear in problems akin to 3D Mesh Unfolding. Furthermore, simulated annealing is easy to implement and very configurable, as later explained in this section.
 
-To avoid such a deadlock in each iteration there is a chance that a worse configuration can be accepted. Let $\delta E = E - E'$ be the difference between the old cost and the cost of the new configuration. If $Delta E \leq 0$ the new configuration is accepted. If $Delta E > 0$ it is treated probabilistic, the chance of the new configuration to be accepted is $(\Delta E) = exp(-\Delta E / k_B T)$. $k_B$ is the Boltzmann constant and $T$ is the temperature. Now a uniformly distributed random number within the range of $(0,1)$ implements the random part of the algorithm. If it is less than $P(\Delta E)$ the new configuration is accepted, otherwise it is discarded. Since $T$ is decreasing on each iteration, it will become more unlikely to accept a worse configuration the closer the algorithm comes to an end.
 
-Summarising the concept of the simulated annealing process, to be able to solve a problem with it four important ingredients are needed. A concise description of the configuration of a system, a generator to generate random moves, which changes the configuration of the system, a quantitative function evaluating the trade offs fthat have been made and last but not least an annealing schedule of temperatures and length of times for the system to evolve needs to be developed.
-\chapter{Definitions}
+Simulated annealing is a well-known optimisation process~\cite{kirkpatrick1983optimization} that is widely applicable in problems found in computer science~\cite{goffe1994global}~\cite{dekkers1991global}~\cite{brooks1995optimization} and other scientific fields~\cite{pannetier1990prediction}~\cite{sutter1995automated}. This process tries to emulate the annealing of metal that is being processed.
+
+The main goal is to find an minimum value of a function, which is called the cost function, which has many independent variables. A typical example that simulated annealing is used is the travelling salesman problem~\cite{malek1989serial}, where the most effective route between different cities has to be found. 
+
+Simulated annealing is an iterative process that starts with a system and its configuration $P$. For this configuration, the cost function calculates a value, which is called the energy of the configuration $E$. In each iteration, the configuration $P$ is rearranged to a configuration $P'$, for which the cost function calculates the value $E'$. Let $E' \leq E$ be true, then the new configuration $P'$ replaces $P$ as the base configuration, from which new configurations are arranged. This iteration repeats until a temperature $T$ reaches a defined minimum temperature $T_{min}$, as $T$ cools down in each iteration. When $T$ reaches $T_{min}$ the value $E$ of configuration $P$ is assumed to be minimal.
+
+The process has to be extended by another step to counteract the problem of deadlocking, which happens when a configuration $P$ reaches a local minimum, instead of the global one. To avoid such situations, let $\Delta E = E - E'$ be the difference between the energy of the old configuration and the energy of the new configuration. If $\Delta E \leq 0$ holds true the new configuration is accepted, otherwise if $\Delta E > 0$ the new configuration is treated probabilistic, where the chance of accepting it is $(\Delta E) = exp(-\Delta E / k_B T)$, where $k_B$ is the Boltzmann constant. If $R < P(\Delta E)$ then the new configuration is accepted, where $R$ is a uniformly distributed random number within the range of $[0,1]$. Otherwise, it discards the new configuration. As $T$ decreases over time, it gets less likely to accept worse configurations and the algorithm execution comes to an end.
+
+To summarise, simulated annealing consists of four essential components. First, a concise description of the configuration of a system is required. Second, a generator, which generates random moves, that changes the configuration of a system is needed. A quantitative function that evaluates the trade-offs for each iteration needs to be defined. Last but not least, the system can only evolve with an annealing schedule of temperatures and length of time. This includes a cooling-rate used to stop the process, which tries to emulate the cooling down of metal which it can only be formed while it is hot.
+
+
+\chapter{Definition of Data and \\ Key Concepts}
 \label{chap:definitions}
+This chapter describes the properties of the data that is processed in the proposed implementation. It also provides definitions for the key concepts used in this thesis.
 
-\section{Data}
+\section{Data Representation of the 3D Mesh Model}
+The original mesh data has to meet the following requirements to be applicable for the suggested approach.
 
-The original data has to meet the following requirements to be used:
 \begin{itemize}
-	\item Data needs to be in the Object File Format (.off)\cite{offfile}.
-	\item Data is triangulated.
-	\item Doubled Vertices have been removed.
-	\item Mesh does not have holes.
+    \item Mesh data is in the Object File Format (.off)
+    \item Mesh data is triangulated
+    \item No duplicated vertices, edges or zero-area faces
+    \item Mesh has no holes
+    \item All faces are connected
 \end{itemize}
 
-The data is read from a file and saved into the CGAL datastructure Polyhedron\_3~\cite{cgal:eb-19a}. The data structure consists of vertices, edges and facets and an incidence relation on them. Each edge is represented by an halfedge and an opposite halfedge, that points into the opposite direction. This datastructure provides all informations necessary to calculate an unfolding for a given mesh.
+\begin{figure}
+\includestandalone[width=\textwidth]{"graphics/figcgal"}
+\caption{CGAL Polyhedron\_3 datastructure visualised. Adapted from the CGAL user manual~\cite{cgal:eb-19a}.}
+\label{fig:cgal}
+\end{figure}
+
+The data is read from a file and saved into the CGAL~\cite{cgal:eb-19a} data structure Polyhedron\_3. A Polyhedron\_3 object consists of vertices, edges and facets and an incidence relation on them, as shown in Figure \ref{fig:cgal}. An halfedge and an opposite halfedge, that points into the opposite direction, represent each edge of the mesh. These halfedges consist of vertex pairs that can be accessed. The opposite halfedge links each face to its neighbouring face, also the halfedges are linked together, therefore enabling iterating through all halfedges of a face. With this data structure, all information is available enabling the application of the approach suggested in this thesis.
 
 \section{Dual Graph}
+Let $G_M$ be the graph representation of a mesh, which is defined by its vertices $V$ and undirected edges $E$ between the vertices. $G_{M_d} = (V_d, E_d)$ is called the dual graph of a graph $G_{M_d} = (V,E)$, which can be obtained by calculating a dual vertex $V_d$ in each enclosed facet and an dual-edge $E_d$ for every two facets separated by an edge in $E$ \cite{gross2004handbook}, as seen in Figure \ref{fig:dualgraph}. The dual graph can then be used to find an unfolding, as a dual-edge connects each neighbouring facets. These dual-edges can either represent an edge that is cut or an edge that is used for bending, which means the dual graph contains all edges, whether they are cut or bent, of the mesh model. A graph has only one dual graph, and the calculation of it can be done very efficiently, which makes it a very compelling data structure to use for 3D mesh unfolding.
+
+\section{Cut- and Bend Edges}
+In this thesis, each edge of the dual graph can represent a cut edge or a bend edge. A cut edge is an edge that is cut to be able to unfold the mesh and can be glued back together later. Contrary to that, a bend edge is not cut but bent in the process of reconstruction.
 
 \begin{figure}
 \includestandalone[width=\textwidth]{"graphics/figdualgraph"}
@@ -206,16 +255,28 @@ The data is read from a file and saved into the CGAL datastructure Polyhedron\_3
 \label{fig:dualgraph}
 \end{figure}
 
-Let $G_M$ be the graph representation of a mesh, which is defined by it's Vertices $V$ and undirected Edges $E$ between the vertices. $G_{M_d} = (V_d, E_d)$ is called the dual graph of a graph $G_{M_d} = (V,E)$, which can be obtained by calculating a dual vertex $V_d$ in each enclosed facet and an dual edge $E_d$ for every two facets seperated by an edge in $E$ \cite{gross2004handbook}, as seen in Figure \ref{fig:dualgraph}. The dual graph can then be used to find an unfolding, as each facet is connected with an edge to its neighbours. These connected edges can either represent an edge that is cut or an edge that is used for bending. For every graph there is exactly one dual graph that can be calculated.
-
 \section{Minimum Spanning Tree}
+Let $G = (V,E)$ be a connected undirected graph with $|V| = n$ vertices and $|E| = m$ edges. Given a value $c(v,w)$ for each edge $(v,w) \in E$, a spanning tree $T = (V,E'), E' \subseteq E$ such that $\sum_{\{v,w\}\in E'} c(v,w)$ is minimal~\cite{cheriton1976finding}. An option to compute a minimum spanning tree is to first sort the edges by their weight and then one edge after another is added to the minimum spanning tree. If an edge makes the graph cyclic, this edge is removed again. After this process, the minimum spanning tree is defined by the edges that are not discarded. Many simple algorithms for computing minimum spanning trees are available~\cite{kruskal1956shortest,ahuja1990faster}. A minimum spanning tree is therefore acyclic by definition and can be used to find an unfolding, as an unfolding must not contain cycles as well. 
 
-Let $G = (V,E)$ be a connected undirected graph with $|V| = n$ vertices and $|E| = m$ edges. Given a value $c(v,w)$ for each edge $(v,w) \in E$, a spanning tree $T = (V,E'), E' \subseteq E$ such that $\sum_{\{v,w\}\in E'} c(v,w)$ is minimal\cite{cheriton1976finding}. A minimum spanning tree is therefore acyclic by definition and can be used to find an unfolding, as an unfolding must not contain cycles. Many simple algorithms for computing minimum spanning trees are available to choose from. To apply a minimum spanning tree algorithm to the mesh unfolding problem, they weights of the edges cannot be a constant value, as it would result in exactly one minimum spanning tree. If this minimum spanning tree doesn't result in an unfolding without faces overlapping each other, another spanning tree needs to be found.
+If the minimum spanning tree is calculated from the dual graph, the edges that are part of the minimum spanning tree are bend edges. All other edges, which are not in the minimum spanning tree, are cut edges. Therefore, due to its simple calculation, a minimum spanning tree in combination with the dual graph is a good tool to calculate possible unfoldings. 
+
+A weighted graph, where no edges have the same weight, has exactly one minimum spanning tree. This is a problem since the dual graph does not inherently have weights assigned to edges. Weights need to be assigned to each edge of the dual graph. However, the weights cannot be constant values, as it is done for the travelling salesman problem, because not all minimum spanning trees will yield an unfolding without any overlaps. 
+As initial weights, this thesis proposed to random values between $(0,1)$.
+
+\section{Gluetag}
+\begin{figure}
+\includestandalone[width=0.8\textwidth]{"graphics/figgluetag"}
+\caption{Exemplary trapezoid Gluetag (green) attached to its source triangle edge (blue) and the triangle it will be glued to (red).}
+\label{fig:Gluetag}
+\end{figure}
+
+A Gluetag is a space that users can use to apply glue. It can have different forms, for example, the shape of a trapezoid, as shown in figure \ref{fig:Gluetag}. As seen in figure \ref{fig:Gluetag}, for each Gluetag exists one source and one destination edge. As a result there exist two valid positions for each that can be swapped to point into the other direction, therefore switching the source and target edge. In this thesis, we propose trapezoid-shaped Gluetags which are put on one side of a cut edge at most. Another advantage of the trapezoid shape is that the Gluetags are treated the same way as the triangles of the original mesh, since each trapezoid consists of two triangles.
+
+\section{Unfolding}
+An unfolding is defined as the 2D representation of the 3D Model, after unfolding. It is created by unfolding faces after each other, according to the minimum spanning tree. The exact order of which face is unfolded first can be neglected as the minimum spanning tree defines exactly one unfolding. The quality of an unfolding is defined by the overlapping area in this thesis, since distortion cannot appear due to the used algorithm. In this thesis, an optimal or correct unfolding is therefore defined as an unfolding without distortion of faces and no overlapping areas. The approach suggested in this thesis avoids distorting faces to make an accurate reconstruction possible. Additionally it is necessary to guarantee that areas do not overlap to enable the creation of a cut-out using a single piece of paper.
 
 \chapter{Methodology}
 \label{chap:methodology}
-
-\section{Overview}
 
 \begin{figure}
 \includestandalone[width=\textwidth]{"graphics/figoverview"}
@@ -223,58 +284,65 @@ Let $G = (V,E)$ be a connected undirected graph with $|V| = n$ vertices and $|E|
 \label{fig:overview}
 \end{figure}
 
-After loading a mesh, its dual graph is calculated as a first step, as seen in Figure \ref{fig:overview}, as it is necessary for all later calculations. After that for each edge, two glue tags are calculated, each targeting one facet of the edge and having its source on the other facet. Then the simulated annealing process starts. In each iteration, a new minimum spanning tree is calculated, which is then unfolded. Afterwards overlaps are calculated, if overlaps are found a new minimum spanning tree is calculated. If no overlaps are found, the process ends, as an overlap-free solution has been found. In the following subchapters, each Step is described in more detail, whereas the simulated annealing process is explained in more detail in Chapter \ref{chap:Implementation}.
+Figure \ref{fig:overview} gives an overview of the solution proposed in this thesis. It shows each step from loading a 3D Model to visualising the resulting unfolded model. After loading a mesh, its dual graph is calculated as a first step, as seen in Figure \ref{fig:overview}, as it is necessary for all later calculations. After that for each edge, two Gluetags are calculated, each targeting one facet of the edge and having its source on the other facet, see Figure \ref{fig:Gluetag}. Then the simulated annealing process starts. Each iteration calculates and unfolds a new minimum spanning tree. Afterwards overlaps are calculated, if overlaps are found a new minimum spanning tree is calculated. If no overlaps are found, the process ends, as an overlap-free solution has been found. In the following sub-chapters, each step is described in more detail, whereas the simulated annealing process is the focus of chapter \ref{chap:Implementation}.
 
-\section{Calculate Dualgraph}
+\section{Calculating the Dualgraph}
+\label{sec:calcdual}
+As the dual graph is calculated from the original mesh, which does not change during the unfolding process, the dual graph is calculated only once in the beginning, as shown in Figure \ref{fig:overview}. The neighbourhood relation of the facets can be derived from the half edges connecting the mesh vertices. 
 
-As the dual graph is calculated from the original mesh, which does not change during the unfolding process, the dual graph is calculated at the beginning once, as shown in Figure \ref{fig:overview}. The neighbourhood relation of the facets can be derived from the half edges connecting the mesh vertices. 
+The dual graph is calculated by iterating through all facets of the mesh. For each facet, we need to iterate through the half edges, where the opposite half-edges are used to identify the neighbouring face. These two facets are saved as an edge and can be initialised with a weight. In this thesis, the weight is initialised and changed throughout the algorithm using a random number to be able to utilise the random walk approach of simulated annealing.
 
-The dual graph is calculated by iterating through all facets of the mesh. For each facet, we need to iterate through the half edges and through the opposite half-edges the neighbouring facet can be identified. These two facets are saved as an edge and can be initialized with the weight of the length of the original half-edge or a random value.
+\section{Calculating the Gluetags}
+\label{sec:calcgluetag}
+The second step in the pipeline shown in Figure \ref{fig:overview} is to calculate Gluetags. For each edge of the dual graph, a Gluetag is calculated for both facets connected by this edge. The endpoints of an edge are the base of a Gluetag. As Gluetags, an example shown in Figure \ref{fig:Gluetag}, can vary in shape and size, this thesis proposes Gluetags in the shape of a trapezoid as it brings a few advantages. 
 
-\section{Calculate Gluetag}
+Two triangles define a trapezoid. Therefore algorithms that are applied to triangles of the mesh can be applied to the Gluetags without altering them. As the top of the trapezoid is smaller than the base, Gluetags that are placed next to each other are less likely to overlap compared to rectangular Gluetags. The algorithm calculates the height of the Gluetag depending on the targeted facet so that it takes up a maximum of 20 percent of the targeted facets space. The height of the Gluetag is an experimental value, as well as the shape, to provide users enough extra space, while not shrinking the solution space further than necessary.
 
-The second step in the pipleline shown in Figure \ref{fig:overview} is to calculate gluetags. For each edge of the dual graph a gluetag can be calculated for both facets connected by this edge. The vertices of an edge are the base of a gluetag. As gluetags can vary in shape and size, this thesis proposes gluetags in the shape of a trapezoid as it brings a few advantages. 
+Gluetags are calculated once after the dual graph was calculated, as the edges they are linked to do not change. The algorithm chooses the Gluetags based on the calculated minimum spanning tree.
 
-A trapezoid is defined by two triangles, therefore algorithms that are applied to triangles of the mesh can be applied to the gluetags without altering them. As the top of the trapezoid is smaller than the base, gluetags that are placed next to each other are less likely to overlap compared to rectangular gluetags. The height of the gluetags is calculated from the facet it targets, so that it takes up a maximum of 20 percent of the targeted facets space.
+\section{Calculating a Minimum Spanning Tree}
+\label{sec:calcmsp}
+In the first step, as shown in Figure \ref{fig:overview}, the algorithm calculates a minimum spanning tree from the dual graph. This is done using Kruskal's Algorithm~\cite{kruskal1956shortest} to find the shortest spanning subtree.
 
-Gluetags are calculated only once after the dual graph was calculated, as the edges they are linked to do not change. Instead the gluetags will be chosen when deciding a minimum spanning tree. 
+For this, the edges are sorted by their weight in ascending order. Then the algorithm iterates through all edges and adds each edge to an adjacency list. This list is used to check if the recently added edge causes the graph to be cyclic. If this is the case, the edge last added is removed and inserted into a list containing the cut edges. Otherwise, the edge is added to a list containing the bend edges. Furthermore, for each iteration, we save the information which face is discovered, so we can assure that the graph is a connected graph besides being acyclic, which is necessary. As a result, the adjacency list defines a minimum spanning tree.
 
-\section{Calculate Minimum Spanning Tree}
+To be able to calculate different minimum spanning trees, the weights of an edge is changed on each iteration, which is part of the simulated annealing process. Fur further details see chapter \ref{chap:Implementation}.
 
-Entering the simulated annealing loop the first step is to calculate the minimum spanning tree of the dual graph, as shown in Figure \ref{fig:overview}. For this the edges are sorted by their weight in an ascending order. Then we need to iterate through all edges and add each edge to an adjacence list. This list can be used to check if the recently added edge causes the graph to be cyclic. If this is the case, the last edge will be removed and added to a list containing the cut edges, if the graph remained acyclic the edge is added to a list containing the bend edges. 
+\section{Unfolding the 3D Mesh using the Minimum Spanning Tree of its Dual Graph}
+\label{sec:unfold}
 
-Furthermore for each iteration we save the information which face has been discovered, so we can assure that the graph is a connected graph as well as acyclic, which is necessary. As a result the adjacence list defines a minimum spanning tree.
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figunfold3d"}
+  \caption{3D Mesh of a box.}
+	\label{fig:unfold3d}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figunfold2d"}
+	\caption{Unfolding of the first two triangles.}
+	\label{fig:unfold2d}
+\end{subfigure}
+\caption{3D model of a box and the unfolding of the first two triangles.}
+\label{fig:unfoldexample}
+\end{figure}
 
-\section{Unfolding}
-
-Following the calculation of the minimum spanning tree, as shown in Figure \ref{fig:overview}, an unfolding of the mesh is calculated. The adjacence list of the last step can be used to determine the order of the faces for unfolding.
+Following the calculation of the minimum spanning tree, as shown in Figure \ref{fig:overview}, an unfolding of the mesh is calculated. The adjacency list of the last step can be used to determine the order of the faces for unfolding.
 
 Let $T = (A,B,C)$ be a triangle defined by three vertices $A(x_A, y_A, z_A)$, $B(x_B, y_B, z_B)$ and $C(x_C, y_C, z_C)$, where $x_N$, $y_N$ and $z_N$, with $N \in \{A,B,C\}$, are the coordinates of each vertex. Let $T_p = (a, b, c)$ be the planar representation of the given triangle, defined by $a(x_a, y_a)$, $b(x_b, y_b)$ and $c(x_c, y_c)$, where again $x_n$, $y_n$, with $n \in \{a,b,c\}$, are the defining coordinates of each vertex.
 
-The first face is treated as a special case, as the later triangles depend on the position of the vertices of the first triangle. Let $A$ be the vertices of the first triangle, it can be set to $(0,0)$ disregarding the position of $A$ as it is not relevant. To calculate $b$ we need to calculate the distance $\overline{AB}$ as it is equal to $\overline{ab}$, wich can be calculated using formula \ref{eq:pytha}.
+The first face, which is on index zero of the adjacency list, the green triangle $(A,B,C)$ in figure \ref{fig:unfoldexample}, that is unfolded is treated as a particular case, as the later triangles depend on the position of the vertices of the first triangle. Let $A$ be the vertices of the first triangle, and it is set to $(0,0)$ disregarding the position of $A$ as it is not relevant. The algorithm calculates $b$ by calculating the distance $\overline{AB}$ as it is equal to $\overline{ab}$, which can be calculated as $\overline{AB} = \overline{ab} = \sqrt{(x_A - x_B)^2 + (y_A - y_B)^2 + (z_A - z_B)^2}$.
 
-\begin{equation}
-\label{eq:pytha}
-\overline{AB} = \overline{ab} = \sqrt{(x_A - x_B)^2 + (y_A - y_B)^2 + (z_A - z_B)^2}
-\end{equation}
-
-Now $b$ can be set to $(\overline{AB}, 0)$, with $y$ being set to $0$ as the original orientation of the triangle does not need to be retained. The last vertices $c$ is again a special case, as two positions are possible, which will be important for all vertices except the first. Two solutions are possible for $c$, as it can be placed on either side of the vector $(a-b)$. 
-
-\begin{equation}
-\label{eq:cone}
-\begin{split}
-c_x &= a_x + d(b_x - a_x) - s(b_y - a_y)\\
-c_y &= a_y + d(b_y - a_y) + s(b_x - a_x)
-\end{split}
-\end{equation}
-
-$s$ and $d$ are defined by the formulas \ref{eq:s}.
+Now $b$ can be set to $(\overline{AB}, 0)$, with $y$ being set to $0$ as the original orientation of the triangle does not need to be retained. The last vertices $c$ is again a particular case. Two solutions are possible for $c$, as it can be placed on either side of the edge $(a-b)$. 
 
 \begin{align}
-\label{eq:s}
+\label{eq:cone}
 \begin{split}
-s &= \frac{\|(B - A)\times(C - A)\|}{\overline{AB}^2}\\
-d &= \frac{(B-A)\cdot(C-A)}{\overline{AB}^2}
+s &= \frac{\|(B - A)\times(C - A)\|}{(\overline{AB})^2}\\
+d &= \frac{(B-A)\cdot(C-A)}{(\overline{AB})^2}\\
+c_x &= a_x + d(b_x - a_x) - s(b_y - a_y)\\
+c_y &= a_y + d(b_y - a_y) + s(b_x - a_x)
 \end{split}
 \end{align}
 
@@ -288,145 +356,467 @@ c_y &= a_y + d(b_y - a_y) - s(b_x - a_x)
 \end{split}
 \end{equation}
 
-For the first triangle any of the two solutions can be chosen. For all other triangles a check needs to be performed, so that $c$ is not on the same side as it is for the previous triangle.
+For the first triangle, either $c_1$ or $c_2$ can be chosen, as it only changes in which direction the other vertices are unfolded. For all other triangles a check needs to be performed, so that $c$ is not on the same side as it is for the previous triangle.
 
-
-Now let $c_{prev} = (c_{x_{prev}},c_{y_{prev}})$ be the vertex of the previous triangle that it does not share with the current triangle. To calculate the side on which the vertex $c$ has to be put can be determined by the formula \ref{eq:side}.
+Now let $c_{prev} = (a_{x_{prev}},a_{y_{prev}})$ be the vertex of the previous triangle that it does not share with the current triangle, as seen in figure \ref{fig:unfoldexample}. To calculate the side on which the vertex $c$ has to be put can be determined by the formula \ref{eq:side}.
 
 \begin{equation}
 \label{eq:side}
 f = (c_x - a_x) * (b_y - a_y) - (c_y - a_y) * (b_x - a_x)
 \end{equation}
 
-In theory these formulas can yield three different results $f < 0$ for one side, $f > 0$ for the other side and $f = 0$ if it is on the line. But as we do not have any degenerate triangles in our mesh there are two cases. $f$ needs to be calculated for $c_{prev}$ and for the two solutions of the previous formula $c_1$ and $c_2$. Now we are left with two possibilities, if $f_{prev} < 0$ and $f_{c_1} > 0$ or if $f_{prev} > 0$ and $f_{c_1} < 0$ then we set $c = c_1$, otherwise $c = c_2$.
+In theory these formulas can yield three different results $f < 0$ for one side, $f > 0$ for the other side and $f = 0$ if it is on the line. But as we do not have any degenerate triangles in our mesh there are two cases. $f$ needs to be calculated for $c_{prev}$ and for the two solutions of the previous formula $c_1$ and $c_2$. Now we are left with two possibilities, if $f_{prev} < 0$ and $f_{c_1} > 0$ or if $f_{prev} > 0$ and $f_{c_1} < 0$ then we set $c = c_1$, otherwise $c = c_2$. In case of figure \ref{fig:unfoldexample} the previous vertices that is not shared is left of the shared edge, therefore the vertices $c$ is set on the right side.
 
-Unfolding of gluetags works in an analouge way, as the gluetag consists of two triangles, therefore it is left to the reader as an excercise.
+The unfolding of Gluetags works in the same way, as the Gluetag consists of two triangles.
 
-\section{Overlap Detection}
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figoverlaptriangles"}
+  \caption{Two triangles $T = (A,B,C)$ and $S = (P,Q,R)$ overlapping each other.}
+	\label{fig:figtrioverlap}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figlineintersection"}
+	\caption{$\overline{AB}$ and $\overline{PQ}$ intersecting each other.}
+	\label{fig:figlineintersection}
+\end{subfigure}
+\caption{Overlaps of triangles resulting in different overlapping areas.}
+\label{fig:overlapexample}
+\end{figure}
 
-The last step of the simulated annealing loop, as shown in Figure \ref{fig:overview}, is to determine the quality of the unfolding. As a meassurement for the quality simply the sum of the overlapping areas is used. Overlaps can happen between triangles, triangles and gluetags or between gluetags. The detection is a two step process, first only the triangles are checked if they overlap each other. In a second step, if no triangles overlap each other, the gluetags are checked if they overlap each other or a triangle.
+\section{Detecting Overlaps}
+\label{sec:overlaps}
+The last step of the simulated annealing loop, as shown in figure \ref{fig:overview}, is to determine the quality of the unfolding. As a measurement for the quality, merely the sum of the overlapping areas is used. Overlaps, as seen in Figure \ref{fig:overlap}, can happen between triangles, triangles and Gluetags or between Gluetags. 
 
-An overlap of two triangles can occur, if any of the edges of the triangles intersect with each other, or if one or multiple points of one triangle are within the other triangle. Let $T = (a,b,c)$ be a triangle defined by the vertices $a = (x_a, y_a)$, $b = (x_b, y_b)$ and $c = (x_c, y_c)$ and a vertices $v = (x_v, y_v)$ of another triangle.
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+    \includestandalone[width=\textwidth]{"graphics/figoverlap"}
+  \caption{Two triangles overlap each other, resulting in a triangle describing the red overlap area.}
+    \label{fig:overlap1}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+    \includestandalone[width=\textwidth]{"graphics/figoverlap2"}
+    \caption{Two triangles overlap each other, resulting in a polygon describing the red overlap area.}
+    \label{fig:overlap2}
+\end{subfigure}
+\caption{Overlaps of triangles resulting in different overlapping areas.}
+\label{fig:overlap}
+\end{figure}
 
-\begin{equation}
-\label{eq:sign}
-sign(p, a, b) = (x_p - x_b) * (y_a - y_b) - (x_a - x_b) * (y_p - y_b);
-\end{equation}
+The detection is a two-step process. First, only the triangles are checked if they overlap each other. In the second step, if no triangles overlap each other, the Gluetags are checked if they overlap each other or a triangle. The algorithm checks if any of their lines intersect with each other to find out if triangles overlap.
 
-The function $sign$, see formula \ref{eq:sign}, is then called for each edge-pair of the triangle $sign(v, a, b)$, $sign(v, b, c)$ and $sign(v, c, a)$. The vertices $v$ is inside the triangle if all results are higher than zero or all results are lower than zero, otherwise the vertices is outside of the triangle.
-Any vertices that is within the other triangle is saved into a list, as they are needed to calculate the overlapping area.
+Let $T = (A,B,C)$ and $S = (P,Q,R)$ be two triangles in figure \ref{fig:overlapexample} that might be overlapping each other, defined by their points $A$, $B$, $C$, $P$, $Q$, $R$. Therefore we check the lines $\overline{AB}$ and $\overline{PQ}$, as seen in figure \ref{fig:figlineintersection}, if they intersect with each other. For two line segments, we define a general case for overlaps and a special case. In general the lines intersect only if the points $(A,B,P)$ (dotted green line) and $(A,B,Q)$ (solid green line) have different orientations as well as $(P,Q,A)$ (dotted red line) and $(P,Q,B)$ (solid red line) have different orientations. In figure \ref{fig:overlapexample}, it can be seen that the green lines have different orientations and red lines too. Therefore the lines intersect, which means that the triangles overlap each other. This test is repeated for every pair of lines.
 
-Let an edge of a triangle be $e_1 = (p_1, p_2)$ and a edge of the other triangle be $e_2 = (p_3, p_4)$. We can calculate the intersection point between the edges of the triangles if the determinant $det(p_1, p_2, p_3, p_4) \neq 0$, see formula \ref{eq:deter}.
+Figure \ref{fig:nooverlap} shows two triangles that do not intersect each other, as $(A,B,Q)$ and $(A,B,P)$ have different orientations, but $(P,Q,A)$ and $(P,Q,B)$ have the same orientation, therefore the triangles do not intersect.
 
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/fignooverlaptriangles"}
+  \caption{Two triangles $T = (A,B,C)$ and $S = (P,Q,R)$ not overlapping each other.}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/fignolineintersection"}
+	\caption{$\overline{AB}$ and $\overline{PQ}$ not intersecting each other.}
+\end{subfigure}
+\caption{Overlaps of triangles resulting in different overlapping areas.}
+\label{fig:nooverlap}
+\end{figure}
 
-\begin{align}
-\begin{split}
-a_1 &= y_{p_2} - y_{p_1}\\
-b_1 &= x_{p_1} - x_{p_2}\\
-c_1 &= (y_{p_2} - y_{p_1}) * x_{p_1} + (x_{p_1} - x_{p_2}) * y_{p_1}\\
-a_2 &= y_{p_4} - y_{p_3}\\
-b_2 &= x_{p_3} - x_{p_4}\\
-c_2 &= (y_{p_4} - y_{p_3}) * x_{p_3} + (x_{p_3} - x_{p_4}) * y_{p_3}\\
-det(p_1, p_2, p_3, p_4) &= (a_1*b_2 - a_2*b_1)
-\end{split}
-\label{eq:deter}
-\end{align}
+For the special case, the lines intersect, if all four point-triplets are co-linear and the x-projections of $(A,B)$ and $(P,Q)$ intersect and the y-projections of $(A,B)$ and $(P,Q)$ intersect as well, which can be seen in figure \ref{fig:colinearoverlap}.
 
-Then the determinant can be used to calculate the point of the intersection, see formula \ref{eq:ipoint}. Therefore if the determinant is $0$ then no intersection occurrs, otherwise we add the intersection point to the list.
+The proposed solution calculates for every pair of lines of the two triangles if they intersect. If at least one pair of lines intersect with each other, it means that the triangles intersect. The overlap detection does not need to be done with the child of another triangle as they share an edge and therefore cannot overlap, as the child is unfolded onto the other side of the shared edge, as explained in section \ref{sec:unfold}.
 
-\begin{equation}
-\label{eq:ipoint}
-point_{intersection} = (\frac{(b_2*c_1 - b_1*c_2)}{det(p_1, p_2, p_3)},\frac{(a_1*c_2 - a_2*c_1)}{det(p_1, p_2, p_3)})
-\end{equation}
+\begin{figure}
+\centering
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figcolineartri"}
+  \caption{Two triangles $T = (A,B,C)$ and $S = (P,Q,R)$ overlapping each other.}
+\end{subfigure}%
+\hspace{.1\textwidth}
+\begin{subfigure}[t]{.4\textwidth}
+	\includestandalone[width=\textwidth]{"graphics/figcolinearline"}
+	\caption{$\overline{AB}$ and $\overline{PQ}$ are colinear and intersect each other.}
+\end{subfigure}
+\caption{Two triangles overlapping each other, due to colinear lines.}
+\label{fig:colinearoverlap}
+\end{figure}
 
-This list of points is then ordered counter clockwise and the overlapping area can be calculated using the shoelace formula, which is left to the reader as an exercise.
+\begin{algorithm}
+\KwData{Clipping Polygon, Subject Polygon}
+\KwResult{List of vertices of the intersection polygon}
+List output = Subject Polygon Vertices\;
+\While{Edge clipedge in Clipping Polygon}
+{
+List input = output\;
+clear output\;
+Point S = input.last()\;
+\While{Point E in inputlist}
+{
+\eIf{E inside clipedge}
+{
+\If{S not inside clipedge}
+{
+output.add(ComputeIntersection(S,E,clipedge))\;
+}
+add E to output\;
+}
+{
+\If{S inside clipedge}
+{
+output.add(ComputeIntersection(S,E,clipedge))\;
+}
+S = E\;
+}
+}
+}
+return output\;
+\caption{Sutherland-Hodgman pseudo algorithm. Adapted from \cite{wiki:polygonclip}.}
+\label{alg:polyclip}
+\end{algorithm}
+
+After detecting that an overlap occurs, the algorithm calculates the area of the polygon, which describes the overlap, to determine quality of the current configuration, the overlapping area is calculated using the Sutherland-Hodgman Clipping algorithm~\cite{sutherland1974reentrant}. This algorithm finds the vertices of the intersection polygon created by the two triangles. The overlap can be described as a polygon, and it can be either be defined at least as a triangle, see Figure \ref{fig:overlap1}, or a polygon with a degree, see Figure \ref{fig:overlap2}, depending on how the triangles overlap each other. Algorithm \ref{alg:polyclip} shows the pseudo-code for the Sutherland-Hodgman Clipping algorithm, where the input is two polygons, in our case, the two triangles that intersect. The vertices list resulting from this algorithm can be used to calculate the area using the shoelace formula~\cite{vslapak2017automated} $Area = \frac{1}{2} \left| \sum_{i=0}^{P-1} x_iy_{i+1} + x_ny_1 - \sum_{i=1}^{n-1} x_{i+1}y_i - x_1y_n \right|$ where $x_i$ and $y_i$ are the coordinates of the $i$-th point in P. It is a mathematical algorithm to calculate the area of a simple polygon, that is described by ordered points $P$ in a plane.
 
 \chapter{Implementation}
 \label{chap:Implementation}
+This chapter specifies on which computer system the proposed approach is developed as well as the libraries that are used. Further, the implementation details of the simulated annealing process are explained.
 
 \section{Specifications}
+The system is implemented on a laptop with an Intel Core i7 CPU (3.3 GHz, 4MB Cache) and 8GB RAM. The source code is written in C++17, and the OpenGL 4.5 library is used for the visualisation of the algorithms step as well as the results. The CGAL 4.13 library is used to read in off-Files and to provide the underlying data structure. The Graphical User Interface (GUI) is developed using the Qt Library 5.13. CMake 3.14 is used to manage the build process, and it compiles on an Ubuntu 18.04.02 LTS operating system.
 
-The prototype system is implemented on an Laptop with an Intel Core i7 CPU (3.3 GHz, 4MB Cache) and 8GB RAM. The source code is written in C++17. The OpenGL Library library is used for the visualization of the algorithms step as well as the results. The CGAL library is used to read in off-Files as well as the basic datastructure. The Graphical User Interface (GUI) is developed using the Qt Library. CMake is used to manage the build process and it is compiled on an Ubuntu 18.04.02 LTS operating system.
-
-\section{Simmulated Annealing}
-
-The four important ingredients to use a simulated annealing process, explained in section \ref{sec:sa}, are defined for the following way.
+\section{Simulated Annealing}
+\label{sec:annealing}
+The four important components required to use a simulated annealing process explained in section \ref{sec:sa}, are defined as:
 \begin{itemize}
-	\item \textbf{System Description} The system configuration is described as a list of edges that will be bent and the complementary list of edges that are cut. Furthermore the facets attached to the edges, as well as the gluetags attached to some of the cut edges.
-	\item \textbf{Random Move} To alter the configuration randomly, a random edge of the full eedge list has its weight changed, therefore the minimum spanning tree that is calculated changes.
-	\item \textbf{Quantitive Function} To evaluate the system configuration the sum of the overlapping areas is used.
-	\item \textbf{Annealing Schedule} The temperature is set to 50.000 as a standard, but can be configured and the cooling rate is set to 1.0, therefore the temperature equals the amount of iterations.
+    \item \textbf{System Description} The system configuration $P$ is described as a list of edges that will be bent and the complementary list of edges that are cut. Furthermore, the facets attached to the edges, as well as the Gluetags attached to some of the cut edges.
+    \item \textbf{Random Move} To alter the configuration $P$ randomly to configuration $P'$, a random edge of the full edge list has its weight changed, therefore the minimum spanning tree that is calculated changes.
+    \item \textbf{Quantitative Function} To evaluate the system configuration $E(P)$, the sum of the overlapping areas is used.
+    \item \textbf{Annealing Schedule} The temperature $T$ is set to 50.000 as a standard but can be configured, and the cooling rate is set to 1.0. Therefore the temperature equals the number of iterations.
 \end{itemize}
 
-After reading in the mesh into the CGAL Polyhedron\_3 datastructure.
+After reading in the mesh into the Polyhedron\_3 data structure preparations are necessary to be able to apply simulated annealing. First as described in chapter \ref{chap:methodology}, the algorithm calculates a dual graph and Gluetags, for each edge of the dual graph, as each edge could be a possible cut edge. Furthermore, it sets the temperature, and the cooling rate to 100.000 and 1.0 per iteration, as experimental values, defining the run-time of the annealing process.
+
+The algorithm assigns each edge of the dual graph a random weight and then sorts the list. Then it calculates an initial spanning tree using the edge list. Glue tags are calculated for all edges that will be cut, which are the edges not present in the minimum spanning tree. The algorithm iterates through all pre-calculated Gluetags and chooses a Gluetag if they fulfil the following conditions:
 
 \begin{itemize}
-	\item simmulated annealing is the process that combines previous explained points
-	\item a temperature is defined that will be lowered in each iteration until the minimum temperature is reached
-	\item before iterating a starting state is calculated by random, the energy of the state should be minimized in the process, as the energy is the sum of the overlap area
-	\item first a random neighborhood state is calculated for the state s
-	\item then the faces are unfolded and their overlaps are calculated
-	\item if no faces overlap, the gluetags are unfolded and the overlaps are calculated
-	\item anyways the energy of the overlaps is calculated	
-	\item if it is smaller than the previous, it is used for future calculations, else the old state will be used
-	\item but for a small chance ;INSERT FORMULA;, a worse move is taken to lessen the probability of getting stuck in a local minimum
-	\item if the energy of the state is zero, an unfolding was found and the loop ends
+    \item The edge the Gluetag is attached to is a cut edge
+    \item The opposite Gluetag was not already added to this edge
+    \item The number of cut edges, that have no Gluetag yet is higher than 1, or neither the source face for the Gluetag nor the face the Gluetag targets has a Gluetag yet
 \end{itemize}
 
-\chapter{Results and Evaluation}
+The algorithm discards all Gluetags that do not fulfil these conditions, as they are not needed for this unfolding. These conditions ensure that the reconstructed model will be stable when glued together without faces being loose, but they also minimise the number of Gluetags to reduce time and effort on reconstruction.
+
+After these steps, the algorithm starts unfolding the triangles and the Gluetags alike, as seen in figure \ref{fig:concept}. It calculates the area of triangle-triangle overlaps, Gluetag-triangle overlaps, and Gluetag-Gluetag overlaps. This approach proposes to weigh triangle-triangle overlaps with a factor of 100, so the algorithm prefers to unfold triangles without overlaps first and afterwards solving Gluetag related overlaps. This step is used to optimise the calculation time as well as to influence the evolving graph. This prioritisation is applied since a configuration that does not have any Gluetag overlaps, but still has triangle overlaps is less optimal than the other way around. If no triangle-triangle overlaps occur in a configuration and only Gluetags overlap are left, these have a chance to be resolved for example by changing which Gluetags are used or by post-processing the size of the Gluetags.
+
+\begin{figure}
+\includestandalone[width=\textwidth]{"graphics/concept"}
+\caption{Overview of the simulated annealing process.}
+\label{fig:concept}
+\end{figure}
+
+The calculated area is then used as the energy of the graph, which we try to minimise in this process. This initial configuration is saved as the best configuration $P$, as seen in figure \ref{fig:concept}. For each following iteration before these steps are repeated. A random edge will be chosen and assigned a new random weight, which possibly changes the next calculated minimum spanning tree and generates the configuration $P'$.
+
+First, the algorithm unfolds the triangles and evaluates the energy of the graph based on the sum of the overlapping area. If and only if the triangles are unfolded without overlaps, it unfolds the Gluetags next. This approach saves computation time, as if the triangles do not unfold without overlaps, no solution is found.
+
+If the energy of the new configuration $P'$ is smaller or equal to the energy of the previous configuration $P$, $P$ will be set to $P'$. If not the configuration is treated probabilistically. If a uniformly distributed random number is smaller than $P(\Delta E) = 1 - e^{-(T + E)/(T_{max})}$ the new configuration will be accepted as the best configuration. This condition should ensure that the algorithm does not get stuck in a local minimum, which would mean that it would not find an optimal global solution.
+
+At the end of every iteration, if a new best configuration was found the new configuration will be visualised using OpenGL, which means that it only changes and impacts calculation time of each iteration if a better configuration was found. 
+
+The annealing process ends if it does not find any overlaps in configuration $P'$ or if the temperature reaches the minimum of $0$, which means that it ends without finding a solution for this problem. Advantages and disadvantages using this random walk approach will be discussed in section \ref{sec:limitations}.
+
+\section{Parameterisation of the System}
+The algorithm is adjustable by changing multiple parameters without changing the approach itself.
+
+\textbf{Gluetag size} is the most influential parameter that can be changed. Depending on the size of the Gluetag, the solution space is widened or made smaller if the Gluetags area increases. The default value is for it to be one fifth of the height of the face it targets.
+
+\textbf{Probabilistic treatment of worse iterations} can also be changed to either favour taking a worse iteration more or less often. If the probability is too high to take a worse iteration, the algorithm will not find a solution and might not even get close to a solution if the probability is too low, the chance of getting stuck in local minimums increases.
+
+\textbf{Number of iteration} can be controlled by changing the cooling down rate as well as the maximum and minimum temperature, therefore changing the time the algorithm has to find a solution. The default number of iterations is 100.000.
+
+By tuning these parameters, the results can be influenced to get better performance or make finding an even unfolding possible.
+
+\chapter{Results and Evaluation of the System}
 \label{chap:reseval}
+In this chapter experimental results are presented and their specifics are discussed. A quantitative performance analysis is also presented, analysing the time it takes to unfold various models. Furthermore, the limitations of the suggested approach are presented.
 
 \section{Results}
+The following figures show the resulting unfolding of the implementation. The Gluetags are visualised in the 3D-Model and the unfolding, furthermore, the minimum spanning tree (green lines) and cut-edges (red lines) are visualised in the 3D-Model.
 
-\begin{itemize}
-	\item pictures of unfoldings vs. original meshes
-\end{itemize}
+Figure \ref{fig:sqrt3} and \ref{fig:loop} are sphere-like objects with a low count of faces, which is optimal for the proposed algorithm, as a solution can be found fast. For figure \ref{fig:sqrt3} three different unfoldings were generated, each having a different shape while it was reached in a different amount of time. This is due to the non-determinism of the algorithm, as well as the random walk when searching an unfolding.
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_sqrt3"}
+    \caption{3D model of a star.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3"}
+    \caption{Unfolding of the model in 31 seconds.}
+  \end{subfigure}
+  \vskip\baselineskip
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3_18"}
+    \caption{Unfolding of the model in 18 seconds.}
+  \end{subfigure}
+    \quad
+    \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_sqrt3_77"}
+    \caption{Unfolding of the model in 77 seconds.}
+  \end{subfigure}
+  
+  \caption{3D Model with 72 faces and three possible unfoldings.}
+  \label{fig:sqrt3}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_loop"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_loop"}
+  \end{subfigure}
+  
+  \caption{3D Model of a star with 96 faces and the corresponding unfolding.}
+  \label{fig:loop}
+\end{figure}
+
+Contrary to the previous two figures figure \ref{fig:pnsplit} and \ref{fig:butterfly} are star-like objects with \ref{fig:pnsplit} having a higher amount of faces. Both of them are harder to solve as they lose their spherical properties, which make unfolding easier. Figure \ref{fig:butterfly} also shows the stretching of the unfolding that happens due to the structure of the model, which can also be observed in figure \ref{fig:horse}. It has very steep angles, which increases the likelihood to produce overlapping faces when unfolded more compact. This makes it harder to compute an unfolding, as the random walk takes more time to stretch out the unfolding.
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_pnsplit"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_pnsplit"}
+  \end{subfigure}
+  
+  \caption{3D Model of a star with 216 faces and the corresponding unfolding.}
+  \label{fig:pnsplit}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_butterfly"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_butterfly"}
+  \end{subfigure}
+  
+  \caption{3D Model of a star with 96 faces and the corresponding unfolding.}
+  \label{fig:butterfly}
+\end{figure}
+
+\newpage
+
+Figures \ref{fig:tiger} to \ref{fig:moneybox392} are organic-like meshes with an increasing face count. The average time to find an unfolding increases, as can be seen in table \ref{tbl:performance}, but still results are produced. Most of the higher face-count models produce stretched-out unfoldings, as the Gluetags make compact solutions less likely due to their need for space between faces.
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_tiger"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_tiger"}
+  \end{subfigure}
+  
+  \caption{3D Model of a tiger head with 112 faces and the corresponding unfolding.}
+  \label{fig:tiger}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_dragon"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_dragon"}
+  \end{subfigure}
+  
+  \caption{3D Model of a dragon with 344 faces and the corresponding unfolding.}
+  \label{fig:dragon}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_horse"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_horse"}
+  \end{subfigure}
+  
+  \caption{3D Model of a horse with 312 faces and the corresponding unfolding.}
+  \label{fig:horse}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_hand"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_hand"}
+  \end{subfigure}
+  
+  \caption{3D Model of a hand with 336 faces and the corresponding unfolding.}
+  \label{fig:hand}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_armadillo"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_armadillo"}
+  \end{subfigure}
+  
+  \caption{3D Model of an armadillo with 386 faces and the corresponding unfolding.}
+  \label{fig:armadillo}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_pooh"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_pooh"}
+  \end{subfigure}
+  
+  \caption{3D Model of Winnie Pooh with 392 faces and the corresponding unfolding.}
+  \label{fig:pooh}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_moneybox392"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_moneybox392"}
+  \end{subfigure}
+  
+  \caption{3D Model of an cat with 392 faces and the corresponding unfolding.}
+  \label{fig:moneybox392}
+\end{figure}
 
 \section{Performance}
+\label{sec:performance}
 
-\begin{itemize}
-	\item TABLE that evaluates the performance for different meshes
-	\item pictures of unfoldings vs. original meshes
-	\item graph depicting performance vs. mesh size
-	\item Performance degrades the bigger the mesh gets
-	\item optimal performance is below 200 faces
-	\item Over 700 faces solution space gets so small and random walk is unlikely to find an unfolding
-\end{itemize}
+To evaluate the algorithm and its implementation experiments were run with a variety of models. The results in table \ref{tbl:performance} were observed using a Gluetag that is defined as a trapezoid with the base being the edge of the to-glue triangles and the top being one half of the base with a maximum height of one-fifth of the size of the triangle being targeted by the Gluetag. The default parameters have been used for these experiments.
+
+\begingroup
+\centering
+\begin{tabular}{|ll|rrr|r|r|}
+\hline
+& & & & &  Time to & Time to \\
+Model & & Vertices & Faces & Edges & Unfold (s) & Bruteforce (s) \\
+\hline
+Octa & & 6 & 8 & 12 & 0 & 0 \\
+Icosa & & 12& 20& 30 & 0 & 0 \\
+Star & & 14& 24& 36 & 8 & 19 \\
+%Sphere-42 & & 42 & - & - \\
+Star-Sqrt3 & (Fig. \ref{fig:sqrt3}) & 38& 72& 108 & 31 & $>$60000 \\
+Star-4Split & & 50& 96& 144 & 435 & -\\
+Star-Loop & (Fig. \ref{fig:loop}) & 50& 96& 144 & 137 & -\\
+Star-Butterfly & (Fig. \ref{fig:butterfly}) & 50& 96& 144 & 1047 & -\\
+Tiger & (Fig. \ref{fig:tiger}) & 58& 112& 168 & 65 & -\\
+Kitten & & 64& 122& 184 & 48 &- \\
+Moneybox-128 & & 64& 128& 190 & 160 &- \\
+Bunny-128 & & 66& 128& 192 & 103 &- \\
+%Sphere-162 & & 162 & - &- \\
+Moneybox-196 & & 98& 196& 292 & 324  &-\\
+%Star-9Split & & 216 & -  &-\\
+Star-PNsplit & (Fig. \ref{fig:pnsplit}) & 110& 216& 324 & 625 & -\\
+Snail-286 & & 145& 286& 429 & 1315 & -\\
+Horse & (Fig. \ref{fig:horse}) & 152& 302& 452 & 946  &-\\
+Hand & (Fig. \ref{fig:hand}) & 170& 336& 504 & 1377  &-\\
+Dragon & (Fig. \ref{fig:dragon}) & 172& 344& 514 & 1292  &-\\
+Bunny-348 & & 176& 348& 522 & 976  &-\\
+Luigi & & 180& 356& 534 & 686  &-\\
+Armadillo & (Fig. \ref{fig:armadillo}) & 195& 386& 579 & 730  &-\\
+Pooh & (Fig. \ref{fig:pooh}) & 198& 392& 588 & 957 &- \\
+Moneybox-392 & (Fig. \ref{fig:moneybox392}) & 196& 392& 586 & 2200  &-\\
+Meister & (Fig. \ref{fig:meister_failed}) & 200& 394& 592 & 3900 & - \\
+%Seagull & & 462 & -  &-\\
+%Knot & & 480 & -  &-\\
+%Chess & & 496 & -  &-\\
+Gear & & 256& 508& 762 & - &- \\
+%Bumpy & & 528 & -  &-\\
+%Snail-574 & & 574 & -  &-\\
+Cat & & 353& 702& 1053 & -  &-\\
+Fish & & 477& 950& 1425 & -  &-\\
+Mannequin & & 690& 1376& 2064 & -  &-\\
+\hline
+\end{tabular}
+\captionof{table}{Table showing the unfolding performance for different models}\label{tbl:performance}
+\endgroup
+
+Performance is not only influenced by the number of faces, but also by the size of Gluetags. The bigger the Gluetags are, the more iterations are necessary to find an unfolding, or an unfolding might no longer be possible. Due to the random walk, the time to find an unfolding is not depending on the number of faces. Table \ref{tbl:performance} shows that not only the number of faces influence the time it takes to find a solution, but it also depends on how and which edges are changed. For models marked with a - in the table \ref{tbl:performance} no unfolding was found within 100000 iterations. Using a bruteforce algorithm solutions for small models is possible, but as the number of faces grows the calculation using bruteforce is not feasible anymore.
+
 
 \section{Limitations}
+\label{sec:limitations}
 
-\begin{itemize}
-	\item random walk in annealing can be problematic, especially for big and complex meshes - sometimes finds fast solution, sometimes doesn't, the bigger the mesh the unliklier a global optimum with an energy of 0 can be found
-	\item bigger meshes need far more iterations and computation time in each iteration -> more sophisticated algorithm needed to scale better
-	\item amount of gluetags cannot be calculated in advance - unfolding decides how many gluetags are needed, same unfolding can have a different amount of gluetags depending on their position, bruteforcing of gluetags takes too long; insert formula and example
-\end{itemize}
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/model_meister"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_meister_failed"}
+  \end{subfigure}
+  
+  \caption{3D Model of the Meister with 400 faces with the failed unfolding after 100000 iterations. Overlapping Gluetags are coloured red.}
+  \label{fig:meister_failed}
+\end{figure}
 
-\section{Parameterization}
+\begin{figure}
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_meister"}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.475\textwidth}
+    \includegraphics[width=\textwidth]{"graphics/unfoldings/unfold_meister_comparison"}
+  \end{subfigure}
+  
+  \caption{(left) Unfolding of the proposed approach. (right) Unfolding with the algorithm proposed by Takahashi et al.\cite{takahashi2011optimized}}
+  \label{fig:meister_comparison}
+\end{figure}
 
-\begin{itemize}
-	\item tune parameters
-	\item annealing vs bruteforce
-	\item mesh size influences time
-\end{itemize}
+Multiple factors limit the suggested approach. The target of the approach is to solve the problem only considering the global optimum, disregarding local overlaps. Therefore the latter are hard to resolve, as they are not explicitly targeted.
+
+Another limitation is that the Gluetags that are necessary cannot be calculated beforehand. Neither the amount nor the position of the Gluetags can be calculated, without using a heuristic approach or brute force, whereas brute force is not feasible as the performance even with small models is abysmal. This can be seen in the performance table \ref{tbl:performance}, where even for small models the amount of time necessary for a brute force algorithm to find a solution is too high even for small models. 
+
+Another limitation that does not have only negative consequences is the random-walk approach used in the simulated annealing. A random edge is chosen and changed in each iteration, which might not change the minimum spanning tree that is generated. It can happen that an edge that is causing an overlap does not change for many iterations. Figure \ref{fig:meister_failed} shows an unfolding proposed after 100,000 iterations that failed to generate an overlap-free solution. When the iteration cap was lifted, an unfolding could be found, as seen in figure \ref{fig:meister_comparison}, after around 130,000 iterations. The figure also shows a comparison between the approach suggested in this thesis and the algorithm proposed by Takahashi et al.\cite{takahashi2011optimized}. The unfolding of their approach can be more since no Gluetags are restricting the space used.
 
 \chapter{Conclusion}
 \label{chap:conclusion}
+In this chapter a short summary of the results is provided and future work is presented.
 
 \section{Summary}
-
-\begin{itemize}
-	\item ???? overall it works fast for smaller meshes, but has its limitations as discussed before
-\end{itemize}
+Calculating an unfolding using a minimum spanning tree approach is possible and can yield excellent performance for smaller meshes. As meshes have increased numbers of faces and Gluetags increase in size, the worse the algorithm is performing. The reconstruction is almost impossible without any visual cues on which edges should be folded or glued first, but this factor can be disregarded as it can be added using this approach by a more significant setback is that the unfolding is more or less random and structures of the 3D-Model might not be well conserved into the unfolding. All in all, the approach is simple to implement as no sophisticated algorithms are needed, and it yields results in an acceptable amount of time for models with less than 200 faces.
 
 \section{Future Work}
+The quality of the unfolding could be improved, by not only measuring the unfolding quality using the overlap area but also considering other factors, like maintaining structures of the mesh together to assist users in the reconstruction of the models.
 
-\begin{itemize}
-	\item determine unfolding quality
-	\item post process gluetags to resolve very small overlap areas to cut down computation time
-	\item change minimum spanning tree to more sophisticated calculation to get an unfolding faster than with a random walk
-	\item find a way to make search space smaller for gluetags to improve performance
-\end{itemize}
+Another possible improvement would be to ensure efficient use of paper space. This mainly requires the avoidance of stretched out unfoldings as seen in Figure \ref{fig:butterfly}. To achieve this, the quality metric of the unfolding can be evaluated not only using the overlapping area but also a value that describes how stretched out the unfolding is.
 
+Performance can be improved, if Gluetags are post-processed to change their shape if the overlap area is rather small. With this improvement, the computation time can be reduced significantly, without impacting other parts of the approach. To compute necessary modifications to the Gluetag the intersection points of the Gluetag and the triangle can be taken as new vertices of the Gluetag.
+
+Once an unfolding with Gluetags for a model is found, a greedy algorithm could be used to minimise the number of Gluetags necessary. Currently, the amount of Gluetags is determined by the order in which the Gluetags are added. Therefore it can result in using more Gluetags than necessary for the particular unfolding.
+
+To avoid manual adjustment of the maximum number of iterations required to find unfoldings for large models, the number of required iterations might be calculated using an exponential function using the number of faces of the mesh.
 \backmatter
 
 % Use an optional list of figures.

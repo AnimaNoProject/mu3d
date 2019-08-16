@@ -22,7 +22,7 @@
 
 #include "utility.h"
 
-#define TEMP_MAX 40000.0
+#define TEMP_MAX 100000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
 
@@ -96,8 +96,6 @@ private:
     void randomMove();
 
     void resetTree();
-    void planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c);
-    void planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu);
 
     QVector3D faceCenter(Facet facet);
 
