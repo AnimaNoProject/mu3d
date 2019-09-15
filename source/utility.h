@@ -41,6 +41,7 @@ public:
 
     static void planar(QVector3D const &A, QVector3D const &B, QVector3D const &C, QVector2D& a, QVector2D& b, QVector2D& c);
     static void planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu);
+    static void gtMirror(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu);
 private:
     static bool intersectionPoint(QVector2D& p1, QVector2D& q1, QVector2D& p2, QVector2D& q2, QVector2D& ip);
     static bool pointInTriangle(QVector2D& p, QVector2D& v1, QVector2D& v2, QVector2D& v3);

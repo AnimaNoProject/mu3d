@@ -124,7 +124,13 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
 
 void Model::loadPlanarGL(QOpenGLShaderProgram* program)
 {
-    _graph.oglPlanar(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
+    if(_graph.energy() <= 0 || _graph.over())
+    {
+        _graph.postProcessPlanar(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
+    }
+    else {
+        _graph.oglPlanar(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
+    }
 
     program->bind();
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);

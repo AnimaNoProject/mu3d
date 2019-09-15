@@ -268,6 +268,52 @@ void Graph::oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& 
     center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
 }
 
+void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center)
+{
+    for(GluetagToPlane& mapper : _CplanarGluetags)
+    {
+        Polyhedron::Halfedge_around_facet_circulator hfc = _facets[mapper._gluetag->_targetFace]->facet_begin();
+        do
+        {
+            QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
+
+            // if this vertex is not shared it is the unkown one
+            if(Pu != Utility::pointToVector(mapper._gluetag->_edge._halfedge->vertex()->point())
+                && Pu != Utility::pointToVector(mapper._gluetag->_edge._halfedge->prev()->vertex()->point()))
+            {
+                QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point()); // bottom left
+                QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point()); // bottom right
+
+                QVector2D p1 = _CplanarFaces[ulong(mapper._gluetag->_targetFace)].get(P1);
+                QVector2D p2 =  _CplanarFaces[ulong(mapper._gluetag->_targetFace)].get(P2);
+                QVector2D p3prev =  _CplanarFaces[ulong(mapper._gluetag->_targetFace)].get(Pu);
+
+                GluetagToPlane tmp(mapper._gluetag);
+
+                if(P1 == mapper._gluetag->_bl)
+                {
+                    tmp.a = p1;
+                    tmp.b = p2;
+                }
+                else
+                {
+                    tmp.b = p1;
+                    tmp.a = p2;
+                }
+
+                Utility::gtMirror(mapper._gluetag->_bl, mapper._gluetag->_br, mapper._gluetag->_tl, tmp.a, tmp.b, p3prev, tmp.c);
+                Utility::gtMirror(mapper._gluetag->_bl, mapper._gluetag->_br, mapper._gluetag->_tr, tmp.a, tmp.b, p3prev, tmp.d);
+
+                tmp._overlaps = mapper._overlaps;
+
+                tmp.drawproperties(vertices, verticesLines, colors);
+            }
+        } while (++hfc != _facets[mapper._gluetag->_targetFace]->facet_begin());
+    }
+
+    oglPlanar(vertices, colors, verticesLines, colorsLines, center);
+}
+
 void Graph::unfoldTriangles()
 {
     std::vector<bool> discovered;

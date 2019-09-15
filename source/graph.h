@@ -46,6 +46,8 @@ public:
     void oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
     void oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
 
+    void postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
+
     void addFace(Facet facet);
 
     double energy();
