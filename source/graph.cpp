@@ -311,7 +311,22 @@ void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVec
         } while (++hfc != _facets[mapper._gluetag->_targetFace]->facet_begin());
     }
 
-    oglPlanar(vertices, colors, verticesLines, colorsLines, center);
+    QVector2D planarCenter(0,0);
+    center.setToIdentity();
+
+    for(FaceToPlane& mapper : _CplanarFaces)
+    {
+        mapper.finalproperties(vertices, verticesLines, colors, _mspEdges);
+        planarCenter += (mapper.a + mapper.b + mapper.c) / 3 / _planarFaces.size();
+    }
+
+    for(GluetagToPlane& mapper : _CplanarGluetags)
+    {
+        mapper.drawproperties(vertices, verticesLines, colors);
+    }
+
+    colorsLines.resize(verticesLines.size());
+    center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
 }
 
 void Graph::unfoldTriangles()
@@ -859,11 +874,30 @@ void Graph::oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D
     {
         if(std::find(_cutEdges.begin(), _cutEdges.end(), edge) == _cutEdges.end())
         {
-            lineVertices.push_back(Utility::pointToVector(edge._halfedge->prev()->vertex()->point()));
-            lineVertices.push_back(Utility::pointToVector(edge._halfedge->vertex()->point()));
+            if(edge.isInwards)
+            {
+                QVector3D start = Utility::pointToVector(edge._halfedge->prev()->vertex()->point());
+                QVector3D target = Utility::pointToVector(edge._halfedge->vertex()->point());
 
-            lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
-            lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+                QVector3D step = (target - start) / 11; // 10 steps
+
+                for(int i = 0; i < 11; i+=2)
+                {
+                    lineVertices.push_back(start + i*step);
+                    lineVertices.push_back(start + i*step + step);
+
+                    lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+                    lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+                }
+            }
+            else
+            {
+                lineVertices.push_back(Utility::pointToVector(edge._halfedge->prev()->vertex()->point()));
+                lineVertices.push_back(Utility::pointToVector(edge._halfedge->vertex()->point()));
+
+                lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+                lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+            }
         }
     }
 }

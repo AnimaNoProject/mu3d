@@ -5,6 +5,40 @@ Edge::Edge(int sFace, int tFace, QVector3D middle, Halfedge halfedge, Facet sFac
       _sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle),  _halfedge(halfedge),
       _middle(middle),  _weight(double(std::rand()) / RAND_MAX)
 {
+
+    /*
+     * Calculate if the edge is bent inwards or outwards.
+     * */
+    isInwards = true;
+
+    QVector3D A = pointToVector(sFacetHandle->halfedge()->vertex()->point());
+    QVector3D B = pointToVector(sFacetHandle->halfedge()->next()->vertex()->point());
+    QVector3D C = pointToVector(sFacetHandle->halfedge()->next()->next()->vertex()->point());
+
+    QVector3D F = pointToVector(tFacetHandle->halfedge()->vertex()->point());
+    QVector3D G = pointToVector(tFacetHandle->halfedge()->next()->vertex()->point());
+    QVector3D H = pointToVector(tFacetHandle->halfedge()->next()->next()->vertex()->point());
+
+    QVector3D NABC = QVector3D::crossProduct(B-A, C-A);
+    QVector3D NFGH = QVector3D::crossProduct(G - F, H - F);
+
+    NABC.normalize();
+    NFGH.normalize();
+
+    float angle = std::acos(QVector3D::dotProduct(NABC, NFGH) / (NABC.length() * NFGH.length()));
+
+    std::cout << angle << std::endl;
+
+
+    if (angle > 180)
+    {
+        isInwards = false;
+    }
+}
+
+QVector3D Edge::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& point)
+{
+    return QVector3D(float(point.x()), float(point.y()), float(point.z()));
 }
 
 Edge::Edge(int sFace, int tFace)

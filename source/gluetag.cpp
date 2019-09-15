@@ -1,6 +1,8 @@
 #include "gluetag.h"
 
-QVector3D Gluetag::_color = QVector3D(0.0f,0.5f,1.0f);
+//QVector3D Gluetag::_color = QVector3D(0.0f,0.5f,1.0f);
+
+size_t Gluetag::id = 0;
 
 Gluetag::Gluetag(Edge& edge, bool flag) : _edge(edge), _probability(0)
 {
@@ -51,6 +53,8 @@ Gluetag::Gluetag(Edge& edge, bool flag) : _edge(edge), _probability(0)
 
     _tr = _br + (target - _br) / 5 - side;
     _tl = _bl + (target - _bl) / 5 + side;
+
+    _color = hex2rgb(colors[id++ % colors.size()]);
 }
 
 void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort>& indices, std::vector<QVector3D>& colors)
@@ -83,4 +87,25 @@ void Gluetag::getVertices(std::vector<QVector3D>& vertices, std::vector<GLushort
 bool Gluetag::operator<(const Gluetag& other) const
 {
     return _probability < other._probability;
+}
+
+QVector3D Gluetag::hex2rgb(std::string hex)
+{
+    if(hex[0] == '#')
+        hex = hex.erase(0, 1);
+
+    int rgb[3];
+
+    std::stringstream ss;
+    std::string str;
+
+    for(ulong i = 0; i < 3; i++)
+    {
+        str = hex.substr(i * 2, 2);
+        ss << std::hex << str;
+        ss >> rgb[i];
+        ss.clear();
+    }
+
+    return QVector3D(float(rgb[0]) / 255.0f, float(rgb[1]) / 255.0f, float(rgb[2]) / 255.0f);
 }

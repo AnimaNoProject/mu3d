@@ -62,6 +62,93 @@ void FaceToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vector<Q
     }
 }
 
+void FaceToPlane::finalproperties(std::vector<QVector3D>& vertices, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colors,
+                                  std::vector<Edge>& mspEdges)
+{
+    vertices.push_back(QVector3D(a, 0));
+    vertices.push_back(QVector3D(b, 0));
+    vertices.push_back(QVector3D(c, 0));
+
+    bool foundAB = false;
+    bool foundBC = false;
+    bool foundAC = false;
+
+    for(Edge& edge : mspEdges)
+    {
+        QVector3D a1 = Utility::pointToVector(edge._halfedge->prev()->vertex()->point());
+        QVector3D b1 = Utility::pointToVector(edge._halfedge->vertex()->point());
+
+        if((A == a1 && B == b1) || (A == b1 && B == a1)
+          || (B == a1 && C == b1) || (B == b1 && C == a1)
+          || (A == a1 && C == b1) || (A == b1 && C == a1))
+        {
+            if((A == a1 && B == b1) || (A == b1 && B == a1))
+            {
+                foundAB = true;
+            }
+            if((B == a1 && C == b1) || (B == b1 && C == a1))
+            {
+                foundBC = true;
+            }
+            if((A == a1 && C == b1) || (A == b1 && C == a1))
+            {
+                foundAC = true;
+            }
+
+            QVector2D start = this->get(a1);
+            QVector2D target = this->get(b1);
+
+            if(edge.isInwards)
+            {
+                QVector2D step = (target - start) / 11; // 10 steps
+                for(int i = 0; i < 11; i+=2)
+                {
+                    verticesLines.push_back(start + i*step);
+                    verticesLines.push_back(start + i*step + step);
+                }
+            }
+            else {
+                verticesLines.push_back(start);
+                verticesLines.push_back(target);
+            }
+        }
+
+        if(foundAB && foundBC && foundAC)
+        {
+            break;
+        }
+    }
+
+    if(!foundAB)
+    {
+        verticesLines.push_back(QVector3D(a, 0));
+        verticesLines.push_back(QVector3D(b, 0));
+    }
+    if(!foundBC)
+    {
+        verticesLines.push_back(QVector3D(b, 0));
+        verticesLines.push_back(QVector3D(c, 0));
+    }
+    if(!foundAC)
+    {
+        verticesLines.push_back(QVector3D(a, 0));
+        verticesLines.push_back(QVector3D(c, 0));
+    }
+
+    if(_overlaps)
+    {
+        colors.push_back(_colorOverlap);
+        colors.push_back(_colorOverlap);
+        colors.push_back(_colorOverlap);
+    }
+    else
+    {
+        colors.push_back(_color);
+        colors.push_back(_color);
+        colors.push_back(_color);
+    }
+}
+
 QVector2D const& FaceToPlane::get(QVector3D const &vec)
 {
     if(vec == A)
