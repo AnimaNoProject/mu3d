@@ -4,8 +4,8 @@
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/squared_distance_3.h>
 #include <stdlib.h>
+#include <math.h>
 
-//#include "utility.h"
 
 typedef CGAL::Polyhedron_3<CGAL::Simple_cartesian<double>>::Halfedge_handle Halfedge;
 typedef CGAL::Simple_cartesian<double> Kernel;

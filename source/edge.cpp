@@ -19,18 +19,30 @@ Edge::Edge(int sFace, int tFace, QVector3D middle, Halfedge halfedge, Facet sFac
     QVector3D G = pointToVector(tFacetHandle->halfedge()->next()->vertex()->point());
     QVector3D H = pointToVector(tFacetHandle->halfedge()->next()->next()->vertex()->point());
 
-    QVector3D NABC = QVector3D::crossProduct(B-A, C-A);
-    QVector3D NFGH = QVector3D::crossProduct(G - F, H - F);
+    QVector3D p;
+    QVector3D q;
 
-    NABC.normalize();
-    NFGH.normalize();
+    if(A != F && A != G && A != H)
+    {
+        p = A;
+        q = B;
+    }
+    else if (B != F && B != G && B != H)
+    {
+        p = B;
+        q = C;
+    }
+    else if (C != F && C != G && C != H)
+    {
+        p = C;
+        q = A;
+    }
 
-    float angle = std::acos(QVector3D::dotProduct(NABC, NFGH) / (NABC.length() * NFGH.length()));
+    QVector3D e = p - q;
+    QVector3D n = QVector3D::crossProduct(G-F, H-G);
 
-    std::cout << angle << std::endl;
-
-
-    if (angle > 180)
+    float angle = QVector3D::dotProduct(e, n);
+    if(angle <= 0)
     {
         isInwards = false;
     }
