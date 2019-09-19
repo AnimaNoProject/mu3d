@@ -256,7 +256,17 @@ void Model::showGluetags()
 
 bool Model::finishedOptimisation()
 {
+    return _graph.finishedOptimise();
+}
 
+void Model::drawGTNumberIndicators()
+{
+    if(!_graph._optimise)
+    {
+        return;
+    }
+
+    _graph.postProcessIndicators(_modelMatrix);
 }
 
 void Model::switchRenderMode()

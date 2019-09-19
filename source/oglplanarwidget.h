@@ -12,6 +12,8 @@
 #include "model.h"
 #include "oglwidget.h"
 
+#include "textrender.h"
+
 class Model;
 
 class OGLPlanarWidget : public OGLWidget

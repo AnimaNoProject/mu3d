@@ -38,6 +38,8 @@ void OGLPlanarWidget::initializeGL()
     _program->bindAttributeLocation("position", 0);
     _program->link();
 
+    TextRender::initialize();
+
     _camera = new Camera();
 }
 
@@ -60,16 +62,15 @@ void OGLPlanarWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    // bind shaderprogram and set variables
-    _program->bind();
-    _program->setUniformValue(_program->uniformLocation("viewProjMatrix"), _projMatrix * _camera->getMatrix());
-
     if(_initialized)
     {
+        // bind shaderprogram and set variables
+        _program->bind();
+        _program->setUniformValue(_program->uniformLocation("viewProjMatrix"), _projMatrix * _camera->getMatrix());
         _model->drawPlanarPatch(_program);
+        _program->release();
+        _model->drawGTNumberIndicators();
     }
-
-    _program->release();
 }
 
 void OGLPlanarWidget::resizeGL(int w, int h)

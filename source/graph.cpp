@@ -298,9 +298,6 @@ bool Graph::optimise()
     }
 
     float newEnergy = compactness();
-
-    std::cout << "new: " << newEnergy << ", old:" << _optEnergy << std::endl;
-
     // if it got better we take the new graph
     if(newEnergy <= _optEnergy)
     {
@@ -389,6 +386,7 @@ void Graph::oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& 
 
 void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center)
 {
+    _CplanarMirrorGT.clear();
     for(GluetagToPlane& mapper : _CplanarGluetags)
     {
         Polyhedron::Halfedge_around_facet_circulator hfc = _facets[mapper._gluetag->_targetFace]->facet_begin();
@@ -420,12 +418,27 @@ void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVec
                     tmp.a = p2;
                 }
 
+                //QVector3D side = (_br - _bl) / 8;
+
+                //_tr = _br + (target - _br) / 3 - side;
+                //_tl = _bl + (target - _bl) / 3 + side;
+
+                //_br = _br - side;
+                //_bl = _bl + side;
+
+
+                QVector2D side = (tmp.b - tmp.a) / 8;
+
+                tmp.b = tmp.b - side;
+                tmp.a = tmp.a + side;
+
                 Utility::gtMirror(mapper._gluetag->_bl, mapper._gluetag->_br, mapper._gluetag->_tl, tmp.a, tmp.b, p3prev, tmp.c);
                 Utility::gtMirror(mapper._gluetag->_bl, mapper._gluetag->_br, mapper._gluetag->_tr, tmp.a, tmp.b, p3prev, tmp.d);
 
                 tmp._overlaps = mapper._overlaps;
-
+                tmp._gluetag = mapper._gluetag;
                 tmp.drawproperties(vertices, verticesLines, colors);
+                _CplanarMirrorGT.push_back(tmp);
             }
         } while (++hfc != _facets[mapper._gluetag->_targetFace]->facet_begin());
     }
@@ -446,6 +459,33 @@ void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVec
 
     colorsLines.resize(verticesLines.size());
     center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
+}
+
+void Graph::postProcessIndicators(QMatrix4x4 proj)
+{
+    int i = 0;
+    for(GluetagToPlane& gtp : _CplanarGluetags)
+    {
+        QVector3D center(0,0,0);
+        center = (gtp.a + gtp.b + gtp.c + gtp.d) / 4;
+        i++;
+        QVector3D color = QVector3D(0,0,0) - gtp._gluetag->_color;
+        glm::vec3 col(0,0,0);
+
+        col.x = color.x();
+        col.y = color.y();
+        col.z = color.z();
+        TextRender::RenderText(std::to_string(i), center.x(), center.y(), 0.02, col, proj);
+
+        for (int i = 0; i < _CplanarMirrorGT.size(); i++)
+        {
+            if(_CplanarMirrorGT.at(i)._gluetag == gtp._gluetag)
+            {
+                TextRender::RenderText(std::to_string(i), center.x(), center.y(), 0.02, col, proj);
+                break;
+            }
+        }
+    }
 }
 
 void Graph::unfoldTriangles()
@@ -552,6 +592,15 @@ void Graph::unfoldGluetags()
                     tmp.b = p1;
                     tmp.a = p2;
                 }
+
+                QVector2D side = (tmp.b - tmp.a) / 8;
+
+                tmp.b = tmp.b - side;
+                tmp.a = tmp.a + side;
+
+                //_tr = _br + (target - _br) / 3 - side;
+                //_tl = _bl + (target - _bl) / 3 + side;
+
 
                 Utility::planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
                 Utility::planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);

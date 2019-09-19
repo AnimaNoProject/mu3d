@@ -48,14 +48,13 @@ Gluetag::Gluetag(Edge& edge, bool flag) : _edge(edge), _probability(0)
     } while (++hfc != face->facet_begin());
 
 
-    // top edge of the gluetag is 1/4 of the size of the base edge
     QVector3D side = (_br - _bl) / 8;
 
-    _tr = _br + (target - _br) / 5 - side;
-    _tl = _bl + (target - _bl) / 5 + side;
+    _tr = _br + (target - _br) / 3 - side * 1.8;
+    _tl = _bl + (target - _bl) / 3 + side * 1.8;
 
-    //_br = _br - side / 2;
-    //_bl = _bl + side / 2;
+    _br = _br - side;
+    _bl = _bl + side;
 
     _color = hex2rgb(colors[id++ % colors.size()]);
 }
