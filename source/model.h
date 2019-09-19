@@ -44,6 +44,10 @@ public:
     void switchRenderMode();
     void showGluetags();
 
+    bool finishedOptimisation();
+
+
+
     Graph _graph;
     QMatrix4x4 _modelMatrixPlanar;
 

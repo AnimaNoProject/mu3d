@@ -58,7 +58,7 @@ Model::Model(const char* filename)
 
 int Model::finishedAnnealing()
 {
-    if (_graph.energy() <= 0 || _graph.over())
+    if (_graph.over()|| (_graph.energy() <= 0 && _graph.finishedOptimise()))
     {
         std::cout << "Energy: " << _graph.energy() << " and " << _graph.over() << std::endl;
         return 0;
@@ -103,7 +103,13 @@ bool Model::bruteForce()
 
 bool Model::anneal()
 {
-    return _graph.neighbourState();
+    if(!_graph._optimise)
+    {
+       return _graph.neighbourState();
+    }
+    else {
+        return _graph.optimise();
+    }
 }
 
 void Model::createGLModelContext(QOpenGLShaderProgram* program)
@@ -246,6 +252,11 @@ void Model::drawPlanarPatch(QOpenGLShaderProgram* program)
 void Model::showGluetags()
 {
     _showgluetags = !_showgluetags;
+}
+
+bool Model::finishedOptimisation()
+{
+
 }
 
 void Model::switchRenderMode()

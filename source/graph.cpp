@@ -2,6 +2,7 @@
 
 Graph::Graph()
 {
+    _optimise = false;
 }
 
 Graph::~Graph()
@@ -19,13 +20,35 @@ int Graph::initBruteForce()
     std::fill(v.begin(), v.begin() + r, true);
 
     _Cenergy = 1000000000000;
+    _optEnergy = 1000000000000;
 
     return 10000000;
 }
 
 int Graph::factorial(int n)
 {
-  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+    return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+}
+
+float Graph::compactness()
+{
+    std::vector<QVector2D> points;
+    for(FaceToPlane& face : _planarFaces)
+    {
+       points.push_back(face.a);
+       points.push_back(face.b);
+       points.push_back(face.c);
+    }
+
+    auto xExtrema = std::minmax_element(points.begin(), points.end(), [](const QVector2D& lhs, const QVector2D& rhs)
+    { return lhs.x() < rhs.x();});
+    auto yExtrema = std::minmax_element(points.begin(), points.end(), [](const QVector2D& lhs, const QVector2D& rhs)
+    { return lhs.y() < rhs.y();});
+
+    QVector2D ul(xExtrema.first->x(), yExtrema.first->y());
+    QVector2D lr(xExtrema.second->x(), yExtrema.second->y());
+
+    return std::abs(lr.x() - ul.x()) + std::abs(ul.y() - lr.y());
 }
 
 bool Graph::nextBruteForce()
@@ -110,6 +133,7 @@ bool Graph::nextBruteForce()
 bool Graph::neighbourState()
 {
     bool redraw = false;
+
     randomMove();
 
     // calculate a new spanning tree and gluetags
@@ -181,6 +205,12 @@ bool Graph::neighbourState()
         _gluetags = _Cgt;
     }
 
+    if(_Cenergy <= 0)
+    {
+        _optimise = true;
+        _optEnergy = compactness();
+    }
+
     // end epoch
     temperature -= EPOCH;
     return redraw;
@@ -196,6 +226,8 @@ void Graph::initializeState()
     calculateGlueTags(_gluetags);
 
     temperature = TEMP_MAX;
+    opttemperature = TEMP_OPT;
+    _optimise = false;
 
     // initialize the energy with this unfolding
     unfoldTriangles();
@@ -224,6 +256,93 @@ bool Graph::over()
 bool Graph::finishedBruteFroce()
 {
     return _Cenergy <= 0;
+}
+
+bool Graph::optimise()
+{
+    bool redraw = false;
+
+    randomMove();
+
+    // calculate a new spanning tree and gluetags
+    calculateMSP();
+    calculateGlueTags(_gluetags);
+
+    // unfold and check for overlaps
+    unfoldTriangles();
+    double trioverlaps = findTriangleOverlaps();
+    double gtoverlaps = 0;
+
+    if(trioverlaps <= 0)
+    {
+        unfoldGluetags();
+        gtoverlaps = findGluetagOverlaps();
+
+        if(gtoverlaps > 0)
+        {
+            _edges.clear();
+            _gluetags.clear();
+
+            _edges = _C;
+            _gluetags = _Cgt;
+            return false;
+        }
+    }
+    else {
+        _edges.clear();
+        _gluetags.clear();
+
+        _edges = _C;
+        _gluetags = _Cgt;
+        return false;
+    }
+
+    float newEnergy = compactness();
+
+    std::cout << "new: " << newEnergy << ", old:" << _optEnergy << std::endl;
+
+    // if it got better we take the new graph
+    if(newEnergy <= _optEnergy)
+    {
+        _Cgt.clear();
+        _C.clear();
+
+        _Cgt = _gluetags;
+        _C = _edges;
+        _optEnergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
+
+        _CplanarFaces = _planarFaces;
+        _CplanarGluetags = _planarGluetags;
+
+        redraw = true;
+    }
+    // continue working with the best
+    else
+    {
+        _edges.clear();
+        _gluetags.clear();
+
+        _edges = _C;
+        _gluetags = _Cgt;
+    }
+
+    // end epoch
+    opttemperature -= EPOCH;
+    return redraw;
+}
+
+bool Graph::finishedOptimise()
+{
+    if(opttemperature <= TEMP_MIN)
+    {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 double Graph::energy()
@@ -688,8 +807,6 @@ void Graph::calculateMSP()
         std::cout << "Graph is a NOT single component!" << std::endl;
 #endif
 }
-
-
 
 void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {

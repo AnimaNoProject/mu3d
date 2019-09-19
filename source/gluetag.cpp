@@ -54,6 +54,9 @@ Gluetag::Gluetag(Edge& edge, bool flag) : _edge(edge), _probability(0)
     _tr = _br + (target - _br) / 5 - side;
     _tl = _bl + (target - _bl) / 5 + side;
 
+    //_br = _br - side / 2;
+    //_bl = _bl + side / 2;
+
     _color = hex2rgb(colors[id++ % colors.size()]);
 }
 

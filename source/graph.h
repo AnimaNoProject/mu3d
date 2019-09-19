@@ -25,6 +25,7 @@
 #define TEMP_MAX 100000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
+#define TEMP_OPT 5000
 
 class Gluetag;
 class GluetagToPlane;
@@ -53,8 +54,12 @@ public:
     double energy();
     bool over();
     bool finishedBruteFroce();
+    bool optimise();
+    bool finishedOptimise();
 
     double temperature;
+    double opttemperature;
+    bool _optimise;
 private:
     int n;
     int r;
@@ -77,6 +82,7 @@ private:
     std::vector<FaceToPlane> _CplanarFaces;
     std::vector<GluetagToPlane> _CplanarGluetags;
     double _Cenergy;
+    float _optEnergy;
 
     std::vector<FaceToPlane> _planarFaces;
     std::vector<GluetagToPlane> _planarGluetags;
@@ -110,4 +116,6 @@ private:
     void initEdgeWeight();
 
     int factorial(int n);
+
+    float compactness();
 };
