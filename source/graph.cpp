@@ -463,28 +463,22 @@ void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVec
 
 void Graph::postProcessIndicators(QMatrix4x4 proj)
 {
-    int i = 0;
-    for(GluetagToPlane& gtp : _CplanarGluetags)
+    float scale = 0.002f;
+
+    for(ulong i = 0; i < _CplanarGluetags.size(); i++)
     {
         QVector3D center(0,0,0);
-        center = (gtp.a + gtp.b + gtp.c + gtp.d) / 4;
-        i++;
-        QVector3D color = QVector3D(0,0,0) - gtp._gluetag->_color;
+        center = (_CplanarGluetags[i].a + _CplanarGluetags[i].b + _CplanarGluetags[i].c + _CplanarGluetags[i].d) / 4;
+        QVector3D color = QVector3D(1,1,1) - _CplanarGluetags[i]._gluetag->_color;
         glm::vec3 col(0,0,0);
 
         col.x = color.x();
         col.y = color.y();
         col.z = color.z();
-        TextRender::RenderText(std::to_string(i), center.x(), center.y(), 0.02, col, proj);
+        TextRender::RenderText(std::to_string(i+1), center.x(), center.y(), scale, col, proj);
 
-        for (int i = 0; i < _CplanarMirrorGT.size(); i++)
-        {
-            if(_CplanarMirrorGT.at(i)._gluetag == gtp._gluetag)
-            {
-                TextRender::RenderText(std::to_string(i), center.x(), center.y(), 0.02, col, proj);
-                break;
-            }
-        }
+        center = (_CplanarMirrorGT[i].a + _CplanarMirrorGT[i].b + _CplanarMirrorGT[i].c + _CplanarMirrorGT[i].d) / 4;
+        TextRender::RenderText(std::to_string(i+1), center.x(), center.y(), scale, col, proj);
     }
 }
 

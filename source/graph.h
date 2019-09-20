@@ -50,7 +50,7 @@ public:
     void oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
 
     void postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
-    void postProcessIndicators(QMatrix4x4 matrix);
+    void postProcessIndicators(QMatrix4x4 proj);
 
     void addFace(Facet facet);
 
