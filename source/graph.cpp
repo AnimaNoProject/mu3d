@@ -409,23 +409,14 @@ void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVec
 
                 if(P1 == mapper._gluetag->_bl)
                 {
-                    tmp.a = p1;
-                    tmp.b = p2;
+                    tmp.a = p2;
+                    tmp.b = p1;
                 }
                 else
                 {
-                    tmp.b = p1;
-                    tmp.a = p2;
+                    tmp.b = p2;
+                    tmp.a = p1;
                 }
-
-                //QVector3D side = (_br - _bl) / 8;
-
-                //_tr = _br + (target - _br) / 3 - side;
-                //_tl = _bl + (target - _bl) / 3 + side;
-
-                //_br = _br - side;
-                //_bl = _bl + side;
-
 
                 QVector2D side = (tmp.b - tmp.a) / 8;
 
@@ -463,10 +454,12 @@ void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVec
 
 void Graph::postProcessIndicators(QMatrix4x4 proj)
 {
-    float scale = 0.002f;
+    float const scale = .01f;
 
     for(ulong i = 0; i < _CplanarGluetags.size(); i++)
     {
+        float size = (_CplanarGluetags[i].c - _CplanarGluetags[i].d).length();
+
         QVector3D center(0,0,0);
         center = (_CplanarGluetags[i].a + _CplanarGluetags[i].b + _CplanarGluetags[i].c + _CplanarGluetags[i].d) / 4;
         QVector3D color = QVector3D(1,1,1) - _CplanarGluetags[i]._gluetag->_color;
@@ -475,10 +468,10 @@ void Graph::postProcessIndicators(QMatrix4x4 proj)
         col.x = color.x();
         col.y = color.y();
         col.z = color.z();
-        TextRender::RenderText(std::to_string(i+1), center.x(), center.y(), scale, col, proj);
+        TextRender::RenderText(std::to_string(i+1), center.x(), center.y(), scale * size, col, proj);
 
         center = (_CplanarMirrorGT[i].a + _CplanarMirrorGT[i].b + _CplanarMirrorGT[i].c + _CplanarMirrorGT[i].d) / 4;
-        TextRender::RenderText(std::to_string(i+1), center.x(), center.y(), scale, col, proj);
+        TextRender::RenderText(std::to_string(i+1), center.x(), center.y(), scale * size, col, proj);
     }
 }
 
@@ -591,10 +584,6 @@ void Graph::unfoldGluetags()
 
                 tmp.b = tmp.b - side;
                 tmp.a = tmp.a + side;
-
-                //_tr = _br + (target - _br) / 3 - side;
-                //_tl = _bl + (target - _bl) / 3 + side;
-
 
                 Utility::planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
                 Utility::planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
