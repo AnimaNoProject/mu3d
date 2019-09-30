@@ -259,14 +259,14 @@ bool Model::finishedOptimisation()
     return _graph.finishedOptimise();
 }
 
-void Model::drawGTNumberIndicators(QMatrix4x4 proj)
+void Model::drawGTNumberIndicators(QMatrix4x4 proj, QMatrix4x4 model)
 {
     if(!_graph._optimise)
     {
         return;
     }
 
-    _graph.postProcessIndicators(proj);
+    _graph.postProcessIndicators(proj, model);
 }
 
 void Model::switchRenderMode()

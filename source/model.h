@@ -46,7 +46,7 @@ public:
 
     bool finishedOptimisation();
 
-    void drawGTNumberIndicators(QMatrix4x4 proj);
+    void drawGTNumberIndicators(QMatrix4x4 proj, QMatrix4x4 model);
 
     Graph _graph;
     QMatrix4x4 _modelMatrixPlanar;

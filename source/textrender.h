@@ -3,6 +3,8 @@
 #include FT_FREETYPE_H
 #include <iostream>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <map>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions_4_5_Core>
@@ -18,7 +20,7 @@ class TextRender
 {
 public:
     static void initialize();
-    static void RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, QMatrix4x4 projMatrix);
+    static void RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, QMatrix4x4 projMatrix, QMatrix4x4 model, glm::vec2 direction);
 private:
     static QOpenGLShaderProgram *_program;
     static std::map<GLchar, Character> Characters;

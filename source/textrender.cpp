@@ -88,7 +88,7 @@ void TextRender::initialize()
         f->glBindVertexArray(0);
 }
 
-void TextRender::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, QMatrix4x4 projMatrix)
+void TextRender::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, QMatrix4x4 projMatrix, QMatrix4x4 model, glm::vec2 direction)
 {
     QOpenGLFunctions_4_5_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_5_Core>();
 
@@ -98,8 +98,15 @@ void TextRender::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scal
     f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     f->glUniform3f(f->glGetUniformLocation(TextRender::_program->programId(), "textColor"), color.x, color.y, color.z);
     TextRender::_program->setUniformValue(_program->uniformLocation("projection"), projMatrix);
+    TextRender::_program->setUniformValue(_program->uniformLocation("orgModel"), model);
     f->glActiveTexture(GL_TEXTURE0);
     f->glBindVertexArray(TextRender::VAO);
+
+    GLfloat   angle_rad = atan2(direction.y, direction.x);
+    glm::mat4 rotateM   = glm::rotate(glm::mat4(1.0f), 45.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+    QMatrix4x4 qtModelM(glm::value_ptr(rotateM));
+    //qtModelM.setToIdentity();
+    TextRender::_program->setUniformValue(_program->uniformLocation("model"), qtModelM);
 
     // Iterate through all characters
     std::string::const_iterator c;
@@ -122,6 +129,7 @@ void TextRender::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scal
             { xpos + w, ypos,       1.0, 1.0 },
             { xpos + w, ypos + h,   1.0, 0.0 }
         };
+
         // Render glyph texture over quad
         f->glBindTexture(GL_TEXTURE_2D, ch.TextureID);
         // Update content of VBO memory

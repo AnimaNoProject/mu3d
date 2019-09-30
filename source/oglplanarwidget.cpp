@@ -69,7 +69,7 @@ void OGLPlanarWidget::paintGL()
         _program->setUniformValue(_program->uniformLocation("viewProjMatrix"), _projMatrix * _camera->getMatrix());
         _model->drawPlanarPatch(_program);
         _program->release();
-        _model->drawGTNumberIndicators(_projMatrix * _camera->getMatrix() * _model->_modelMatrixPlanar);
+        _model->drawGTNumberIndicators(_projMatrix * _camera->getMatrix(), _model->_modelMatrixPlanar);
     }
 }
 
