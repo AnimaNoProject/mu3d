@@ -12,6 +12,8 @@ Model::Model(const char* filename)
         filebuffer.close();
     }
 
+    _graph._mesh = _mesh;
+
     QVector3D middle(0,0,0);
 
     // get all vertices
@@ -61,6 +63,11 @@ int Model::finishedAnnealing()
     if (_graph.over()|| (_graph.energy() <= 0 && _graph.finishedOptimise()))
     {
         std::cout << "Energy: " << _graph.energy() << " and " << _graph.over() << std::endl;
+
+        _graph.writeMSP();
+        _graph.writeGluetags();
+
+
         return 0;
     }
     else

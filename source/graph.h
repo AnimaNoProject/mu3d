@@ -27,7 +27,7 @@
 #define TEMP_MAX 100000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
-#define TEMP_OPT 5000
+#define TEMP_OPT 10
 
 class Gluetag;
 class GluetagToPlane;
@@ -38,6 +38,8 @@ class Graph
 public:
     Graph();
     ~Graph();
+
+    Polyhedron _mesh;
 
     void initializeState();
     bool neighbourState();
@@ -59,6 +61,9 @@ public:
     bool finishedBruteFroce();
     bool optimise();
     bool finishedOptimise();
+
+    void writeGluetags();
+    void writeMSP();
 
     double temperature;
     double opttemperature;

@@ -456,6 +456,7 @@ void Graph::postProcessIndicators(QMatrix4x4 proj, QMatrix4x4 model)
 {
     float const scale = 0.005;//.0025f;
 
+    /*
     for(ulong i = 0; i < _CplanarGluetags.size(); i++)
     {
         float size = 1;
@@ -485,6 +486,7 @@ void Graph::postProcessIndicators(QMatrix4x4 proj, QMatrix4x4 model)
         center = (_CplanarMirrorGT[i].a + _CplanarMirrorGT[i].b + _CplanarMirrorGT[i].c + _CplanarMirrorGT[i].d) / 4;
         TextRender::RenderText(std::to_string(i+1), _CplanarMirrorGT[i].a.x(), _CplanarMirrorGT[i].a.y(), scale * size, col, proj, model, direction);
     }
+    */
 }
 
 void Graph::unfoldTriangles()
@@ -1040,6 +1042,7 @@ void Graph::oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D
                 QVector3D start = Utility::pointToVector(edge._halfedge->prev()->vertex()->point());
                 QVector3D target = Utility::pointToVector(edge._halfedge->vertex()->point());
 
+
                 QVector3D step = (target - start) / 11; // 10 steps
 
                 for(int i = 0; i < 11; i+=2)
@@ -1098,4 +1101,96 @@ bool Graph::find(Edge& edge)
 {
     // check if this edge already exists in the graph
     return std::find(_edges.begin(), _edges.end(), edge) != _edges.end();
+}
+
+void Graph::writeGluetags()
+{
+    //_bl = QVector3D(float(_edge._halfedge->vertex()->point().x()),
+    //                             float(_edge._halfedge->vertex()->point().y()),
+    //                             float(_edge._halfedge->vertex()->point().z()));
+    // prev
+
+    std::ofstream gluetabs ("model.tab");
+
+    gluetabs << _necessaryGluetags.size() << std::endl;
+
+    for(Gluetag& gt : _necessaryGluetags)
+    {
+        for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
+        {
+            if(gt._edge._halfedge->vertex()->point() == v->point())
+            {
+                gluetabs << std::distance(_mesh.vertices_begin(), v) << "\t";
+            }
+        }
+
+        for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
+        {
+            if(gt._edge._halfedge->prev()->vertex()->point() == v->point())
+            {
+                gluetabs << std::distance(_mesh.vertices_begin(), v) << std::endl;
+            }
+        }
+
+        //auto v = std::find(_mesh.vertices_begin(), _mesh.vertices_end(), gt._edge._halfedge->vertex());
+        //gluetabs << std::distance(_mesh.vertices_begin(), v) << "\t";
+        //v = std::find(_mesh.vertices_begin(), _mesh.vertices_end(), gt._edge._halfedge->prev()->vertex());
+        //gluetabs << std::distance(_mesh.vertices_begin(), v) << std::endl;
+    }
+
+    gluetabs.close();
+}
+
+
+
+
+void Graph::writeMSP()
+{
+    std::ofstream msp ("model.spt");
+
+    for(Edge& edge : _mspEdges)
+    {
+        /*
+        std::cout << "Edge: (" << edge._halfedge->vertex()->point().x() << "," <<
+                  edge._halfedge->vertex()->point().y() << "," <<
+                  edge._halfedge->vertex()->point().z() << "), ("
+                  <<  edge._halfedge->prev()->vertex()->point().x() << ","
+                  <<  edge._halfedge->prev()->vertex()->point().y() << ","
+                  <<  edge._halfedge->prev()->vertex()->point().z() << ")"
+                   << std::endl;
+        */
+        for (Polyhedron::Edge_iterator e = _mesh.edges_begin(); e != _mesh.edges_end(); ++e)
+        {
+            /*
+            std::cout << "Polyhedron-Iterator: (" << e->vertex()->point().x() << "," <<
+                      e->vertex()->point().y() << "," <<
+                      e->vertex()->point().z() << "), ("
+                      <<  e->prev()->vertex()->point().x() << ","
+                      <<  e->prev()->vertex()->point().y() << ","
+                      <<  e->prev()->vertex()->point().z() << ")"
+                       << std::endl;
+            */
+            if((edge._halfedge->vertex()->point().x() == e->vertex()->point().x()
+            && edge._halfedge->vertex()->point().y() == e->vertex()->point().y()
+            && edge._halfedge->vertex()->point().z() == e->vertex()->point().z())
+
+            && (edge._halfedge->prev()->vertex()->point().x() == e->prev()->vertex()->point().x()
+            && edge._halfedge->prev()->vertex()->point().y() == e->prev()->vertex()->point().y()
+            && edge._halfedge->prev()->vertex()->point().z() == e->prev()->vertex()->point().z()))
+            {
+                msp << std::distance(_mesh.edges_begin(), e) << std::endl;
+                break;
+            }
+            //if(e->vertex() == edge._halfedge->vertex() && e->prev()->vertex() == edge._halfedge->prev()->vertex())
+            //{
+            //    msp << std::distance(_mesh.edges_begin(), e) << std::endl;
+            //}
+        }
+
+        //Polyhedron::Edge_iterator e = std::find(_mesh.edges_begin(), _mesh.edges_end(), edge._halfedge);
+        //msp << std::distance(_mesh.edges_begin(), e) << std::endl;
+    }
+
+    msp.close();
+
 }
