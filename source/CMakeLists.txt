@@ -57,3 +57,16 @@ set(3d-mesh-unfolding_SRCS
 # create the executeable from all source files
 add_executable(${PROJECT_NAME} ${3d-mesh-unfolding_SRCS})
 target_link_libraries(${PROJECT_NAME} CGAL::CGAL Qt5::Widgets ${OPENGL_gl_LIBRARY} ${Boost_LIBRARIES})
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/shader/shader.frag
+        ${CMAKE_CURRENT_BINARY_DIR}/shader/shader.frag)
+
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/shader/shader.vert
+        ${CMAKE_CURRENT_BINARY_DIR}/shader/shader.vert)
