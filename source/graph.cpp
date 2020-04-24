@@ -452,43 +452,6 @@ void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVec
     center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
 }
 
-void Graph::postProcessIndicators(QMatrix4x4 proj, QMatrix4x4 model)
-{
-    float const scale = 0.005;//.0025f;
-
-    /*
-    for(ulong i = 0; i < _CplanarGluetags.size(); i++)
-    {
-        float size = 1;
-
-        QVector3D center(0,0,0);
-        center = (_CplanarGluetags[i].a + _CplanarGluetags[i].b + _CplanarGluetags[i].c + _CplanarGluetags[i].d) / 4;
-        QVector3D color = QVector3D(1,1,1) - _CplanarGluetags[i]._gluetag->_color;
-        glm::vec3 col(1,1,1);
-
-        QVector2D dir;
-        dir = (_CplanarGluetags[i].b - _CplanarGluetags[i].a);
-
-        glm::vec2 direction(1);
-        direction.x = dir.x();
-        direction.y = dir.y();
-
-        col.x = color.x();
-        col.y = color.y();
-        col.z = color.z();
-        TextRender::RenderText(std::to_string(i+1), _CplanarGluetags[i].a.x(), _CplanarGluetags[i].a.y(), scale * size, col, proj, model, direction);
-
-        dir = (_CplanarMirrorGT[i].b - _CplanarMirrorGT[i].a);
-
-        direction.x = dir.x();
-        direction.y = dir.y();
-
-        center = (_CplanarMirrorGT[i].a + _CplanarMirrorGT[i].b + _CplanarMirrorGT[i].c + _CplanarMirrorGT[i].d) / 4;
-        TextRender::RenderText(std::to_string(i+1), _CplanarMirrorGT[i].a.x(), _CplanarMirrorGT[i].a.y(), scale * size, col, proj, model, direction);
-    }
-    */
-}
-
 void Graph::unfoldTriangles()
 {
     std::vector<bool> discovered;

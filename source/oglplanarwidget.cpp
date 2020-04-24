@@ -38,8 +38,6 @@ void OGLPlanarWidget::initializeGL()
     _program->bindAttributeLocation("position", 0);
     _program->link();
 
-    TextRender::initialize();
-
     _camera = new Camera();
 }
 
@@ -69,7 +67,6 @@ void OGLPlanarWidget::paintGL()
         _program->setUniformValue(_program->uniformLocation("viewProjMatrix"), _projMatrix * _camera->getMatrix());
         _model->drawPlanarPatch(_program);
         _program->release();
-        _model->drawGTNumberIndicators(_projMatrix * _camera->getMatrix(), _model->_modelMatrixPlanar);
     }
 }
 

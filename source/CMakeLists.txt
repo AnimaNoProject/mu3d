@@ -5,14 +5,11 @@ cmake_minimum_required(VERSION 3.10.2)
 project(3d-mesh-unfolding)
 
 # Find includes in corresponding build directories
+set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(OpenGL_GL_PREFERENCE GLVND)
 # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOMOC ON)
-
-# Boost settings
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,7 +23,6 @@ find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(OpenGL)
 find_package(Boost)
 find_package(glm)
-find_package(Freetype)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OpenGL_INCLUDE_DIRS})
@@ -56,10 +52,8 @@ set(3d-mesh-unfolding_SRCS
     facetoplane.cpp
     gluetagtoplane.h
     gluetagtoplane.cpp
-    textrender.h
-    textrender.cpp
 )
 
 # create the executeable from all source files
 add_executable(${PROJECT_NAME} ${3d-mesh-unfolding_SRCS})
-target_link_libraries(${PROJECT_NAME} CGAL::CGAL Qt5::Widgets ${OPENGL_gl_LIBRARY} ${Boost_LIBRARIES} Freetype::Freetype glm)
+target_link_libraries(${PROJECT_NAME} CGAL::CGAL Qt5::Widgets ${OPENGL_gl_LIBRARY} ${Boost_LIBRARIES})

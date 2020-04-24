@@ -414,3 +414,5 @@ build-source-Desktop-Debug/shader/shader\.vert
 build-source-Desktop-Debug/shader/text\.frag
 
 build-source-Desktop-Debug/shader/text\.vert
+
+source/cmake-build-debug/

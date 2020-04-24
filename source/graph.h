@@ -22,8 +22,6 @@
 
 #include "utility.h"
 
-#include "textrender.h"
-
 #define TEMP_MAX 100000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
@@ -52,7 +50,6 @@ public:
     void oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
 
     void postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
-    void postProcessIndicators(QMatrix4x4 proj, QMatrix4x4 model);
 
     void addFace(Facet facet);
 
