@@ -25,6 +25,7 @@
 #define TEMP_MAX 100000.0
 #define EPOCH 1.0
 #define TEMP_MIN 10.0
+#define TEMP_OPT 10
 
 class Gluetag;
 class GluetagToPlane;
@@ -36,6 +37,8 @@ public:
     Graph();
     ~Graph();
 
+    Polyhedron _mesh;
+
     void initializeState();
     bool neighbourState();
 
@@ -46,13 +49,22 @@ public:
     void oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D>& lineColors);
     void oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors);
 
+    void postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center);
+
     void addFace(Facet facet);
 
     double energy();
     bool over();
     bool finishedBruteFroce();
+    bool optimise();
+    bool finishedOptimise();
+
+    void writeGluetags();
+    void writeMSP();
 
     double temperature;
+    double opttemperature;
+    bool _optimise;
 private:
     int n;
     int r;
@@ -74,7 +86,9 @@ private:
     std::vector<Gluetag> _Cgt;
     std::vector<FaceToPlane> _CplanarFaces;
     std::vector<GluetagToPlane> _CplanarGluetags;
+    std::vector<GluetagToPlane> _CplanarMirrorGT;
     double _Cenergy;
+    float _optEnergy;
 
     std::vector<FaceToPlane> _planarFaces;
     std::vector<GluetagToPlane> _planarGluetags;
@@ -108,4 +122,6 @@ private:
     void initEdgeWeight();
 
     int factorial(int n);
+
+    float compactness();
 };

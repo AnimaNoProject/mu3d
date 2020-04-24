@@ -4,6 +4,8 @@
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/squared_distance_3.h>
 #include <stdlib.h>
+#include <math.h>
+
 
 typedef CGAL::Polyhedron_3<CGAL::Simple_cartesian<double>>::Halfedge_handle Halfedge;
 typedef CGAL::Simple_cartesian<double> Kernel;
@@ -27,8 +29,12 @@ public:
     Edge();
     ~Edge();
 
+    bool isInwards;
+
     bool isNeighbour(const Edge& edge);
     bool is(int A, int B);
     bool operator==(const Edge& other) const;
     bool operator<(const Edge& other) const;
+private:
+    QVector3D pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& point);
 };

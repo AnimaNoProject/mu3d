@@ -43,12 +43,12 @@ void GluetagToPlane::drawproperties(std::vector<QVector3D>& vertices, std::vecto
     }
     else
     {
-        colors.push_back(_color);
-        colors.push_back(_color);
-        colors.push_back(_color);
-        colors.push_back(_color);
-        colors.push_back(_color);
-        colors.push_back(_color);
+        colors.push_back(_gluetag->_color);
+        colors.push_back(_gluetag->_color);
+        colors.push_back(_gluetag->_color);
+        colors.push_back(_gluetag->_color);
+        colors.push_back(_gluetag->_color);
+        colors.push_back(_gluetag->_color);
     }
 }
 

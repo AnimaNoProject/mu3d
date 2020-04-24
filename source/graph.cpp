@@ -2,6 +2,7 @@
 
 Graph::Graph()
 {
+    _optimise = false;
 }
 
 Graph::~Graph()
@@ -19,13 +20,35 @@ int Graph::initBruteForce()
     std::fill(v.begin(), v.begin() + r, true);
 
     _Cenergy = 1000000000000;
+    _optEnergy = 1000000000000;
 
     return 10000000;
 }
 
 int Graph::factorial(int n)
 {
-  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+    return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+}
+
+float Graph::compactness()
+{
+    std::vector<QVector2D> points;
+    for(FaceToPlane& face : _planarFaces)
+    {
+       points.push_back(face.a);
+       points.push_back(face.b);
+       points.push_back(face.c);
+    }
+
+    auto xExtrema = std::minmax_element(points.begin(), points.end(), [](const QVector2D& lhs, const QVector2D& rhs)
+    { return lhs.x() < rhs.x();});
+    auto yExtrema = std::minmax_element(points.begin(), points.end(), [](const QVector2D& lhs, const QVector2D& rhs)
+    { return lhs.y() < rhs.y();});
+
+    QVector2D ul(xExtrema.first->x(), yExtrema.first->y());
+    QVector2D lr(xExtrema.second->x(), yExtrema.second->y());
+
+    return std::abs(lr.x() - ul.x()) + std::abs(ul.y() - lr.y());
 }
 
 bool Graph::nextBruteForce()
@@ -110,6 +133,7 @@ bool Graph::nextBruteForce()
 bool Graph::neighbourState()
 {
     bool redraw = false;
+
     randomMove();
 
     // calculate a new spanning tree and gluetags
@@ -181,6 +205,12 @@ bool Graph::neighbourState()
         _gluetags = _Cgt;
     }
 
+    if(_Cenergy <= 0)
+    {
+        _optimise = true;
+        _optEnergy = compactness();
+    }
+
     // end epoch
     temperature -= EPOCH;
     return redraw;
@@ -196,6 +226,8 @@ void Graph::initializeState()
     calculateGlueTags(_gluetags);
 
     temperature = TEMP_MAX;
+    opttemperature = TEMP_OPT;
+    _optimise = false;
 
     // initialize the energy with this unfolding
     unfoldTriangles();
@@ -224,6 +256,90 @@ bool Graph::over()
 bool Graph::finishedBruteFroce()
 {
     return _Cenergy <= 0;
+}
+
+bool Graph::optimise()
+{
+    bool redraw = false;
+
+    randomMove();
+
+    // calculate a new spanning tree and gluetags
+    calculateMSP();
+    calculateGlueTags(_gluetags);
+
+    // unfold and check for overlaps
+    unfoldTriangles();
+    double trioverlaps = findTriangleOverlaps();
+    double gtoverlaps = 0;
+
+    if(trioverlaps <= 0)
+    {
+        unfoldGluetags();
+        gtoverlaps = findGluetagOverlaps();
+
+        if(gtoverlaps > 0)
+        {
+            _edges.clear();
+            _gluetags.clear();
+
+            _edges = _C;
+            _gluetags = _Cgt;
+            return false;
+        }
+    }
+    else {
+        _edges.clear();
+        _gluetags.clear();
+
+        _edges = _C;
+        _gluetags = _Cgt;
+        return false;
+    }
+
+    float newEnergy = compactness();
+    // if it got better we take the new graph
+    if(newEnergy <= _optEnergy)
+    {
+        _Cgt.clear();
+        _C.clear();
+
+        _Cgt = _gluetags;
+        _C = _edges;
+        _optEnergy = newEnergy;
+
+        _CplanarFaces.clear();
+        _CplanarGluetags.clear();
+
+        _CplanarFaces = _planarFaces;
+        _CplanarGluetags = _planarGluetags;
+
+        redraw = true;
+    }
+    // continue working with the best
+    else
+    {
+        _edges.clear();
+        _gluetags.clear();
+
+        _edges = _C;
+        _gluetags = _Cgt;
+    }
+
+    // end epoch
+    opttemperature -= EPOCH;
+    return redraw;
+}
+
+bool Graph::finishedOptimise()
+{
+    if(opttemperature <= TEMP_MIN)
+    {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 double Graph::energy()
@@ -256,6 +372,74 @@ void Graph::oglPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& 
     for(FaceToPlane& mapper : _CplanarFaces)
     {
         mapper.drawproperties(vertices, verticesLines, colors);
+        planarCenter += (mapper.a + mapper.b + mapper.c) / 3 / _planarFaces.size();
+    }
+
+    for(GluetagToPlane& mapper : _CplanarGluetags)
+    {
+        mapper.drawproperties(vertices, verticesLines, colors);
+    }
+
+    colorsLines.resize(verticesLines.size());
+    center.translate(QVector3D(0,0,0) - QVector3D(planarCenter, 0));
+}
+
+void Graph::postProcessPlanar(std::vector<QVector3D>& vertices, std::vector<QVector3D>& colors, std::vector<QVector3D>& verticesLines, std::vector<QVector3D>& colorsLines, QMatrix4x4& center)
+{
+    _CplanarMirrorGT.clear();
+    for(GluetagToPlane& mapper : _CplanarGluetags)
+    {
+        Polyhedron::Halfedge_around_facet_circulator hfc = _facets[mapper._gluetag->_targetFace]->facet_begin();
+        do
+        {
+            QVector3D Pu = Utility::pointToVector(hfc->vertex()->point());
+
+            // if this vertex is not shared it is the unkown one
+            if(Pu != Utility::pointToVector(mapper._gluetag->_edge._halfedge->vertex()->point())
+                && Pu != Utility::pointToVector(mapper._gluetag->_edge._halfedge->prev()->vertex()->point()))
+            {
+                QVector3D P1 = Utility::pointToVector(hfc->next()->vertex()->point()); // bottom left
+                QVector3D P2 = Utility::pointToVector(hfc->next()->next()->vertex()->point()); // bottom right
+
+                QVector2D p1 = _CplanarFaces[ulong(mapper._gluetag->_targetFace)].get(P1);
+                QVector2D p2 =  _CplanarFaces[ulong(mapper._gluetag->_targetFace)].get(P2);
+                QVector2D p3prev =  _CplanarFaces[ulong(mapper._gluetag->_targetFace)].get(Pu);
+
+                GluetagToPlane tmp(mapper._gluetag);
+
+                if(P1 == mapper._gluetag->_bl)
+                {
+                    tmp.a = p2;
+                    tmp.b = p1;
+                }
+                else
+                {
+                    tmp.b = p2;
+                    tmp.a = p1;
+                }
+
+                QVector2D side = (tmp.b - tmp.a) / 8;
+
+                tmp.b = tmp.b - side;
+                tmp.a = tmp.a + side;
+
+                Utility::gtMirror(mapper._gluetag->_bl, mapper._gluetag->_br, mapper._gluetag->_tl, tmp.a, tmp.b, p3prev, tmp.c);
+                Utility::gtMirror(mapper._gluetag->_bl, mapper._gluetag->_br, mapper._gluetag->_tr, tmp.a, tmp.b, p3prev, tmp.d);
+
+                tmp._overlaps = mapper._overlaps;
+                tmp._gluetag = mapper._gluetag;
+                tmp.drawproperties(vertices, verticesLines, colors);
+                _CplanarMirrorGT.push_back(tmp);
+            }
+        } while (++hfc != _facets[mapper._gluetag->_targetFace]->facet_begin());
+    }
+
+    QVector2D planarCenter(0,0);
+    center.setToIdentity();
+
+    for(FaceToPlane& mapper : _CplanarFaces)
+    {
+        mapper.finalproperties(vertices, verticesLines, colors, _mspEdges);
         planarCenter += (mapper.a + mapper.b + mapper.c) / 3 / _planarFaces.size();
     }
 
@@ -372,6 +556,11 @@ void Graph::unfoldGluetags()
                     tmp.b = p1;
                     tmp.a = p2;
                 }
+
+                QVector2D side = (tmp.b - tmp.a) / 8;
+
+                tmp.b = tmp.b - side;
+                tmp.a = tmp.a + side;
 
                 Utility::planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
                 Utility::planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
@@ -628,8 +817,6 @@ void Graph::calculateMSP()
 #endif
 }
 
-
-
 void Graph::oglGluetags(std::vector<QVector3D>& gtVertices, std::vector<GLushort>& gtIndices, std::vector<QVector3D>& gtColors)
 {
     gtVertices.clear();
@@ -813,11 +1000,31 @@ void Graph::oglLines(std::vector<QVector3D>& lineVertices, std::vector<QVector3D
     {
         if(std::find(_cutEdges.begin(), _cutEdges.end(), edge) == _cutEdges.end())
         {
-            lineVertices.push_back(Utility::pointToVector(edge._halfedge->prev()->vertex()->point()));
-            lineVertices.push_back(Utility::pointToVector(edge._halfedge->vertex()->point()));
+            if(edge.isInwards)
+            {
+                QVector3D start = Utility::pointToVector(edge._halfedge->prev()->vertex()->point());
+                QVector3D target = Utility::pointToVector(edge._halfedge->vertex()->point());
 
-            lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
-            lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+
+                QVector3D step = (target - start) / 11; // 10 steps
+
+                for(int i = 0; i < 11; i+=2)
+                {
+                    lineVertices.push_back(start + i*step);
+                    lineVertices.push_back(start + i*step + step);
+
+                    lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+                    lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+                }
+            }
+            else
+            {
+                lineVertices.push_back(Utility::pointToVector(edge._halfedge->prev()->vertex()->point()));
+                lineVertices.push_back(Utility::pointToVector(edge._halfedge->vertex()->point()));
+
+                lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+                lineColors.push_back(QVector3D(0.0f, 0.0f, 0.0f));
+            }
         }
     }
 }
@@ -857,4 +1064,96 @@ bool Graph::find(Edge& edge)
 {
     // check if this edge already exists in the graph
     return std::find(_edges.begin(), _edges.end(), edge) != _edges.end();
+}
+
+void Graph::writeGluetags()
+{
+    //_bl = QVector3D(float(_edge._halfedge->vertex()->point().x()),
+    //                             float(_edge._halfedge->vertex()->point().y()),
+    //                             float(_edge._halfedge->vertex()->point().z()));
+    // prev
+
+    std::ofstream gluetabs ("model.tab");
+
+    gluetabs << _necessaryGluetags.size() << std::endl;
+
+    for(Gluetag& gt : _necessaryGluetags)
+    {
+        for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
+        {
+            if(gt._edge._halfedge->vertex()->point() == v->point())
+            {
+                gluetabs << std::distance(_mesh.vertices_begin(), v) << "\t";
+            }
+        }
+
+        for ( Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
+        {
+            if(gt._edge._halfedge->prev()->vertex()->point() == v->point())
+            {
+                gluetabs << std::distance(_mesh.vertices_begin(), v) << std::endl;
+            }
+        }
+
+        //auto v = std::find(_mesh.vertices_begin(), _mesh.vertices_end(), gt._edge._halfedge->vertex());
+        //gluetabs << std::distance(_mesh.vertices_begin(), v) << "\t";
+        //v = std::find(_mesh.vertices_begin(), _mesh.vertices_end(), gt._edge._halfedge->prev()->vertex());
+        //gluetabs << std::distance(_mesh.vertices_begin(), v) << std::endl;
+    }
+
+    gluetabs.close();
+}
+
+
+
+
+void Graph::writeMSP()
+{
+    std::ofstream msp ("model.spt");
+
+    for(Edge& edge : _mspEdges)
+    {
+        /*
+        std::cout << "Edge: (" << edge._halfedge->vertex()->point().x() << "," <<
+                  edge._halfedge->vertex()->point().y() << "," <<
+                  edge._halfedge->vertex()->point().z() << "), ("
+                  <<  edge._halfedge->prev()->vertex()->point().x() << ","
+                  <<  edge._halfedge->prev()->vertex()->point().y() << ","
+                  <<  edge._halfedge->prev()->vertex()->point().z() << ")"
+                   << std::endl;
+        */
+        for (Polyhedron::Edge_iterator e = _mesh.edges_begin(); e != _mesh.edges_end(); ++e)
+        {
+            /*
+            std::cout << "Polyhedron-Iterator: (" << e->vertex()->point().x() << "," <<
+                      e->vertex()->point().y() << "," <<
+                      e->vertex()->point().z() << "), ("
+                      <<  e->prev()->vertex()->point().x() << ","
+                      <<  e->prev()->vertex()->point().y() << ","
+                      <<  e->prev()->vertex()->point().z() << ")"
+                       << std::endl;
+            */
+            if((edge._halfedge->vertex()->point().x() == e->vertex()->point().x()
+            && edge._halfedge->vertex()->point().y() == e->vertex()->point().y()
+            && edge._halfedge->vertex()->point().z() == e->vertex()->point().z())
+
+            && (edge._halfedge->prev()->vertex()->point().x() == e->prev()->vertex()->point().x()
+            && edge._halfedge->prev()->vertex()->point().y() == e->prev()->vertex()->point().y()
+            && edge._halfedge->prev()->vertex()->point().z() == e->prev()->vertex()->point().z()))
+            {
+                msp << std::distance(_mesh.edges_begin(), e) << std::endl;
+                break;
+            }
+            //if(e->vertex() == edge._halfedge->vertex() && e->prev()->vertex() == edge._halfedge->prev()->vertex())
+            //{
+            //    msp << std::distance(_mesh.edges_begin(), e) << std::endl;
+            //}
+        }
+
+        //Polyhedron::Edge_iterator e = std::find(_mesh.edges_begin(), _mesh.edges_end(), edge._halfedge);
+        //msp << std::distance(_mesh.edges_begin(), e) << std::endl;
+    }
+
+    msp.close();
+
 }

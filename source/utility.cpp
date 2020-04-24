@@ -44,6 +44,36 @@ void Utility::planar(QVector3D const &P1, QVector3D const &P2, QVector3D const &
     }
 }
 
+void Utility::gtMirror(QVector3D const &P1, QVector3D const &P2, QVector3D const &Pu, QVector2D const &p1, QVector2D const &p2, QVector2D const &p3prev,  QVector2D& pu)
+{
+    float length = (p1 - p2).length();
+
+    float s = QVector3D::crossProduct((P2 - P1), (Pu - P1)).length() / float(std::pow(length, 2));
+    float unkown = QVector3D::dotProduct((P2 - P1), (Pu - P1)) / float(std::pow(length, 2));
+
+    QVector2D pu1 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) + s * (p2.y() - p1.y()),
+                              p1.y() + unkown * (p2.y() - p1.y()) - s * (p2.x() - p1.x()));
+
+    QVector2D pu2 = QVector2D(p1.x() + unkown * (p2.x() - p1.x()) - s * (p2.y() - p1.y()),
+                              p1.y() + unkown * (p2.y() - p1.y()) + s * (p2.x() - p1.x()));
+
+    // the points that are not shared by the triangles need to be on opposite sites
+    if (((((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) < 0)
+     && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) > 0)))
+    ||
+    (
+    (((p3prev.x() - p1.x()) * (p2.y() - p1.y()) - (p3prev.y() - p1.y()) * (p2.x() - p1.x()) > 0)
+             && ((pu1.x() - p1.x()) * (p2.y() - p1.y()) - (pu1.y() - p1.y()) * (p2.x() - p1.x()) < 0))
+                ))
+    {
+        pu = pu2;
+    }
+    else
+    {
+        pu = pu1;
+    }
+}
+
 QVector3D Utility::pointToVector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& point)
 {
     return QVector3D(float(point.x()), float(point.y()), float(point.z()));

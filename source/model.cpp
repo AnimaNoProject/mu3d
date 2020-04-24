@@ -12,6 +12,8 @@ Model::Model(const char* filename)
         filebuffer.close();
     }
 
+    _graph._mesh = _mesh;
+
     QVector3D middle(0,0,0);
 
     // get all vertices
@@ -58,9 +60,14 @@ Model::Model(const char* filename)
 
 int Model::finishedAnnealing()
 {
-    if (_graph.energy() <= 0 || _graph.over())
+    if (_graph.over()|| (_graph.energy() <= 0 && _graph.finishedOptimise()))
     {
         std::cout << "Energy: " << _graph.energy() << " and " << _graph.over() << std::endl;
+
+        _graph.writeMSP();
+        _graph.writeGluetags();
+
+
         return 0;
     }
     else
@@ -103,7 +110,13 @@ bool Model::bruteForce()
 
 bool Model::anneal()
 {
-    return _graph.neighbourState();
+    if(!_graph._optimise)
+    {
+       return _graph.neighbourState();
+    }
+    else {
+        return _graph.optimise();
+    }
 }
 
 void Model::createGLModelContext(QOpenGLShaderProgram* program)
@@ -124,7 +137,13 @@ void Model::createGLModelContext(QOpenGLShaderProgram* program)
 
 void Model::loadPlanarGL(QOpenGLShaderProgram* program)
 {
-    _graph.oglPlanar(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
+    if(_graph.energy() <= 0 || _graph.over())
+    {
+        _graph.postProcessPlanar(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
+    }
+    else {
+        _graph.oglPlanar(_planarVertices, _planarColors, _planarLines, _planarLinesColors, _modelMatrixPlanar);
+    }
 
     program->bind();
     Utility::createBuffers(_vaoPlanar, _vboPlanar, _planarVertices, _planarColors);
@@ -240,6 +259,11 @@ void Model::drawPlanarPatch(QOpenGLShaderProgram* program)
 void Model::showGluetags()
 {
     _showgluetags = !_showgluetags;
+}
+
+bool Model::finishedOptimisation()
+{
+    return _graph.finishedOptimise();
 }
 
 void Model::switchRenderMode()
