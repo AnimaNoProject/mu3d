@@ -1116,12 +1116,12 @@ void Graph::writeMSP()
 
     for (auto& f2p : _CplanarFaces)
     {
-        vs << "v" << f2p.A.x() << " " << f2p.A.y() << " " << f2p.A.z() << std::endl;
-        vs << "v" << f2p.B.x() << " " << f2p.B.y() << " " << f2p.B.z() << std::endl;
-        vs << "v" << f2p.C.x() << " " << f2p.C.y() << " " << f2p.C.z() << std::endl;
-        vts << "vt" << f2p.a.x() << " " << f2p.a.y() << std::endl;
-        vts << "vt" << f2p.b.x() << " " << f2p.b.y() << std::endl;
-        vts << "vt" << f2p.c.x() << " " << f2p.c.y() << std::endl;
+        vs << "v " << f2p.A.x() << " " << f2p.A.y() << " " << f2p.A.z() << std::endl;
+        vs << "v " << f2p.B.x() << " " << f2p.B.y() << " " << f2p.B.z() << std::endl;
+        vs << "v " << f2p.C.x() << " " << f2p.C.y() << " " << f2p.C.z() << std::endl;
+        vts << "vt " << f2p.a.x() << " " << f2p.a.y() << std::endl;
+        vts << "vt " << f2p.b.x() << " " << f2p.b.y() << std::endl;
+        vts << "vt " << f2p.c.x() << " " << f2p.c.y() << std::endl;
     }
 
     transfer << vs.str() << std::endl;
@@ -1134,11 +1134,11 @@ void Graph::writeMSP()
 
     for (auto& f2p : _CplanarGluetags)
     {
-        vsGt << "v" << f2p.a.x() << " " << f2p.a.y() << " " << std::endl;
-        vsGt << "v" << f2p.b.x() << " " << f2p.b.y() << " " << std::endl;
-        vsGt << "v" << f2p.c.x() << " " << f2p.c.y() << " " << std::endl;
-        vsGt << "v" << f2p.b.x() << " " << f2p.b.y() << " " << std::endl;
-        vsGt << "v" << f2p.d.x() << " " << f2p.d.y() << " " << std::endl;
+        vsGt << "v " << f2p.a.x() << " " << f2p.a.y() << " " << std::endl;
+        vsGt << "v " << f2p.b.x() << " " << f2p.b.y() << " " << std::endl;
+        vsGt << "v " << f2p.c.x() << " " << f2p.c.y() << " " << std::endl;
+        vsGt << "v " << f2p.b.x() << " " << f2p.b.y() << " " << std::endl;
+        vsGt << "v " << f2p.d.x() << " " << f2p.d.y() << " " << std::endl;
     }
 
     transferGT << vsGt.str() << std::endl;
