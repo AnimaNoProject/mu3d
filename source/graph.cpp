@@ -19,8 +19,8 @@ int Graph::initBruteForce()
     v = std::vector<bool>(ulong(n));
     std::fill(v.begin(), v.begin() + r, true);
 
-    _Cenergy = 1000000000000;
-    _optEnergy = 1000000000000;
+    _Cenergy = 1000000000;
+    _optEnergy = 1000000000;
 
     return 10000000;
 }
@@ -1109,10 +1109,47 @@ void Graph::writeGluetags()
 
 void Graph::writeMSP()
 {
+    std::ofstream transfer ("main.obj");
+    transfer << "o Transferable" << std::endl;
+    std::stringstream vs;
+    std::stringstream vts;
+
+    for (auto& f2p : _CplanarFaces)
+    {
+        vs << "v" << f2p.A.x() << " " << f2p.A.y() << " " << f2p.A.z() << std::endl;
+        vs << "v" << f2p.B.x() << " " << f2p.B.y() << " " << f2p.B.z() << std::endl;
+        vs << "v" << f2p.C.x() << " " << f2p.C.y() << " " << f2p.C.z() << std::endl;
+        vts << "vt" << f2p.a.x() << " " << f2p.a.y() << std::endl;
+        vts << "vt" << f2p.b.x() << " " << f2p.b.y() << std::endl;
+        vts << "vt" << f2p.c.x() << " " << f2p.c.y() << std::endl;
+    }
+
+    transfer << vs.str() << std::endl;
+    transfer << vts.str() << std::endl;
+    transfer.close();
+
+    std::ofstream transferGT ("gluetab.obj");
+
+    std::stringstream vsGt;
+
+    for (auto& f2p : _CplanarGluetags)
+    {
+        vsGt << "v" << f2p.a.x() << " " << f2p.a.y() << " " << std::endl;
+        vsGt << "v" << f2p.b.x() << " " << f2p.b.y() << " " << std::endl;
+        vsGt << "v" << f2p.c.x() << " " << f2p.c.y() << " " << std::endl;
+        vsGt << "v" << f2p.b.x() << " " << f2p.b.y() << " " << std::endl;
+        vsGt << "v" << f2p.d.x() << " " << f2p.d.y() << " " << std::endl;
+    }
+
+    transferGT << vsGt.str() << std::endl;
+    transferGT.close();
+
     std::ofstream msp ("model.spt");
 
     for(Edge& edge : _mspEdges)
     {
+
+
         /*
         std::cout << "Edge: (" << edge._halfedge->vertex()->point().x() << "," <<
                   edge._halfedge->vertex()->point().y() << "," <<
