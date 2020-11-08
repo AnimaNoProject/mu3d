@@ -1,6 +1,7 @@
 #include <facetoplane.h>
 #include <utility.h>
-
+namespace mu3d
+{
     faceToPlane::~faceToPlane()
     {
 
@@ -67,3 +68,4 @@
             throw std::invalid_argument("something went wrong");
 
     }
+}

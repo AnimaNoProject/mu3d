@@ -1,16 +1,17 @@
-#include "gluetagtoplane.h"
+#include "gluetabtoplane.h"
 #include <utility.h>
-
-    gluetagToPlane::gluetagToPlane(gluetag* gluetag) : _gluetag(gluetag)
+namespace mu3d
+{
+    gluetabToPlane::gluetabToPlane(gluetab* gluetab) : _gluetag(gluetab)
     {
     }
 
-    gluetagToPlane::~gluetagToPlane()
+    gluetabToPlane::~gluetabToPlane()
     {
 
     }
 
-    double gluetagToPlane::overlaps(gluetagToPlane& other)
+    double gluetabToPlane::overlaps(gluetabToPlane& other)
     {
         if (utility::intersects(a, c, other.a, other.c)
             || utility::intersects(a, c, other.c, other.d)
@@ -33,7 +34,7 @@
         }
     }
 
-    double gluetagToPlane::overlaps(faceToPlane& other)
+    double gluetabToPlane::overlaps(faceToPlane& other)
     {
         if (utility::intersects(a, c, other.a, other.b)
             || utility::intersects(a, c, other.b, other.c)
@@ -56,7 +57,7 @@
 
     }
 
-    glm::vec2 const& gluetagToPlane::get(glm::vec3 const& vec)
+    glm::vec2 const& gluetabToPlane::get(glm::vec3 const& vec)
     {
         if (vec == _gluetag->_bl)
             return a;
@@ -69,7 +70,7 @@
         throw std::invalid_argument("something went wrong trying to retrieve 2D representation");
     }
 
-    glm::vec3 const& gluetagToPlane::get(glm::vec2 const& vec)
+    glm::vec3 const& gluetabToPlane::get(glm::vec2 const& vec)
     {
         if (vec == a)
             return _gluetag->_bl;
@@ -82,3 +83,4 @@
 
         throw std::invalid_argument("something went wrong trying to retrieve 3D representation");
     }
+}

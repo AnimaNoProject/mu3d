@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+namespace mu3d
+{
     typedef CGAL::Polyhedron_3<CGAL::Simple_cartesian<double>>::Halfedge_handle Halfedge;
     typedef CGAL::Simple_cartesian<double> Kernel;
     typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
@@ -34,3 +36,4 @@
         bool operator==(const edge& other) const;
         bool operator<(const edge& other) const;
     };
+}

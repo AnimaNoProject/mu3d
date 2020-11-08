@@ -10,16 +10,16 @@ include_directories("include")
 add_library(MU3D STATIC   
 						"include/graph.h" 
 						"include/edge.h" 
-						"include/gluetag.h" 
+						"include/gluetab.h" 
 						"include/facetoplane.h"  
-						"include/gluetagtoplane.h" 
+						"include/gluetabtoplane.h" 
 						"include/utility.h"
 						 
 						"graph.cpp" 
 						"edge.cpp" 
-						"gluetag.cpp"
+						"gluetab.cpp"
 						"facetoplane.cpp"
-						"gluetagtoplane.cpp"
+						"gluetabtoplane.cpp"
 						"utility.cpp")
 
 target_link_libraries(MU3D CGAL::CGAL)
