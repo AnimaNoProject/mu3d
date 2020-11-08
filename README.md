@@ -1,9 +1,5 @@
 # mu3d - 3D Meshunfolding Library
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
@@ -29,11 +25,11 @@ g.load("assets/octa.off");
 bool result = g.unfold(1000, 1000);
 if (!result)
 {
-	std::cerr << "Failed to unfold within 1000 iterations." << std::endl;
+    std::cerr << "Failed to unfold within 1000 iterations." << std::endl;
 }
 else
 {
-	g.save("assets/model.obj", "assets/gluetabs.obj");
+    g.save("assets/model.obj", "assets/gluetabs.obj");
 }
 return 0;
 ```
