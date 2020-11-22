@@ -265,16 +265,18 @@ namespace mu3d
 			vs << "v " << f2p.B.x << " " << f2p.B.y << " " << f2p.B.z << std::endl;
 			vs << "v " << f2p.C.x << " " << f2p.C.y << " " << f2p.C.z << std::endl;
 
-			fs << "f " << index - 2 << "//0 " << index - 1 << "//0 " << index << "//0" << std::endl;
+			fs << "f " << index - 2 << "/" << index - 2 << "/0 " << index - 1 << "/" << index - 1 << "/0 "  << index << "/" << index << "/0" << std::endl;
 
 			vts << "vt " << f2p.a.x << " " << f2p.a.y << std::endl;
 			vts << "vt " << f2p.b.x << " " << f2p.b.y << std::endl;
 			vts << "vt " << f2p.c.x << " " << f2p.c.y << std::endl;
 		}
 
-		transfer << vs.str() << std::endl;
-		transfer << fs.str() << std::endl;
-		transfer << vts.str() << std::endl;
+		transfer << vs.str();
+		transfer << vts.str();
+		transfer << "s off" << std::endl;
+		transfer << fs.str();
+
 		transfer.close();
 
 		std::ofstream transferGT(gluetabs);
