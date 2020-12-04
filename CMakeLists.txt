@@ -7,4 +7,4 @@ project ("3dmeshunfoldinglib")
 
 # Include sub-projects.
 add_subdirectory ("mu3d")
-add_subdirectory ("test")
+add_subdirectory ("examples")
