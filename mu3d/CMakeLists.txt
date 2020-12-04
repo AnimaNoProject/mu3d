@@ -1,13 +1,13 @@
 cmake_minimum_required (VERSION 3.8)
 
-project(MU3D CXX)
+project(mu3d CXX)
 
 find_package(CGAL)
 
 include_directories("../glm/glm")
 include_directories("include")
 
-add_library(MU3D STATIC   
+add_library(mu3d STATIC   
 						"include/graph.h" 
 						"include/edge.h" 
 						"include/gluetab.h" 
@@ -22,5 +22,5 @@ add_library(MU3D STATIC
 						"gluetabtoplane.cpp"
 						"utility.cpp")
 
-target_link_libraries(MU3D CGAL::CGAL)
-target_include_directories(MU3D PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mu3d CGAL::CGAL)
+target_include_directories(mu3d PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

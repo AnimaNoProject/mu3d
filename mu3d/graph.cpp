@@ -1,9 +1,12 @@
 #include <fstream>
 #include <graph.h>
 #include <utility.h>
+
 namespace mu3d
 {
-	graph::graph()
+	graph::graph() : _Cenergy(0), _maxtemp(0), 
+					_optEnergy(0), _optimise(false), 
+					_opttemperature(0), _temperature(0)
 	{
 	}
 
@@ -17,6 +20,10 @@ namespace mu3d
 			std::istream is(&filebuffer);
 			CGAL::read_off(is, _mesh);
 			filebuffer.close();
+		}
+		else
+		{
+			throw std::exception(("Failed to load \"" + file + "\".").c_str());
 		}
 
 		// get all vertices
@@ -256,23 +263,27 @@ namespace mu3d
 		std::stringstream vs;
 		std::stringstream vts;
 		std::stringstream fs;
+		std::stringstream ns;
 
 		int index = 0;
 		for (auto& f2p : _CplanarFaces)
 		{
 			index += 3;
-			vs << "v " << f2p.A.x << " " << f2p.A.y << " " << f2p.A.z << std::endl;
-			vs << "v " << f2p.B.x << " " << f2p.B.y << " " << f2p.B.z << std::endl;
-			vs << "v " << f2p.C.x << " " << f2p.C.y << " " << f2p.C.z << std::endl;
+			vs << "v "		<< f2p.A.x		<< " " << f2p.A.y		<< " "	<< f2p.A.z << std::endl;
+			vs << "v "		<< f2p.B.x		<< " " << f2p.B.y		<< " "	<< f2p.B.z << std::endl;
+			vs << "v "		<< f2p.C.x		<< " " << f2p.C.y		<< " "	<< f2p.C.z << std::endl;
 
-			fs << "f " << index - 2 << "/" << index - 2 << "/0 " << index - 1 << "/" << index - 1 << "/0 "  << index << "/" << index << "/0" << std::endl;
+			fs << "f "		<< index - 2	<< "/" << index - 2		<< "/0" << " "
+							<< index - 1	<< "/" << index - 1		<< "/0" << " "
+							<< index		<< "/" << index			<< "/0" << std::endl;
 
-			vts << "vt " << f2p.a.x << " " << f2p.a.y << std::endl;
-			vts << "vt " << f2p.b.x << " " << f2p.b.y << std::endl;
-			vts << "vt " << f2p.c.x << " " << f2p.c.y << std::endl;
+			vts << "vt "	<< f2p.a.x		<< " " << f2p.a.y		<< std::endl;
+			vts << "vt "	<< f2p.b.x		<< " " << f2p.b.y		<< std::endl;
+			vts << "vt "	<< f2p.c.x		<< " " << f2p.c.y		<< std::endl;
 		}
 
 		transfer << vs.str();
+		transfer << ns.str();
 		transfer << vts.str();
 		transfer << "s off" << std::endl;
 		transfer << fs.str();
