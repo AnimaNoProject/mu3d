@@ -1,6 +1,7 @@
 #include <fstream>
 #include <graph.h>
-#include <utility.h>
+#include <utility.hpp>
+#include <stdlib.h>
 
 namespace mu3d
 {
@@ -8,6 +9,7 @@ namespace mu3d
 					_optEnergy(0), _optimise(false), 
 					_opttemperature(0), _temperature(0)
 	{
+		srand(time(NULL));
 	}
 
 	void graph::load(std::string file)
@@ -47,6 +49,8 @@ namespace mu3d
 		initialise(max_its, opt_its);
 		int progress = 0;
 		int blockpit = ceil(max_its / 10);
+		utility::print_progress(0);
+
 		while (_temperature > 0 && _Cenergy > 0)
 		{
 			next();
@@ -56,6 +60,7 @@ namespace mu3d
 			{
 				progress++;
 				utility::print_progress(progress);
+				std::cout << "energy: " << _Cenergy;
 			}
 		}
 
@@ -106,16 +111,8 @@ namespace mu3d
 		// unfold and check for overlaps
 		unfoldTriangles();
 		double trioverlaps = findTriangleOverlaps();
-		double gtoverlaps = 0;
-
-		if (trioverlaps <= 0)
-		{
-			unfoldGluetags();
-			gtoverlaps = findGluetagOverlaps();
-		}
-		else {
-			gtoverlaps = 40;
-		}
+		unfoldGluetags();
+		double gtoverlaps = findGluetagOverlaps();
 
 		double newEnergy = trioverlaps + gtoverlaps;
 
@@ -652,14 +649,13 @@ namespace mu3d
 				double area = _planarFaces[j].overlaps(_planarFaces[i]);
 				if (area > 0)
 				{
-					overlaps += area * 1000;
+					overlaps += area;
 					_planarFaces[j]._overlaps = true;
 					_planarFaces[i]._overlaps = true;
 					break;
 				}
 			}
 		}
-
 		return overlaps;
 	}
 
@@ -697,15 +693,14 @@ namespace mu3d
 				}
 			}
 		}
-
 		return overlaps;
 	}
 
 	void graph::randomMove()
 	{
 		// take a random edge and change it's weight
-		size_t random = size_t(rand()) % (_edges.size() + 0 + 1) + 0;
-		_edges[random]._weight = (double(std::rand()) / RAND_MAX);
+		size_t random = size_t(rand()) % (_edges.size());
+		_edges[random]._weight = ((double)rand() / (RAND_MAX)) + 1;
 	}
 
 	void graph::resetTree()
@@ -782,12 +777,12 @@ namespace mu3d
 		// init edge weights
 		for (edge& edge : _edges)
 		{
-			edge._weight = (double(std::rand()) / RAND_MAX);
+			edge._weight = ((double)rand() / (RAND_MAX)) + 1;
 		}
 		// init gluetag probabilities
 		for (gluetab& gluetag : _gluetags)
 		{
-			gluetag._probability = (double(std::rand()) / RAND_MAX);
+			gluetag._probability = ((double)rand() / (RAND_MAX)) + 1;
 		}
 	}
 

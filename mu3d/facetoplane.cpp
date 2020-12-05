@@ -1,5 +1,5 @@
 #include <facetoplane.h>
-#include <utility.h>
+#include <utility.hpp>
 namespace mu3d
 {
     faceToPlane::~faceToPlane()
@@ -13,23 +13,7 @@ namespace mu3d
 
     double faceToPlane::overlaps(faceToPlane& other)
     {
-        if (utility::intersects(a, b, other.a, other.b) ||
-            utility::intersects(a, b, other.b, other.c) ||
-            utility::intersects(a, b, other.c, other.a) ||
-            utility::intersects(b, c, other.a, other.b) ||
-            utility::intersects(b, c, other.b, other.c) ||
-            utility::intersects(b, c, other.c, other.a) ||
-            utility::intersects(c, a, other.a, other.b) ||
-            utility::intersects(c, a, other.b, other.c) ||
-            utility::intersects(c, a, other.c, other.a))
-        {
-            return utility::intersectionArea(a, b, c, other.a, other.b, other.c);
-        }
-        else
-        {
-            return 0;
-        }
-
+        return utility::sh_overlapping_area(a, b, c, other.a, other.b, other.c);
     }
 
     glm::vec2 const& faceToPlane::get(glm::vec3 const& vec)

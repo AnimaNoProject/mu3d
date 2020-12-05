@@ -1,5 +1,5 @@
 #include <edge.h>
-#include <utility.h>
+#include <utility.hpp>
 
 namespace mu3d
 {

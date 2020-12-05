@@ -13,14 +13,13 @@ add_library(mu3d STATIC
 						"include/gluetab.h" 
 						"include/facetoplane.h"  
 						"include/gluetabtoplane.h" 
-						"include/utility.h"
+						"include/utility.hpp"
 						 
 						"graph.cpp" 
 						"edge.cpp" 
 						"gluetab.cpp"
 						"facetoplane.cpp"
-						"gluetabtoplane.cpp"
-						"utility.cpp")
+						"gluetabtoplane.cpp")
 
 target_link_libraries(mu3d CGAL::CGAL)
 target_include_directories(mu3d PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

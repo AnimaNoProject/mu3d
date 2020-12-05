@@ -1,5 +1,5 @@
 #include "gluetabtoplane.h"
-#include <utility.h>
+#include <utility.hpp>
 namespace mu3d
 {
     gluetabToPlane::gluetabToPlane(gluetab* gluetab) : _gluetag(gluetab)
@@ -8,53 +8,17 @@ namespace mu3d
 
     gluetabToPlane::~gluetabToPlane()
     {
-
     }
 
     double gluetabToPlane::overlaps(gluetabToPlane& other)
     {
-        if (utility::intersects(a, c, other.a, other.c)
-            || utility::intersects(a, c, other.c, other.d)
-            || utility::intersects(a, c, other.b, other.d)
-
-            || utility::intersects(c, d, other.a, other.c)
-            || utility::intersects(c, d, other.c, other.d)
-            || utility::intersects(c, d, other.b, other.d)
-
-            || utility::intersects(b, d, other.a, other.c)
-            || utility::intersects(b, d, other.c, other.d)
-            || utility::intersects(b, d, other.b, other.d))
-        {
-            return utility::intersectionArea(a, b, c, other.a, other.b, other.c) + utility::intersectionArea(c, b, d, other.a, other.b, other.c) +
-                utility::intersectionArea(a, b, c, other.c, other.b, other.d) + utility::intersectionArea(c, b, d, other.c, other.b, other.d);
-        }
-        else
-        {
-            return 0;
-        }
+        return utility::sh_overlapping_area(a, b, c, other.a, other.b, other.c) + utility::sh_overlapping_area(c, b, d, other.a, other.b, other.c) +
+            utility::sh_overlapping_area(a, b, c, other.c, other.b, other.d) + utility::sh_overlapping_area(c, b, d, other.c, other.b, other.d);
     }
 
     double gluetabToPlane::overlaps(faceToPlane& other)
     {
-        if (utility::intersects(a, c, other.a, other.b)
-            || utility::intersects(a, c, other.b, other.c)
-            || utility::intersects(a, c, other.c, other.a)
-
-            || utility::intersects(c, d, other.a, other.b)
-            || utility::intersects(c, d, other.b, other.c)
-            || utility::intersects(c, d, other.c, other.a)
-
-            || utility::intersects(b, d, other.a, other.b)
-            || utility::intersects(b, d, other.b, other.c)
-            || utility::intersects(b, d, other.c, other.a))
-        {
-            return utility::intersectionArea(a, b, c, other.a, other.b, other.c) + utility::intersectionArea(c, b, d, other.a, other.b, other.c);
-        }
-        else
-        {
-            return 0;
-        }
-
+        return utility::sh_overlapping_area(a, b, c, other.a, other.b, other.c) + utility::sh_overlapping_area(c, b, d, other.a, other.b, other.c);
     }
 
     glm::vec2 const& gluetabToPlane::get(glm::vec3 const& vec)
