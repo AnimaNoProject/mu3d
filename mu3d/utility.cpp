@@ -76,6 +76,26 @@ namespace mu3d
 		}
 	}
 
+	void utility::print_progress(int block_idx)
+	{
+#ifdef NDEBUG
+		system("CLS");
+#endif
+
+		for (int i = 0; i < block_idx; i++)
+		{
+			std::cout << (char)254u;
+		}
+
+		for (int i = block_idx; i < 10; i++)
+		{
+			std::cout << "_";
+		}
+
+		std::cout << " " << block_idx / 10.0f * 100 << "%" << std::endl;
+
+	}
+
 	glm::vec3 utility::point_to_vector(CGAL::Point_3<CGAL::Simple_cartesian<double>>& point)
 	{
 		return glm::vec3(float(point.x()), float(point.y()), float(point.z()));
@@ -304,4 +324,6 @@ namespace mu3d
 
 		return false;
 	}
+
+
 }

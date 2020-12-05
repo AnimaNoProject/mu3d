@@ -34,6 +34,9 @@ namespace mu3d
 		static void planar(glm::vec3 const& A, glm::vec3 const& B, glm::vec3 const& C, glm::vec2& a, glm::vec2& b, glm::vec2& c);
 		static void planar(glm::vec3 const& P1, glm::vec3 const& P2, glm::vec3 const& Pu, glm::vec2 const& p1, glm::vec2 const& p2, glm::vec2 const& p3prev, glm::vec2& pu);
 		static void gtMirror(glm::vec3 const& P1, glm::vec3 const& P2, glm::vec3 const& Pu, glm::vec2 const& p1, glm::vec2 const& p2, glm::vec2 const& p3prev, glm::vec2& pu);
+
+		static void print_progress(int block_idx = 10);
+
 	private:
 		static int orientation(glm::vec2& p, glm::vec2& q, glm::vec2& r);
 		static bool onSegment(glm::vec2& p, glm::vec2& q, glm::vec2& r);

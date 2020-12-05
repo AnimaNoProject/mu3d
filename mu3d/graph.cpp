@@ -26,12 +26,6 @@ namespace mu3d
 			throw std::exception(("Failed to load \"" + file + "\".").c_str());
 		}
 
-		// get all vertices
-		for (Polyhedron::Vertex_iterator v = _mesh.vertices_begin(); v != _mesh.vertices_end(); ++v)
-		{
-			_vertices.push_back(utility::point_to_vector(v->point()));
-		}
-
 		// loop through all facets
 		for (Polyhedron::Facet_iterator fi = _mesh.facets_begin(); fi != _mesh.facets_end(); ++fi)
 		{
@@ -45,37 +39,27 @@ namespace mu3d
 				// all other facets get the index+1
 				_facets.insert(std::make_pair(_facets.rbegin()->first + 1, fi));
 			}
-
-			// get the first facet
-			Polyhedron::Halfedge_around_facet_circulator hfc = fi->facet_begin();
-			// assert that all facets are triangles
-			CGAL_assertion(CGAL::circulator_size(hfc) >= 3);
-			do
-			{
-				unsigned short foundindex = 0;
-				// loop through vertices and save their index if they match
-				for (std::vector<int>::size_type i = 0; i != _vertices.size(); ++i)
-				{
-					if (utility::point_to_vector(hfc->vertex()->point()) == _vertices[i])
-					{
-						foundindex = short(i);
-						break;
-					}
-				}
-				_indices.push_back(foundindex);
-
-			} while (++hfc != fi->facet_begin());
 		}
 	}
 
 	bool graph::unfold(float max_its, float opt_its)
 	{
 		initialise(max_its, opt_its);
-
+		int progress = 0;
+		int blockpit = ceil(max_its / 10);
 		while (_temperature > 0 && _Cenergy > 0)
 		{
 			next();
+
+
+			if (static_cast<int>(_temperature) % blockpit == 0)
+			{
+				progress++;
+				utility::print_progress(progress);
+			}
 		}
+
+		utility::print_progress();
 
 		while (_opttemperature > 0)
 		{
@@ -301,7 +285,6 @@ namespace mu3d
 			vsGt << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
 			vsGt << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
 			vsGt << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
-			//vsGt << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 <<  std::endl;
 			vsGt << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
 
 			fsGt << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
@@ -311,6 +294,43 @@ namespace mu3d
 		transferGT << vsGt.str() << std::endl;
 		transferGT << fsGt.str() << std::endl;
 		transferGT.close();
+	}
+
+	void graph::save(std::string filepath)
+	{
+		std::stringstream vs;
+		std::stringstream fs;
+
+		int index = 0;
+		for (auto& f2p : _CplanarFaces)
+		{
+			index += 3;
+			vs << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
+			vs << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
+			vs << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
+
+			fs << "f " << index - 2 << "//0" << " " << index - 1 << "//0" << " " << index << "//0" << std::endl;
+		}
+
+		for (auto& f2p : _CplanarGluetags)
+		{
+			index += 4;
+			vs << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
+			vs << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
+			vs << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
+			vs << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
+
+			fs << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
+			fs << "f " << index - 1 << "//0 " << index - 2 << "//0 " << index << "//0" << std::endl;
+		}
+
+		std::ofstream transfer(filepath);
+		transfer << "o Model" << std::endl;
+		transfer << vs.str();
+		transfer << "s off" << std::endl;
+		transfer << fs.str();
+
+		transfer.close();
 	}
 
 	void graph::compute_dual()

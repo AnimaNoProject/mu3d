@@ -24,11 +24,10 @@ namespace mu3d
 		void load(std::string file);
 		bool unfold(float max_its, float opt_its = 0);
 		void save(std::string mainmodel, std::string gluetabs);
+		void save(std::string filepath);
 	private:
 		Polyhedron _mesh;
 		std::map<int, Facet> _facets;
-		std::vector<glm::vec3> _vertices;
-		std::vector<short> _indices;
 		std::vector<edge> _edges;
 		std::vector<gluetab> _gluetags;
 
@@ -50,7 +49,7 @@ namespace mu3d
 
 		double _Cenergy;
 		float _optEnergy;
-		double _temperature;
+		float _temperature;
 		double _maxtemp;
 		double _opttemperature;
 		bool _optimise;
