@@ -16,20 +16,22 @@ saved in the .obj format. The code is based on the paper [Simulated Annealing to
 ## Usage
 
 ```C++
+#include <iostream>
+#include <mu3d/graph.h>
 // initialize a graph object
 mu3d::graph g = mu3d::graph();
 // load a mesh
 g.load("assets/octa.off");
-// try to unfold the mesh within 1000 iterations
+// try to unfold the mesh within 10000 iterations
 // further, 1000 iterations to optimise the unfolding if one is found
-bool result = g.unfold(1000, 1000);
+bool result = g.unfold(10000, 1000);
 if (!result)
 {
-    std::cerr << "Failed to unfold within 1000 iterations." << std::endl;
+    std::cerr << "Failed to unfold within 10000 iterations." << std::endl;
 }
 else
 {
-    g.save("assets/model.obj", "assets/gluetabs.obj");
+    g.save("assets/igoo.obj");
 }
 return 0;
 ```

@@ -3,6 +3,7 @@
 project(mu3d_test)
 
 include_directories("../glm/glm")
+include_directories("../mu3d")
 add_executable (mu3d_test main.cpp)
 
 target_link_libraries(mu3d_test LINK_PUBLIC mu3d)

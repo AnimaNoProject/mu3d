@@ -1,6 +1,5 @@
 ﻿#include <iostream>
-#include <../mu3d/include/graph.h>
-#include <../mu3d/include/utility.hpp>
+#include <mu3d/graph.h>
 
 int main()
 {
@@ -14,7 +13,7 @@ int main()
 	else
 	{
 		//g.save("assets/model.obj", "assets/gluetabs.obj");
-		g.save("assets/result.obj");
+		g.save("assets/igoo.obj");
 	}
 	return 0;
 }
