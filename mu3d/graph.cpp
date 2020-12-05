@@ -9,7 +9,7 @@ namespace mu3d
 					_optEnergy(0), _optimise(false), 
 					_opttemperature(0), _temperature(0)
 	{
-		srand(time(NULL));
+		srand(static_cast<unsigned int>(time(NULL)));
 	}
 
 	void graph::load(std::string file)
@@ -48,7 +48,7 @@ namespace mu3d
 	{
 		initialise(max_its, opt_its);
 		int progress = 0;
-		int blockpit = ceil(max_its / 10);
+		int blockpit = static_cast<int>(ceil(max_its / 10));
 		utility::print_progress(0);
 
 		while (_temperature > 0 && _Cenergy > 0)
@@ -68,7 +68,7 @@ namespace mu3d
 
 		while (_opttemperature > 0)
 		{
-			compactIt();
+			next_optimise();
 		}
 
 		return _Cenergy == 0;
@@ -76,12 +76,12 @@ namespace mu3d
 
 	void graph::initialise(float max_its, float opt_its)
 	{
-		initEdgeWeight();
+		assign_edge_weights();
 
 		// calculate the dualgraph and an initial MSP and Gluetags
 		compute_dual();
 		compute_mst();
-		calculateGlueTags(_gluetags);
+		compute_gluetabs(_gluetags);
 
 		_temperature = max_its;
 		_maxtemp = max_its;
@@ -89,30 +89,30 @@ namespace mu3d
 		_optimise = opt_its == 0;
 
 		// initialize the energy with this unfolding
-		unfoldTriangles();
-		unfoldGluetags();
+		unfold_mesh();
+		unfold_gluetabs();
 
 		// it is the best we have
 		_Cgt = _gluetags;
 		_C = _edges;
-		_Cenergy = findTriangleOverlaps() + findGluetagOverlaps();
+		_Cenergy = overlapping_area_mesh() + overlapping_area_gluetabs();
 		_CplanarFaces = _planarFaces;
-		_CplanarGluetags = _planarGluetags;
+		_CplanarGluetabs = _planarGluetabs;
 	}
 
 	void graph::next()
 	{
-		randomMove();
+		rand_step();
 
 		// calculate a new spanning tree and gluetags
 		compute_mst();
-		calculateGlueTags(_gluetags);
+		compute_gluetabs(_gluetags);
 
 		// unfold and check for overlaps
-		unfoldTriangles();
-		double trioverlaps = findTriangleOverlaps();
-		unfoldGluetags();
-		double gtoverlaps = findGluetagOverlaps();
+		unfold_mesh();
+		double trioverlaps = overlapping_area_mesh();
+		unfold_gluetabs();
+		double gtoverlaps = overlapping_area_gluetabs();
 
 		double newEnergy = trioverlaps + gtoverlaps;
 
@@ -130,10 +130,10 @@ namespace mu3d
 			_Cenergy = newEnergy;
 
 			_CplanarFaces.clear();
-			_CplanarGluetags.clear();
+			_CplanarGluetabs.clear();
 
 			_CplanarFaces = _planarFaces;
-			_CplanarGluetags = _planarGluetags;
+			_CplanarGluetabs = _planarGluetabs;
 		}
 		// if it is worse, there is a chance we take the worse one (helps getting out of local minimum
 		else if (chance >= random)
@@ -146,10 +146,10 @@ namespace mu3d
 			_Cenergy = newEnergy;
 
 			_CplanarFaces.clear();
-			_CplanarGluetags.clear();
+			_CplanarGluetabs.clear();
 
 			_CplanarFaces = _planarFaces;
-			_CplanarGluetags = _planarGluetags;
+			_CplanarGluetabs = _planarGluetabs;
 		}
 		// continue working with the best
 		else
@@ -171,23 +171,23 @@ namespace mu3d
 		_temperature -= 1;
 	}
 
-	void graph::compactIt()
+	void graph::next_optimise()
 	{
-		randomMove();
+		rand_step();
 
 		// calculate a new spanning tree and gluetags
 		compute_mst();
-		calculateGlueTags(_gluetags);
+		compute_gluetabs(_gluetags);
 
 		// unfold and check for overlaps
-		unfoldTriangles();
-		double trioverlaps = findTriangleOverlaps();
+		unfold_mesh();
+		double trioverlaps = overlapping_area_mesh();
 		double gtoverlaps = 0;
 
 		if (trioverlaps <= 0)
 		{
-			unfoldGluetags();
-			gtoverlaps = findGluetagOverlaps();
+			unfold_gluetabs();
+			gtoverlaps = overlapping_area_gluetabs();
 
 			if (gtoverlaps > 0)
 			{
@@ -218,10 +218,10 @@ namespace mu3d
 			_optEnergy = newEnergy;
 
 			_CplanarFaces.clear();
-			_CplanarGluetags.clear();
+			_CplanarGluetabs.clear();
 
 			_CplanarFaces = _planarFaces;
-			_CplanarGluetags = _planarGluetags;
+			_CplanarGluetabs = _planarGluetabs;
 		}
 		// continue working with the best
 		else
@@ -276,7 +276,7 @@ namespace mu3d
 		std::stringstream vsGt;
 		std::stringstream fsGt;
 		index = 0;
-		for (auto& f2p : _CplanarGluetags)
+		for (auto& f2p : _CplanarGluetabs)
 		{
 			index += 4;
 			vsGt << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
@@ -309,7 +309,7 @@ namespace mu3d
 			fs << "f " << index - 2 << "//0" << " " << index - 1 << "//0" << " " << index << "//0" << std::endl;
 		}
 
-		for (auto& f2p : _CplanarGluetags)
+		for (auto& f2p : _CplanarGluetabs)
 		{
 			index += 4;
 			vs << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
@@ -401,7 +401,7 @@ namespace mu3d
 					continue;
 
 				// if the graph is cyclic
-				if (!isAcyclic(adjacenceList, i, discovered, -1))
+				if (!is_acyclic(adjacenceList, i, discovered, -1))
 				{
 					_mspEdges.erase(remove(_mspEdges.begin(), _mspEdges.end(), edge), _mspEdges.end());
 
@@ -429,17 +429,17 @@ namespace mu3d
 			std::cout << "Edge: " << edge._sFace << "<->" << edge._tFace << std::endl;
 
 		// check if the graph is a single component
-		if (isSingleComponent(adjacenceList))
+		if (is_single_component(adjacenceList))
 			std::cout << "Graph is a single component!" << std::endl;
 		else
 			std::cout << "Graph is a NOT single component!" << std::endl;
 #endif
 	}
 
-	void graph::calculateGlueTags(std::vector<gluetab> gluetabs)
+	void graph::compute_gluetabs(std::vector<gluetab> gluetabs)
 	{
 		// clear old gluetags
-		_necessaryGluetags.clear();
+		_necessaryGluetabs.clear();
 
 #ifndef NDEBUG
 		std::cout << "Gluetags: " << _cutEdges.size() << std::endl;
@@ -459,7 +459,7 @@ namespace mu3d
 
 			// go through all already added gluetags, if the complimentary gluetag was already added we skip this one
 			bool found = false;
-			for (gluetab& other : _necessaryGluetags)
+			for (gluetab& other : _necessaryGluetabs)
 			{
 				if (gt._edge == other._edge)
 				{
@@ -484,7 +484,7 @@ namespace mu3d
 			}
 
 			// now check how many of the cut-edge-neighbours have a gluetag
-			for (gluetab& gluneighbours : _necessaryGluetags)
+			for (gluetab& gluneighbours : _necessaryGluetabs)
 			{
 				if (gt._edge.isNeighbour(gluneighbours._edge))
 				{
@@ -497,27 +497,27 @@ namespace mu3d
 			{
 				tagged[size_t(gt._placedFace)] = true;
 				tagged[size_t(gt._targetFace)] = true;
-				_necessaryGluetags.push_back(gt);
+				_necessaryGluetabs.push_back(gt);
 			}
 		}
 
 #ifndef NDEBUG
-		std::cout << "Necessary Gluetags: " << _necessaryGluetags.size() << std::endl;
+		std::cout << "Necessary Gluetags: " << _necessaryGluetabs.size() << std::endl;
 #endif
 	}
 
-	void graph::unfoldTriangles()
+	void graph::unfold_mesh()
 	{
 		std::vector<bool> discovered;
 		discovered.resize(_facets.size());
 		_planarFaces.clear();
 		_planarFaces.resize(_facets.size());
-		_planarGluetags.clear();
-		resetTree();
-		unfoldTriangles(0, discovered, 0);
+		_planarGluetabs.clear();
+		reset_tree();
+		unfold_mesh(0, discovered, 0);
 	}
 
-	void graph::unfoldTriangles(int index, std::vector<bool>& discovered, int parent)
+	void graph::unfold_mesh(int index, std::vector<bool>& discovered, int parent)
 	{
 		// only the case for the first triangle
 		if (index == parent)
@@ -571,15 +571,15 @@ namespace mu3d
 		{
 			if (!discovered[size_t(_tree[size_t(index)][i])])
 			{
-				unfoldTriangles(int(_tree[int(index)][i]), discovered, int(index));
+				unfold_mesh(int(_tree[int(index)][i]), discovered, int(index));
 			}
 		}
 	}
 
-	void graph::unfoldGluetags()
+	void graph::unfold_gluetabs()
 	{
-		_planarGluetags.clear();
-		for (gluetab& gluetag : _necessaryGluetags)
+		_planarGluetabs.clear();
+		for (gluetab& gluetag : _necessaryGluetabs)
 		{
 			int index = gluetag._placedFace;
 			Polyhedron::Halfedge_around_facet_circulator hfc = _facets[index]->facet_begin();
@@ -622,13 +622,13 @@ namespace mu3d
 					tmp._overlaps = false;
 					tmp.faceindex = index;
 
-					_planarGluetags.push_back(tmp);
+					_planarGluetabs.push_back(tmp);
 				}
 			} while (++hfc != _facets[int(index)]->facet_begin());
 		}
 	}
 
-	double graph::findTriangleOverlaps()
+	double graph::overlapping_area_mesh()
 	{
 		double overlaps = 0;
 
@@ -659,11 +659,11 @@ namespace mu3d
 		return overlaps;
 	}
 
-	double graph::findGluetagOverlaps()
+	double graph::overlapping_area_gluetabs()
 	{
 		double overlaps = 0;
 
-		for (gluetabToPlane& gt : _planarGluetags)
+		for (gluetabToPlane& gt : _planarGluetabs)
 		{
 			for (faceToPlane& face : _planarFaces)
 			{
@@ -680,15 +680,15 @@ namespace mu3d
 			}
 		}
 
-		for (size_t i = 0; i < _planarGluetags.size(); i++)
+		for (size_t i = 0; i < _planarGluetabs.size(); i++)
 		{
-			for (size_t j = i + 1; j < _planarGluetags.size(); j++)
+			for (size_t j = i + 1; j < _planarGluetabs.size(); j++)
 			{
-				double area = _planarGluetags[j].overlaps(_planarGluetags[i]);
+				double area = _planarGluetabs[j].overlaps(_planarGluetabs[i]);
 				if (area > 0)
 				{
 					overlaps += area;
-					_planarGluetags[j]._overlaps = true;
+					_planarGluetabs[j]._overlaps = true;
 					break;
 				}
 			}
@@ -696,14 +696,14 @@ namespace mu3d
 		return overlaps;
 	}
 
-	void graph::randomMove()
+	void graph::rand_step()
 	{
 		// take a random edge and change it's weight
 		size_t random = size_t(rand()) % (_edges.size());
 		_edges[random]._weight = ((double)rand() / (RAND_MAX)) + 1;
 	}
 
-	void graph::resetTree()
+	void graph::reset_tree()
 	{
 		_tree.clear();
 		_tree.resize(_facets.size());
@@ -720,13 +720,13 @@ namespace mu3d
 		}
 	}
 
-	bool graph::isSingleComponent(std::vector<std::vector<int>>& adjacenceList)
+	bool graph::is_single_component(std::vector<std::vector<int>>& adjacenceList)
 	{
 		// list storing discovered nodes
 		std::vector<bool> discovered(_facets.size());
 
 		// check if it is acyclic from the first node
-		if (!isAcyclic(adjacenceList, 0, discovered, -1))
+		if (!is_acyclic(adjacenceList, 0, discovered, -1))
 		{
 			return false;
 		}
@@ -747,7 +747,7 @@ namespace mu3d
 		return true;
 	}
 
-	bool graph::isAcyclic(std::vector<std::vector<int>> const& adjacenceList, int start, std::vector<bool>& discovered, int parent)
+	bool graph::is_acyclic(std::vector<std::vector<int>> const& adjacenceList, int start, std::vector<bool>& discovered, int parent)
 	{
 		// mark current node as discovered
 		discovered[start] = true;
@@ -758,7 +758,7 @@ namespace mu3d
 			// if this node was not discovered
 			if (!discovered[node])
 			{
-				if (!isAcyclic(adjacenceList, int(node), discovered, int(start))) // start dfs from node
+				if (!is_acyclic(adjacenceList, int(node), discovered, int(start))) // start dfs from node
 					return false;
 			}
 			// node is discovered but not a parent => back-edge (cycle)
@@ -772,7 +772,7 @@ namespace mu3d
 		return true;
 	}
 
-	void graph::initEdgeWeight()
+	void graph::assign_edge_weights()
 	{
 		// init edge weights
 		for (edge& edge : _edges)

@@ -34,18 +34,18 @@ namespace mu3d
 		/** Calculated each epoch **/
 		std::vector<edge> _mspEdges;
 		std::vector<edge> _cutEdges;
-		std::vector<gluetab> _necessaryGluetags;
+		std::vector<gluetab> _necessaryGluetabs;
 		std::vector<std::vector<size_t>> _tree;
 
 		/** Best calculated Solution **/
 		std::vector<edge> _C;
 		std::vector<gluetab> _Cgt;
 		std::vector<faceToPlane> _CplanarFaces;
-		std::vector<gluetabToPlane> _CplanarGluetags;
+		std::vector<gluetabToPlane> _CplanarGluetabs;
 		std::vector<gluetabToPlane> _CplanarMirrorGT;
 
 		std::vector<faceToPlane> _planarFaces;
-		std::vector<gluetabToPlane> _planarGluetags;
+		std::vector<gluetabToPlane> _planarGluetabs;
 
 		double _Cenergy;
 		float _optEnergy;
@@ -56,28 +56,28 @@ namespace mu3d
 
 		void initialise(float max_its, float opt_its = 0);
 		void next();
-		void compactIt();
+		void next_optimise();
 
 		int find(Facet facet);
 		bool find(edge& edge);
 
 		void compute_dual();
 		void compute_mst();
-		void calculateGlueTags(std::vector<gluetab> gluetags);
+		void compute_gluetabs(std::vector<gluetab> gluetabs);
 
-		void unfoldTriangles();
-		void unfoldTriangles(int index, std::vector<bool>& discovered, int parent);
-		void unfoldGluetags();
+		void unfold_mesh();
+		void unfold_mesh(int index, std::vector<bool>& discovered, int parent);
+		void unfold_gluetabs();
 
-		double findTriangleOverlaps();
-		double findGluetagOverlaps();
+		double overlapping_area_mesh();
+		double overlapping_area_gluetabs();
 
-		void randomMove();
-		void resetTree();
+		void rand_step();
+		void reset_tree();
 
-		bool isSingleComponent(std::vector<std::vector<int>>& adjacenceList);
-		bool isAcyclic(std::vector<std::vector<int>> const& adjacenceList, int start, std::vector<bool>& discovered, int parent);
-		void initEdgeWeight();
+		bool is_single_component(std::vector<std::vector<int>>& adjacenceList);
+		bool is_acyclic(std::vector<std::vector<int>> const& adjacenceList, int start, std::vector<bool>& discovered, int parent);
+		void assign_edge_weights();
 		float compactness();
 	};
 }

@@ -135,7 +135,7 @@ namespace mu3d
 				rightSum += new_polygon[j].x * new_polygon[i].y;
 			}
 
-			float area = 0.5 * glm::abs(leftSum - rightSum);
+			float area = 0.5f * glm::abs(leftSum - rightSum);
 			if (area < 1e-5) // eliminate the cases where two triangles share one vertex
 			{
 				return 0;
@@ -154,7 +154,7 @@ namespace mu3d
 
 			float n1 = cp1.x * cp2.y - cp1.y * cp2.x;
 			float n2 = s.x * e.y - s.y * e.x;
-			float n3 = 1.0 / (dc.x * dp.y - dc.y * dp.x);
+			float n3 = 1.0f / (dc.x * dp.y - dc.y * dp.x);
 
 			return { (n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3 };
 		}
