@@ -2,6 +2,7 @@
 #include <graph.h>
 #include <utility.hpp>
 #include <stdlib.h>
+#include <CGAL/IO/Polyhedron_iostream.h>
 
 namespace mu3d
 {
@@ -12,6 +13,10 @@ namespace mu3d
 		srand(static_cast<unsigned int>(time(NULL)));
 	}
 
+	graph::~graph()
+	{
+	}
+
 	void graph::load(std::string file)
 	{
 		// open file buffer
@@ -20,8 +25,21 @@ namespace mu3d
 		{
 			// read .off file into CGAL::Polyhedron_3
 			std::istream is(&filebuffer);
-			CGAL::read_off(is, _mesh);
+
+			if (!is)
+			{
+				throw std::exception(("Bad input stream for file \"" + file + "\".").c_str());
+			}
+
+			// scan instead of read so we get some error messages from CGAL
+			CGAL::scan_OFF(is, _mesh, true);
+
 			filebuffer.close();
+
+			// at least one face is necessary, even if its useless
+			assert(_mesh.size_of_vertices() >= 3);
+			assert(_mesh.size_of_halfedges() >= 3);
+			assert(_mesh.size_of_facets() >= 1);
 		}
 		else
 		{
@@ -44,37 +62,42 @@ namespace mu3d
 		}
 	}
 
-	bool graph::unfold(float max_its, float opt_its)
+	bool graph::unfold(int max_its, int opt_its)
 	{
 		initialise(max_its, opt_its);
+
+#ifndef NDEBUG
 		int progress = 0;
 		int blockpit = static_cast<int>(ceil(max_its / 10));
-		utility::print_progress(0);
+		utility::print_progress(0, _Cenergy);
+#endif
 
-		while (_temperature > 0 && _Cenergy > 0)
+		while (_temperature > 0 && _Cenergy > 0.0f)
 		{
 			next();
 
-
+#ifndef NDEBUG
 			if (static_cast<int>(_temperature) % blockpit == 0)
 			{
 				progress++;
-				utility::print_progress(progress);
-				std::cout << "energy: " << _Cenergy;
+				utility::print_progress(progress, _Cenergy);
 			}
+#endif
 		}
 
-		utility::print_progress();
+#ifndef NDEBUG
+		utility::print_progress(10, _Cenergy);
+#endif
 
-		while (_opttemperature > 0)
+		while (_opttemperature > 0.0f)
 		{
 			next_optimise();
 		}
 
-		return _Cenergy == 0;
+		return _Cenergy <= 0.0f;
 	}
 
-	void graph::initialise(float max_its, float opt_its)
+	void graph::initialise(int max_its, int opt_its)
 	{
 		assign_edge_weights();
 
@@ -84,8 +107,8 @@ namespace mu3d
 		compute_gluetabs(_gluetags);
 
 		_temperature = max_its;
-		_maxtemp = max_its;
-		_opttemperature = opt_its;
+		_maxtemp = static_cast<float>(max_its);
+		_opttemperature = static_cast<float>(opt_its);
 		_optimise = opt_its == 0;
 
 		// initialize the energy with this unfolding
@@ -116,7 +139,7 @@ namespace mu3d
 
 		double newEnergy = trioverlaps + gtoverlaps;
 
-		double chance = (1 - std::pow(std::exp(1), -(_temperature) / _maxtemp)) / 2000 / 10;
+		double chance = (1 - std::pow(std::exp(1), -(_temperature) / _maxtemp)) / 2000.0f / 10.0f;
 		double random = (double(std::rand()) / RAND_MAX);
 
 		// if it got better we take the new graph
@@ -161,7 +184,7 @@ namespace mu3d
 			_gluetags = _Cgt;
 		}
 
-		if (_Cenergy <= 0)
+		if (_Cenergy <= 0.0f)
 		{
 			_optimise = true;
 			_optEnergy = compactness();
@@ -244,7 +267,6 @@ namespace mu3d
 		std::stringstream vs;
 		std::stringstream vts;
 		std::stringstream fs;
-		std::stringstream ns;
 
 		int index = 0;
 		for (auto& f2p : _CplanarFaces)
@@ -264,7 +286,7 @@ namespace mu3d
 		}
 
 		transfer << vs.str();
-		transfer << ns.str();
+		transfer << "vn 0 0 0" << std::endl;
 		transfer << vts.str();
 		transfer << "s off" << std::endl;
 		transfer << fs.str();
@@ -828,4 +850,34 @@ namespace mu3d
 	{
 		return std::find(_edges.begin(), _edges.end(), edge) != _edges.end();
 	}
+}
+
+mu3d::graph* __stdcall _graph()
+{
+	return new mu3d::graph();
+}
+
+void __stdcall _deleteGraph(mu3d::graph* g)
+{
+	g->~graph();
+}
+
+void __stdcall _load(mu3d::graph* g, char* file)
+{
+	g->load(std::string(file));
+}
+
+bool __stdcall _unfold(mu3d::graph* g, int max_its, int opt_its)
+{
+	return g->unfold(max_its, opt_its);
+}
+
+void __stdcall _save(mu3d::graph* g, char* mainmodel, char* gluetabs)
+{
+	g->save(std::string(mainmodel), std::string(gluetabs));
+}
+
+void __stdcall _save_unified(mu3d::graph* g, char* filepath)
+{
+	g->save(std::string(filepath));
 }

@@ -21,8 +21,9 @@ namespace mu3d
 	class graph {
 	public:
 		graph();
+		~graph();
 		void load(std::string file);
-		bool unfold(float max_its, float opt_its = 0);
+		bool unfold(int max_its, int opt_its = 0);
 		void save(std::string mainmodel, std::string gluetabs);
 		void save(std::string filepath);
 	private:
@@ -48,13 +49,13 @@ namespace mu3d
 		std::vector<gluetabToPlane> _planarGluetabs;
 
 		double _Cenergy;
-		float _optEnergy;
-		float _temperature;
-		double _maxtemp;
-		double _opttemperature;
+		double _optEnergy;
+		int _temperature;
+		float _maxtemp;
+		float _opttemperature;
 		bool _optimise;
 
-		void initialise(float max_its, float opt_its = 0);
+		void initialise(int max_its, int opt_its = 0);
 		void next();
 		void next_optimise();
 
@@ -81,3 +82,15 @@ namespace mu3d
 		float compactness();
 	};
 }
+
+extern "C" 	__declspec(dllexport) mu3d::graph * __stdcall _graph();
+
+extern "C" 	__declspec(dllexport) void __stdcall _deleteGraph(mu3d::graph * g);
+
+extern "C" 	__declspec(dllexport) void __stdcall _load(mu3d::graph * g, char* file);
+
+extern "C" 	__declspec(dllexport) bool __stdcall _unfold(mu3d::graph * g, int max_its, int opt_its = 0);
+
+extern "C" 	__declspec(dllexport) void __stdcall _save(mu3d::graph * g, char* mainmodel, char* gluetabs);
+
+extern "C" 	__declspec(dllexport) void __stdcall _save_unified(mu3d::graph * g, char* filepath);

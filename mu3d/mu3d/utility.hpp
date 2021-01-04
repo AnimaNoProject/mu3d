@@ -60,15 +60,11 @@ namespace mu3d
 				pu = pu2;
 			}
 		}
-		static void print_progress(int block_idx = 10)
+		static void print_progress(int block_idx, double energy)
 		{
-#ifdef NDEBUG
-			system("CLS");
-#endif
-
 			for (int i = 0; i < block_idx; i++)
 			{
-				std::cout << (char)254u;
+				std::cout << "[]";
 			}
 
 			for (int i = block_idx; i < 10; i++)
@@ -77,7 +73,6 @@ namespace mu3d
 			}
 
 			std::cout << " " << block_idx / 10.0f * 100 << "%" << std::endl;
-
 		}
 		static double sh_overlapping_area(glm::vec2& a, glm::vec2& b, glm::vec2& c, glm::vec2& p, glm::vec2& q, glm::vec2& r)
 		{

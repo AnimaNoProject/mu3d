@@ -4,8 +4,8 @@
 int main()
 {
 	mu3d::graph g = mu3d::graph();
-	g.load("./assets/igloo.off");
-	bool result = g.unfold(50000, 0);
+	g.load("./assets/igloo_complex.off");
+	bool result = g.unfold(5000, 0);
 	if (!result)
 	{
 		std::cerr << "failed to unfold." << std::endl;
@@ -13,7 +13,7 @@ int main()
 	else
 	{
 		//g.save("assets/model.obj", "assets/gluetabs.obj");
-		g.save("assets/igoo.obj");
+		g.save("assets/unfolded.obj");
 	}
 	return 0;
 }

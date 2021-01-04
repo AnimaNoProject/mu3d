@@ -3,9 +3,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Library to unfold triangulated 3D meshes with genus 0.
-The meshes need to be provided in the .off file format and will be
-saved in the .obj format. The code is based on the paper [Simulated Annealing to Unfold 3D Meshes and Assign Glue Tabs](https://otik.uk.zcu.cz/handle/11025/38424).
+Library to unfold triangulated 3D meshes with genus 0. The meshes need to be provided in the .off file format and will be saved in the .obj format. 
+The code is based on the paper [Simulated Annealing to Unfold 3D Meshes and Assign Glue Tabs](https://otik.uk.zcu.cz/handle/11025/38424).
+Native implementation for C++ and a wrapper for python is provided.
 
 ### Built With
 
@@ -14,6 +14,8 @@ saved in the .obj format. The code is based on the paper [Simulated Annealing to
 
 <!-- GETTING STARTED -->
 ## Usage
+
+### Native implementation
 
 ```C++
 #include <iostream>
@@ -36,7 +38,24 @@ else
 return 0;
 ```
 
+### Python wrapper
+
+```python
+from mu3dpy.mu3d import Graph
+
+g = Graph()
+g.load("igloo.off")
+
+if not g.unfold(5000, 0):
+    print("failed to unfold :(")
+else:
+    print("succesfully unfolded :)")
+    g.save_single("temp.obj")
+```
+
 <!-- PREREQUISITES -->
 ### Prerequisites
 
 To be able to build the library you need to have CGAL installed.
+For the python wrapper to work the mu3d.dll needs to be placed in the folder containing the mu3d.py file.
+Post build the mu3d.dll is copied to the mu3dpy folder, that contains the python wrapper.
