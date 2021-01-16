@@ -267,6 +267,7 @@ namespace mu3d
 		std::stringstream vs;
 		std::stringstream vts;
 		std::stringstream fs;
+		std::stringstream vns;
 
 		int index = 0;
 		for (auto& f2p : _CplanarFaces)
@@ -283,10 +284,12 @@ namespace mu3d
 			vts << "vt "	<< f2p.a.x		<< " " << f2p.a.y		<< std::endl;
 			vts << "vt "	<< f2p.b.x		<< " " << f2p.b.y		<< std::endl;
 			vts << "vt "	<< f2p.c.x		<< " " << f2p.c.y		<< std::endl;
+
+			vns << "vn 0 0 0" << std::endl;
 		}
 
 		transfer << vs.str();
-		transfer << "vn 0 0 0" << std::endl;
+		transfer << vns.str() << std::endl;
 		transfer << vts.str();
 		transfer << "s off" << std::endl;
 		transfer << fs.str();
