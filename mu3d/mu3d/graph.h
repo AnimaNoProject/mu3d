@@ -10,6 +10,7 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/squared_distance_3.h>
+#include <random>
 
 typedef CGAL::Polyhedron_3<CGAL::Simple_cartesian<double>>::Halfedge_handle Halfedge;
 typedef CGAL::Simple_cartesian<double> Kernel;
@@ -54,6 +55,8 @@ namespace mu3d
 		float _maxtemp;
 		float _opttemperature;
 		bool _optimise;
+		std::default_random_engine generator;
+  		std::uniform_real_distribution<float> distribution;
 
 		void initialise(int max_its, int opt_its = 0);
 		void next();

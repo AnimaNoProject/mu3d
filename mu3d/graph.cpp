@@ -8,7 +8,7 @@ namespace mu3d
 {
 	graph::graph() : _Cenergy(0), _maxtemp(0), 
 					_optEnergy(0), _optimise(false), 
-					_opttemperature(0), _temperature(0)
+					_opttemperature(0), _temperature(0), distribution(0.0f,1.0f)
 	{
 		srand(static_cast<unsigned int>(time(NULL)));
 	}
@@ -66,28 +66,26 @@ namespace mu3d
 	{
 		initialise(max_its, opt_its);
 
-#ifndef NDEBUG
 		int progress = 0;
 		int blockpit = static_cast<int>(ceil(max_its / 10));
 		utility::print_progress(0, _Cenergy);
-#endif
 
-		while (_temperature > 0 && _Cenergy > 0.0f)
+
+
+		while (_temperature > 0 && _Cenergy > 0.01f)
 		{
 			next();
-
-#ifndef NDEBUG
 			if (static_cast<int>(_temperature) % blockpit == 0)
 			{
 				progress++;
 				utility::print_progress(progress, _Cenergy);
 			}
-#endif
+
+			std::cout << _Cenergy << std::endl;
 		}
 
-#ifndef NDEBUG
+
 		utility::print_progress(10, _Cenergy);
-#endif
 
 		while (_opttemperature > 0.0f)
 		{
@@ -142,6 +140,7 @@ namespace mu3d
 		double chance = (1 - std::pow(std::exp(1), -(_temperature) / _maxtemp)) / 2000.0f / 10.0f;
 		double random = (double(std::rand()) / RAND_MAX);
 
+
 		// if it got better we take the new graph
 		if (newEnergy <= _Cenergy)
 		{
@@ -184,7 +183,7 @@ namespace mu3d
 			_gluetags = _Cgt;
 		}
 
-		if (_Cenergy <= 0.0f)
+		if (_Cenergy <= 0.01f)
 		{
 			_optimise = true;
 			_optEnergy = compactness();
