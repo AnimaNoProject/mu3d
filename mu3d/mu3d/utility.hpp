@@ -72,7 +72,7 @@ namespace mu3d
 				std::cout << "_";
 			}
 
-			std::cout << " " << block_idx / 10.0f * 100 << "%" << std::endl;
+			std::cout << " " << block_idx / 10.0f * 100 << "% with " << energy << std::endl;
 		}
 		static double sh_overlapping_area(glm::dvec2& a, glm::dvec2& b, glm::dvec2& c, glm::dvec2& p, glm::dvec2& q, glm::dvec2& r)
 		{

@@ -3,6 +3,7 @@
 #include <utility.hpp>
 #include <stdlib.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
+#include <CGAL/Polygon_mesh_processing/repair.h>
 
 namespace mu3d
 {
@@ -46,19 +47,20 @@ namespace mu3d
 			throw std::exception(("Failed to load \"" + file + "\".").c_str());
 		}
 
-		// loop through all facets
+		assert(CGAL::is_valid_polygon_mesh(_mesh, true));
+		assert(CGAL::is_triangle_mesh(_mesh));
+		assert(!CGAL::Polygon_mesh_processing::does_self_intersect(_mesh));
+
+		for(auto& v = _mesh.vertices_begin(); v != _mesh.vertices_end(); v++)
+		{
+			// there should be no non-manifold vertices
+			assert(!CGAL::Polygon_mesh_processing::is_non_manifold_vertex(v, _mesh));
+		}
+
+		size_t face_id = 0;
 		for (Polyhedron::Facet_iterator fi = _mesh.facets_begin(); fi != _mesh.facets_end(); ++fi)
 		{
-			if (_facets.empty())
-			{
-				// first facet
-				_facets.insert(std::make_pair(0, fi));
-			}
-			else
-			{
-				// all other facets get the index+1
-				_facets.insert(std::make_pair(_facets.rbegin()->first + 1, fi));
-			}
+			_facets.insert(std::make_pair(face_id++, fi));
 		}
 	}
 
