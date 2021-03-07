@@ -24,7 +24,7 @@ namespace mu3d
 
         double _weight;
 
-        edge(int sFace, int tFace, glm::vec3 middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
+        edge(int sFace, int tFace, glm::dvec3 middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle);
         edge(int sFace, int tFace);
         edge();
         ~edge();

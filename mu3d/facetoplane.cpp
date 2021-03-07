@@ -16,7 +16,7 @@ namespace mu3d
         return utility::sh_overlapping_area(a, b, c, other.a, other.b, other.c);
     }
 
-    glm::vec2 const& faceToPlane::get(glm::vec3 const& vec)
+    glm::dvec2 const& faceToPlane::get(glm::dvec3 const& vec)
     {
         if (vec == A)
             return a;
@@ -28,7 +28,7 @@ namespace mu3d
             throw std::invalid_argument("something went wrong trying to retrieve 2D representation");
     }
 
-    glm::vec3 const& faceToPlane::get(glm::vec2 const& vec)
+    glm::dvec3 const& faceToPlane::get(glm::dvec2 const& vec)
     {
         if (vec == a)
             return A;
@@ -40,7 +40,7 @@ namespace mu3d
             throw std::invalid_argument("something went wrong trying to retrieve 3D representation");
     }
 
-    glm::vec3 const& faceToPlane::get(glm::vec3 const& one, glm::vec3 const& two)
+    glm::dvec3 const& faceToPlane::get(glm::dvec3 const& one, glm::dvec3 const& two)
     {
         if (one != A && two != A)
             return A;

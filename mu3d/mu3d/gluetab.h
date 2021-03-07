@@ -10,10 +10,10 @@ namespace mu3d
         int _placedFace;
         int _targetFace;
         edge _edge;
-        glm::vec3 _bl;
-        glm::vec3 _br;
-        glm::vec3 _tl;
-        glm::vec3 _tr;
+        glm::dvec3 _bl;
+        glm::dvec3 _br;
+        glm::dvec3 _tl;
+        glm::dvec3 _tr;
 
         double _probability;
 

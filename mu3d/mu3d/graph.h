@@ -55,8 +55,8 @@ namespace mu3d
 		float _maxtemp;
 		float _opttemperature;
 		bool _optimise;
-		std::default_random_engine generator;
-  		std::uniform_real_distribution<float> distribution;
+		std::default_random_engine _generator;
+  		std::uniform_real_distribution<double> _distribution;
 
 		void initialise(int max_its, int opt_its = 0);
 		void next();
@@ -82,7 +82,7 @@ namespace mu3d
 		bool is_single_component(std::vector<std::vector<int>>& adjacenceList);
 		bool is_acyclic(std::vector<std::vector<int>> const& adjacenceList, int start, std::vector<bool>& discovered, int parent);
 		void assign_edge_weights();
-		float compactness();
+		double compactness();
 	};
 }
 

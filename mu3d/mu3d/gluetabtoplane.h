@@ -14,10 +14,10 @@ namespace mu3d
         gluetabToPlane(gluetab* gluetab);
         ~gluetabToPlane();
 
-        glm::vec2 a;
-        glm::vec2 b;
-        glm::vec2 c;
-        glm::vec2 d;
+        glm::dvec2 a;
+        glm::dvec2 b;
+        glm::dvec2 c;
+        glm::dvec2 d;
 
         bool _overlaps;
 
@@ -29,7 +29,7 @@ namespace mu3d
         double overlaps(gluetabToPlane& other);
         double overlaps(faceToPlane& other);
 
-        glm::vec2 const& get(glm::vec3 const& vec);
-        glm::vec3 const& get(glm::vec2 const& vec);
+        glm::dvec2 const& get(glm::dvec3 const& vec);
+        glm::dvec3 const& get(glm::dvec2 const& vec);
     };
 }

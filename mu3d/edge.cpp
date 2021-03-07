@@ -3,7 +3,7 @@
 
 namespace mu3d
 {
-	edge::edge(int sFace, int tFace, glm::vec3 middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle)
+	edge::edge(int sFace, int tFace, glm::dvec3 middle, Halfedge halfedge, Facet sFacetHandle, Facet tFacetHandle)
 		: _sFace(sFace), _tFace(tFace),
 		_sFacetHandle(sFacetHandle), _tFacetHandle(tFacetHandle), _halfedge(halfedge), _weight(double(std::rand()) / RAND_MAX)
 	{
@@ -13,16 +13,16 @@ namespace mu3d
 		 * */
 		isInwards = true;
 
-		glm::vec3 A = utility::point_to_vector(sFacetHandle->halfedge()->vertex()->point());
-		glm::vec3 B = utility::point_to_vector(sFacetHandle->halfedge()->next()->vertex()->point());
-		glm::vec3 C = utility::point_to_vector(sFacetHandle->halfedge()->next()->next()->vertex()->point());
+		glm::dvec3 A = utility::point_to_vector(sFacetHandle->halfedge()->vertex()->point());
+		glm::dvec3 B = utility::point_to_vector(sFacetHandle->halfedge()->next()->vertex()->point());
+		glm::dvec3 C = utility::point_to_vector(sFacetHandle->halfedge()->next()->next()->vertex()->point());
 
-		glm::vec3 F = utility::point_to_vector(tFacetHandle->halfedge()->vertex()->point());
-		glm::vec3 G = utility::point_to_vector(tFacetHandle->halfedge()->next()->vertex()->point());
-		glm::vec3 H = utility::point_to_vector(tFacetHandle->halfedge()->next()->next()->vertex()->point());
+		glm::dvec3 F = utility::point_to_vector(tFacetHandle->halfedge()->vertex()->point());
+		glm::dvec3 G = utility::point_to_vector(tFacetHandle->halfedge()->next()->vertex()->point());
+		glm::dvec3 H = utility::point_to_vector(tFacetHandle->halfedge()->next()->next()->vertex()->point());
 
-		glm::vec3 p;
-		glm::vec3 q;
+		glm::dvec3 p;
+		glm::dvec3 q;
 
 		if (A != F && A != G && A != H)
 		{
@@ -40,9 +40,9 @@ namespace mu3d
 			q = A;
 		}
 
-		glm::vec3 e = p - q;
-		glm::vec3 n = glm::cross(G - F, H - G);
-		float angle = glm::dot(e, n);
+		glm::dvec3 e = p - q;
+		glm::dvec3 n = glm::cross(G - F, H - G);
+		double angle = glm::dot(e, n);
 		if (angle <= 0)
 		{
 			isInwards = false;

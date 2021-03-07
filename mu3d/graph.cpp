@@ -8,7 +8,7 @@ namespace mu3d
 {
 	graph::graph() : _Cenergy(0), _maxtemp(0), 
 					_optEnergy(0), _optimise(false), 
-					_opttemperature(0), _temperature(0), distribution(0.0f,1.0f)
+					_opttemperature(0), _temperature(0), _distribution(0.0,1.0)
 	{
 		srand(static_cast<unsigned int>(time(NULL)));
 	}
@@ -72,7 +72,7 @@ namespace mu3d
 
 
 
-		while (_temperature > 0 && _Cenergy > 0.01f)
+		while (_temperature > 0 && _Cenergy > 0.0f)
 		{
 			next();
 			if (static_cast<int>(_temperature) % blockpit == 0)
@@ -80,10 +80,7 @@ namespace mu3d
 				progress++;
 				utility::print_progress(progress, _Cenergy);
 			}
-
-			std::cout << _Cenergy << std::endl;
 		}
-
 
 		utility::print_progress(10, _Cenergy);
 
@@ -124,41 +121,18 @@ namespace mu3d
 	void graph::next()
 	{
 		rand_step();
-
 		// calculate a new spanning tree and gluetags
 		compute_mst();
 		compute_gluetabs(_gluetags);
-
 		// unfold and check for overlaps
 		unfold_mesh();
-		double trioverlaps = overlapping_area_mesh();
 		unfold_gluetabs();
-		double gtoverlaps = overlapping_area_gluetabs();
-
-		double newEnergy = trioverlaps + gtoverlaps;
-
-		double chance = (1 - std::pow(std::exp(1), -(_temperature) / _maxtemp)) / 2000.0f / 10.0f;
-		double random = (double(std::rand()) / RAND_MAX);
-
+		double newEnergy = overlapping_area_mesh() + overlapping_area_gluetabs();
 
 		// if it got better we take the new graph
-		if (newEnergy <= _Cenergy)
-		{
-			_Cgt.clear();
-			_C.clear();
-
-			_Cgt = _gluetags;
-			_C = _edges;
-			_Cenergy = newEnergy;
-
-			_CplanarFaces.clear();
-			_CplanarGluetabs.clear();
-
-			_CplanarFaces = _planarFaces;
-			_CplanarGluetabs = _planarGluetabs;
-		}
-		// if it is worse, there is a chance we take the worse one (helps getting out of local minimum
-		else if (chance >= random)
+		if (newEnergy < _Cenergy || 
+			// or acceptance probability high enough
+			std::exp((_Cenergy - newEnergy) / _temperature) / 100.0 > _distribution(_generator))
 		{
 			_Cgt.clear();
 			_C.clear();
@@ -183,7 +157,7 @@ namespace mu3d
 			_gluetags = _Cgt;
 		}
 
-		if (_Cenergy <= 0.01f)
+		if (_Cenergy <= 0.0f)
 		{
 			_optimise = true;
 			_optEnergy = compactness();
@@ -228,7 +202,7 @@ namespace mu3d
 			_gluetags = _Cgt;
 		}
 
-		float newEnergy = compactness();
+		double newEnergy = compactness();
 		// if it got better we take the new graph
 		if (newEnergy <= _optEnergy)
 		{
@@ -370,7 +344,7 @@ namespace mu3d
 				int oppositeFaceId = find(hfc->opposite()->facet());
 
 				// center of the edge
-				glm::vec3 center = (utility::point_to_vector(hfc->prev()->vertex()->point()) + utility::point_to_vector(hfc->vertex()->point())) / 2.0f;
+				glm::dvec3 center = (utility::point_to_vector(hfc->prev()->vertex()->point()) + utility::point_to_vector(hfc->vertex()->point())) * (double)0.5;
 
 				edge e = edge(faceId, oppositeFaceId, center, hfc, _facets[faceId], _facets[oppositeFaceId]);
 
@@ -563,16 +537,16 @@ namespace mu3d
 			Polyhedron::Halfedge_around_facet_circulator hfc = _facets[int(index)]->facet_begin();
 			do
 			{
-				glm::vec3 Pu = utility::point_to_vector(hfc->vertex()->point());
+				glm::dvec3 Pu = utility::point_to_vector(hfc->vertex()->point());
 				// if this vertex is not shared it is the unkown one
 				if (Pu != _planarFaces[size_t(parent)].A && Pu != _planarFaces[size_t(parent)].B && Pu != _planarFaces[size_t(parent)].C)
 				{ // bottom right
-					glm::vec3 P1 = utility::point_to_vector(hfc->next()->vertex()->point());
-					glm::vec3 P2 = utility::point_to_vector(hfc->next()->next()->vertex()->point());
+					glm::dvec3 P1 = utility::point_to_vector(hfc->next()->vertex()->point());
+					glm::dvec3 P2 = utility::point_to_vector(hfc->next()->next()->vertex()->point());
 
-					glm::vec2 p1 = _planarFaces[size_t(parent)].get(P1);
-					glm::vec2 p2 = _planarFaces[size_t(parent)].get(P2);
-					glm::vec2 p3prev = _planarFaces[size_t(parent)].get(_planarFaces[size_t(parent)].get(P1, P2));
+					glm::dvec2 p1 = _planarFaces[size_t(parent)].get(P1);
+					glm::dvec2 p2 = _planarFaces[size_t(parent)].get(P2);
+					glm::dvec2 p3prev = _planarFaces[size_t(parent)].get(_planarFaces[size_t(parent)].get(P1, P2));
 
 					_planarFaces[size_t(index)].A = P1;
 					_planarFaces[size_t(index)].B = P2;
@@ -609,18 +583,18 @@ namespace mu3d
 			Polyhedron::Halfedge_around_facet_circulator hfc = _facets[index]->facet_begin();
 			do
 			{
-				glm::vec3 Pu = utility::point_to_vector(hfc->vertex()->point());
+				glm::dvec3 Pu = utility::point_to_vector(hfc->vertex()->point());
 
 				// if this vertex is not shared it is the unkown one
 				if (Pu != utility::point_to_vector(gluetag._edge._halfedge->vertex()->point())
 					&& Pu != utility::point_to_vector(gluetag._edge._halfedge->prev()->vertex()->point()))
 				{
-					glm::vec3 P1 = utility::point_to_vector(hfc->next()->vertex()->point()); // bottom left
-					glm::vec3 P2 = utility::point_to_vector(hfc->next()->next()->vertex()->point()); // bottom right
+					glm::dvec3 P1 = utility::point_to_vector(hfc->next()->vertex()->point()); // bottom left
+					glm::dvec3 P2 = utility::point_to_vector(hfc->next()->next()->vertex()->point()); // bottom right
 
-					glm::vec2 p1 = _planarFaces[size_t(index)].get(P1);
-					glm::vec2 p2 = _planarFaces[size_t(index)].get(P2);
-					glm::vec2 p3prev = _planarFaces[size_t(index)].get(Pu);
+					glm::dvec2 p1 = _planarFaces[size_t(index)].get(P1);
+					glm::dvec2 p2 = _planarFaces[size_t(index)].get(P2);
+					glm::dvec2 p3prev = _planarFaces[size_t(index)].get(Pu);
 
 					gluetabToPlane tmp(&gluetag);
 
@@ -635,7 +609,7 @@ namespace mu3d
 						tmp.a = p2;
 					}
 
-					glm::vec2 side = (tmp.b - tmp.a) / 8.0f;
+					glm::dvec2 side = (tmp.b - tmp.a) / 8.0;
 
 					tmp.b = tmp.b - side;
 					tmp.a = tmp.a + side;
@@ -810,9 +784,9 @@ namespace mu3d
 		}
 	}
 
-	float graph::compactness()
+	double graph::compactness()
 	{
-		std::vector<glm::vec2> points;
+		std::vector<glm::dvec2> points;
 		for (faceToPlane& face : _planarFaces)
 		{
 			points.push_back(face.a);
@@ -820,13 +794,13 @@ namespace mu3d
 			points.push_back(face.c);
 		}
 
-		auto xExtrema = std::minmax_element(points.begin(), points.end(), [](const glm::vec2& lhs, const glm::vec2& rhs)
+		auto xExtrema = std::minmax_element(points.begin(), points.end(), [](const glm::dvec2& lhs, const glm::dvec2& rhs)
 		{ return lhs.x < rhs.x; });
-		auto yExtrema = std::minmax_element(points.begin(), points.end(), [](const glm::vec2& lhs, const glm::vec2& rhs)
+		auto yExtrema = std::minmax_element(points.begin(), points.end(), [](const glm::dvec2& lhs, const glm::dvec2& rhs)
 		{ return lhs.y < rhs.y; });
 
-		glm::vec2 ul(xExtrema.first->x, yExtrema.first->y);
-		glm::vec2 lr(xExtrema.second->x, yExtrema.second->y);
+		glm::dvec2 ul(xExtrema.first->x, yExtrema.first->y);
+		glm::dvec2 lr(xExtrema.second->x, yExtrema.second->y);
 
 		return std::abs(lr.x - ul.x) + std::abs(ul.y - lr.y);
 	}
