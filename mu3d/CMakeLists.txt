@@ -44,5 +44,5 @@ target_include_directories(mu3ds PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_custom_command(
         TARGET mu3ds POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy 
-                "${CMAKE_CURRENT_BINARY_DIR}/mu3ds.dll"
+				$<TARGET_FILE:mu3ds>
 				"${CMAKE_CURRENT_SOURCE_DIR}/../mu3dpy/mu3d.dll")
