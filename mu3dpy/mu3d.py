@@ -1,6 +1,6 @@
 import ctypes
 import os
-
+from sys import platform
 
 class Graph(object):
     """
@@ -12,7 +12,13 @@ class Graph(object):
         Initialises the object to call c++ functions.
         """
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.cgraph = ctypes.WinDLL(dir_path + "/mu3d.dll")
+        if platform == "linux" or platform == "linux2" or platform == "darwin":
+            self.cgraph = ctypes.CDLL(dir_path + "/mu3d.so")
+        elif platform == "win32":
+            self.cgraph = ctypes.WinDLL(dir_path + "/mu3d.dll")
+        else:
+            raise Exception("unsupported platform")
+
         self.cgraph._graph.restype = ctypes.c_void_p
         self.cgraph._load.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         self.cgraph._unfold.argtypes = [ctypes.c_void_p, ctypes.c_int16, ctypes.c_int16]

@@ -12,8 +12,8 @@ int main()
 	}
 	else
 	{
-		g.save("assets/model.obj", "assets/gluetabs.obj");
-		//g.save("assets/unfolded.obj");
+		//g.save("assets/model.obj", "assets/gluetabs.obj");
+		g.save("assets/unfolded.obj");
 	}
 	return 0;
 }
