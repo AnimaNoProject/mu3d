@@ -11,6 +11,7 @@ Native implementation for C++ and a wrapper for python is provided.
 
 * [glm](https://glm.g-truc.net/0.9.9/index.html)
 * [CGAL](https://www.cgal.org/)
+* [Boost](https://www.boost.org/)
 
 <!-- GETTING STARTED -->
 ## Usage
@@ -56,6 +57,11 @@ else:
 <!-- PREREQUISITES -->
 ### Prerequisites
 
-To be able to build the library you need to have CGAL installed.
+To be able to build the library you need to have CGAL and Boost installed.
 For the python wrapper to work the mu3d.dll needs to be placed in the folder containing the mu3d.py file.
 Post build the mu3d.dll is copied to the mu3dpy folder, that contains the python wrapper.
+
+* Install [CGAL](https://www.cgal.org/download/windows.html)
+* Add `CGAL_DIR` to your environment variables pointing to your CGAL installation (i.e. `C:\dev\CGAL-5.1`)
+* Install [Boost](https://www.boost.org/users/history/version_1_76_0.html)
+* Add `BOOST_ROOT` to your environment variables poingto to your Boost installation (i.e. `C:\dev\boost_1_74_0`)
