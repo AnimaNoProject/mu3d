@@ -64,4 +64,4 @@ Post build the mu3d.dll is copied to the mu3dpy folder, that contains the python
 * Install [CGAL](https://www.cgal.org/download/windows.html)
 * Add `CGAL_DIR` to your environment variables pointing to your CGAL installation (i.e. `C:\dev\CGAL-5.1`)
 * Install [Boost](https://www.boost.org/users/history/version_1_76_0.html)
-* Add `BOOST_ROOT` to your environment variables poingto to your Boost installation (i.e. `C:\dev\boost_1_74_0`)
+* Add `BOOST_ROOT` to your environment variables pointing to your Boost installation (i.e. `C:\dev\boost_1_74_0`)
