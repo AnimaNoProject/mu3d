@@ -235,6 +235,130 @@ namespace mu3d
 		_opttemperature -= 1;
 	}
 
+	void graph::compute_gluetab_target(std::vector<gluetabToPlane>& gluetabs)
+	{
+		for (auto gttp : gluetabs)
+		{
+			int index = gttp._gluetag->_targetFace;
+			Polyhedron::Halfedge_around_facet_circulator hfc = _facets[index]->facet_begin();
+			const auto& gt = gttp._gluetag;
+			do
+			{
+				glm::dvec3 Pu = utility::point_to_vector(hfc->vertex()->point());
+
+				// if this vertex is not shared it is the unkown one
+				if (Pu != utility::point_to_vector(gt->_edge._halfedge->vertex()->point())
+					&& Pu != utility::point_to_vector(gt->_edge._halfedge->prev()->vertex()->point()))
+				{
+					glm::dvec3 P1 = utility::point_to_vector(hfc->next()->vertex()->point()); // bottom left
+					glm::dvec3 P2 = utility::point_to_vector(hfc->next()->next()->vertex()->point()); // bottom right
+
+					glm::dvec2 p1 = _planarFaces[size_t(index)].get(P1);
+					glm::dvec2 p2 = _planarFaces[size_t(index)].get(P2);
+					glm::dvec2 p3prev = _planarFaces[size_t(index)].get(Pu);
+
+					gluetabToPlane mirror(gt);
+
+					if (P1 == gt->_bl)
+					{
+						mirror.a = p1;
+						mirror.b = p2;
+					}
+					else
+					{
+						mirror.b = p1;
+						mirror.a = p2;
+					}
+
+					glm::dvec2 side = (mirror.b - mirror.a) / 8.0;
+
+					mirror.b = mirror.b - side;
+					mirror.a = mirror.a + side;
+
+					utility::planar(gt->_bl, gt->_br, gt->_tl, mirror.a, mirror.b, p3prev, mirror.c, true);
+					utility::planar(gt->_bl, gt->_br, gt->_tr, mirror.a, mirror.b, p3prev, mirror.d, true);
+
+					_CplanarMirrorGT.push_back(mirror);
+				}
+			} while (++hfc != _facets[int(index)]->facet_begin());
+		}
+	}
+
+	void graph::save(std::string mainmodel, std::string gluetabs, std::string gluetabsMirror)
+	{
+		compute_gluetab_target(_CplanarGluetabs);
+
+		std::ofstream transfer(mainmodel);
+		transfer << "o Model" << std::endl;
+		std::stringstream vs;
+		std::stringstream vts;
+		std::stringstream fs;
+		std::stringstream vns;
+
+		int index = 0;
+		for (auto& f2p : _CplanarFaces)
+		{
+			index += 3;
+			vs << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
+			vs << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
+			vs << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
+
+			fs << "f " << index - 2 << "//0" << " " << index - 1 << "//0" << " " << index << "//0" << std::endl;
+		}
+
+		transfer << vs.str();
+		transfer << vns.str() << std::endl;
+		transfer << vts.str();
+		transfer << "s off" << std::endl;
+		transfer << fs.str();
+
+		transfer.close();
+
+		std::cout << _CplanarGluetabs.size() << ", " << _CplanarMirrorGT.size() << std::endl;
+
+		std::ofstream transferGT(gluetabs);
+		transferGT << "o Gluetabs" << std::endl;
+		std::stringstream vsGt;
+		std::stringstream fsGt;
+		index = 0;
+		for (auto& f2p : _CplanarGluetabs)
+		{
+			index += 4;
+			vsGt << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
+			vsGt << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
+			vsGt << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
+			vsGt << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
+
+			fsGt << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
+			fsGt << "f " << index - 1 << "//0 " << index - 2 << "//0 " << index << "//0" << std::endl;
+		}
+
+		transferGT << vsGt.str() << std::endl;
+		transferGT << fsGt.str() << std::endl;
+		transferGT.close();
+
+		std::ofstream transfermirrorGT(gluetabsMirror);
+		transfermirrorGT << "o GluetabsMirrored" << std::endl;
+		std::stringstream vsmGt;
+		std::stringstream fsmGt;
+		index = 0;
+		for (auto& f2p : _CplanarMirrorGT)
+		{
+			index += 4;
+			vsmGt << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
+			vsmGt << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
+			vsmGt << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
+			vsmGt << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
+
+			fsmGt << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
+			fsmGt << "f " << index - 1 << "//0 " << index - 2 << "//0 " << index << "//0" << std::endl;
+		}
+
+		transfermirrorGT << vsmGt.str() << std::endl;
+		transfermirrorGT << fsmGt.str() << std::endl;
+		transfermirrorGT.close();
+	}
+
 	void graph::save(std::string mainmodel, std::string gluetabs)
 	{
 		std::ofstream transfer(mainmodel);
@@ -579,17 +703,17 @@ namespace mu3d
 	void graph::unfold_gluetabs()
 	{
 		_planarGluetabs.clear();
-		for (gluetab& gluetag : _necessaryGluetabs)
+		for (gluetab& gt : _necessaryGluetabs)
 		{
-			int index = gluetag._placedFace;
+			int index = gt._placedFace;
 			Polyhedron::Halfedge_around_facet_circulator hfc = _facets[index]->facet_begin();
 			do
 			{
 				glm::dvec3 Pu = utility::point_to_vector(hfc->vertex()->point());
 
 				// if this vertex is not shared it is the unkown one
-				if (Pu != utility::point_to_vector(gluetag._edge._halfedge->vertex()->point())
-					&& Pu != utility::point_to_vector(gluetag._edge._halfedge->prev()->vertex()->point()))
+				if (Pu != utility::point_to_vector(gt._edge._halfedge->vertex()->point())
+					&& Pu != utility::point_to_vector(gt._edge._halfedge->prev()->vertex()->point()))
 				{
 					glm::dvec3 P1 = utility::point_to_vector(hfc->next()->vertex()->point()); // bottom left
 					glm::dvec3 P2 = utility::point_to_vector(hfc->next()->next()->vertex()->point()); // bottom right
@@ -598,9 +722,9 @@ namespace mu3d
 					glm::dvec2 p2 = _planarFaces[size_t(index)].get(P2);
 					glm::dvec2 p3prev = _planarFaces[size_t(index)].get(Pu);
 
-					gluetabToPlane tmp(&gluetag);
+					gluetabToPlane tmp(&gt);
 
-					if (P1 == gluetag._bl)
+					if (P1 == gt._bl)
 					{
 						tmp.a = p1;
 						tmp.b = p2;
@@ -616,8 +740,8 @@ namespace mu3d
 					tmp.b = tmp.b - side;
 					tmp.a = tmp.a + side;
 
-					utility::planar(gluetag._bl, gluetag._br, gluetag._tl, tmp.a, tmp.b, p3prev, tmp.c);
-					utility::planar(gluetag._bl, gluetag._br, gluetag._tr, tmp.a, tmp.b, p3prev, tmp.d);
+					utility::planar(gt._bl, gt._br, gt._tl, tmp.a, tmp.b, p3prev, tmp.c);
+					utility::planar(gt._bl, gt._br, gt._tr, tmp.a, tmp.b, p3prev, tmp.d);
 
 					tmp._overlaps = false;
 					tmp.faceindex = index;
@@ -853,6 +977,11 @@ bool __stdcall _unfold(mu3d::graph* g, int max_its, int opt_its)
 void __stdcall _save(mu3d::graph* g, char* mainmodel, char* gluetabs)
 {
 	g->save(std::string(mainmodel), std::string(gluetabs));
+}
+
+void __stdcall _save(mu3d::graph* g, char* mainmodel, char* gluetabs, char* gluetabsmirror)
+{
+	g->save(std::string(mainmodel), std::string(gluetabs), std::string(gluetabsmirror));
 }
 
 void __stdcall _save_unified(mu3d::graph* g, char* filepath)

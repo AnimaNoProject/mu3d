@@ -24,6 +24,7 @@ class Graph(object):
         self.cgraph._unfold.argtypes = [ctypes.c_void_p, ctypes.c_int16, ctypes.c_int16]
         self.cgraph._unfold.restype = ctypes.c_bool
         self.cgraph._save.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        self.cgraph._save_all.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
         self.cgraph._save_unified.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         self.obj = self.cgraph._graph()
 
@@ -72,3 +73,14 @@ class Graph(object):
         :return: None
         """
         self.cgraph._save(self.obj, modelfile.encode(), gluetabfile.encode())
+
+    def save_all(self, modelfile, gluetabfile, gluetabmirrorfile):
+        """
+        Saves the 3D model to an obj formatted file with the given name,
+        the glue tabs and mirrored glue tabs are saved with 2D coordinates in an obj formatted file with the given name.
+        :param modelfile: File where the 3D model is saved to.
+        :param gluetabfile: File where the unfolded glue tabs are saved to.
+        :param gluetabmirrorfile: File where the mirrored unfolded glue tabs (glue area on faces) are saved to.
+        :return: None
+        """
+        self.cgraph._save_all(self.obj, modelfile.encode(), gluetabfile.encode(), gluetabmirrorfile.encode())

@@ -17,7 +17,7 @@ namespace mu3d
 		{
 			return glm::dvec3(point.x(), point.y(), point.z());
 		}
-		static void planar(glm::dvec3 const& A, glm::dvec3 const& B, glm::dvec3 const& C, glm::dvec2& a, glm::dvec2& b, glm::dvec2& c)
+		static void planar(const glm::dvec3& A, const glm::dvec3& B, const glm::dvec3& C, glm::dvec2& a, glm::dvec2& b, glm::dvec2& c)
 		{
 
 			double lengthAB = glm::length(A - B);
@@ -31,7 +31,7 @@ namespace mu3d
 			c = glm::dvec2(a.x + cl * (b.x - a.x) - s * (b.y - a.y),
 				a.y + cl * (b.y - a.y) + s * (b.x - a.x));
 		}
-		static void planar(glm::dvec3 const& P1, glm::dvec3 const& P2, glm::dvec3 const& Pu, glm::dvec2 const& p1, glm::dvec2 const& p2, glm::dvec2 const& p3prev, glm::dvec2& pu)
+		static void planar(const glm::dvec3& P1, const glm::dvec3& P2, const glm::dvec3& Pu, const glm::dvec2& p1, const glm::dvec2& p2, const glm::dvec2& p3prev, glm::dvec2& pu, bool flip = false)
 		{
 			double length = glm::length(p1 - p2);
 
@@ -53,13 +53,14 @@ namespace mu3d
 						&& ((pu1.x - p1.x) * (p2.y - p1.y) - (pu1.y - p1.y) * (p2.x - p1.x) < 0))
 					))
 			{
-				pu = pu1;
+				pu = flip ? pu2 : pu1;
 			}
 			else
 			{
-				pu = pu2;
+				pu = flip ? pu1 : pu2;
 			}
 		}
+
 		static void print_progress(int block_idx, double energy)
 		{
 			for (int i = 0; i < block_idx; i++)

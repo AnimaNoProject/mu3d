@@ -26,6 +26,7 @@ namespace mu3d
 		void load(std::string file);
 		bool unfold(int max_its, int opt_its = 0);
 		void save(std::string mainmodel, std::string gluetabs);
+		void save(std::string mainmodel, std::string gluetabs, std::string gluetabsMirror);
 		void save(std::string filepath);
 	private:
 		Polyhedron _mesh;
@@ -68,6 +69,7 @@ namespace mu3d
 		void compute_dual();
 		void compute_mst();
 		void compute_gluetabs(std::vector<gluetab> gluetabs);
+		void compute_gluetab_target(std::vector<gluetabToPlane>& gluetabs);
 
 		void unfold_mesh();
 		void unfold_mesh(int index, std::vector<bool>& discovered, int parent);
@@ -95,5 +97,7 @@ extern "C" 	__declspec(dllexport) void __stdcall _load(mu3d::graph * g, char* fi
 extern "C" 	__declspec(dllexport) bool __stdcall _unfold(mu3d::graph * g, int max_its, int opt_its = 0);
 
 extern "C" 	__declspec(dllexport) void __stdcall _save(mu3d::graph * g, char* mainmodel, char* gluetabs);
+
+extern "C" 	__declspec(dllexport) void __stdcall _save(mu3d::graph * g, char* mainmodel, char* gluetabs, char* gluetabsmirror);
 
 extern "C" 	__declspec(dllexport) void __stdcall _save_unified(mu3d::graph * g, char* filepath);
