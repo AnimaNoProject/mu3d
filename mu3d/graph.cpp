@@ -979,7 +979,7 @@ void __stdcall _save(mu3d::graph* g, char* mainmodel, char* gluetabs)
 	g->save(std::string(mainmodel), std::string(gluetabs));
 }
 
-void __stdcall _save(mu3d::graph* g, char* mainmodel, char* gluetabs, char* gluetabsmirror)
+void __stdcall _save_extra(mu3d::graph* g, char* mainmodel, char* gluetabs, char* gluetabsmirror)
 {
 	g->save(std::string(mainmodel), std::string(gluetabs), std::string(gluetabsmirror));
 }

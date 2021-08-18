@@ -98,6 +98,6 @@ extern "C" 	__declspec(dllexport) bool __stdcall _unfold(mu3d::graph * g, int ma
 
 extern "C" 	__declspec(dllexport) void __stdcall _save(mu3d::graph * g, char* mainmodel, char* gluetabs);
 
-extern "C" 	__declspec(dllexport) void __stdcall _save(mu3d::graph * g, char* mainmodel, char* gluetabs, char* gluetabsmirror);
+extern "C" 	__declspec(dllexport) void __stdcall _save_extra(mu3d::graph * g, char* mainmodel, char* gluetabs, char* gluetabsmirror);
 
 extern "C" 	__declspec(dllexport) void __stdcall _save_unified(mu3d::graph * g, char* filepath);

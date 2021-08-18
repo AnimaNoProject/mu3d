@@ -24,7 +24,7 @@ class Graph(object):
         self.cgraph._unfold.argtypes = [ctypes.c_void_p, ctypes.c_int16, ctypes.c_int16]
         self.cgraph._unfold.restype = ctypes.c_bool
         self.cgraph._save.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
-        self.cgraph._save_all.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+        self.cgraph._save_extra.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
         self.cgraph._save_unified.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         self.obj = self.cgraph._graph()
 
@@ -83,4 +83,4 @@ class Graph(object):
         :param gluetabmirrorfile: File where the mirrored unfolded glue tabs (glue area on faces) are saved to.
         :return: None
         """
-        self.cgraph._save_all(self.obj, modelfile.encode(), gluetabfile.encode(), gluetabmirrorfile.encode())
+        self.cgraph._save_extra(self.obj, modelfile.encode(), gluetabfile.encode(), gluetabmirrorfile.encode())
