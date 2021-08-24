@@ -294,6 +294,7 @@ namespace mu3d
 		std::stringstream vts;
 		std::stringstream fs;
 		std::stringstream vns;
+		std::stringstream vnFs;
 
 		int index = 0;
 		for (auto& f2p : _CplanarFaces)
@@ -303,11 +304,15 @@ namespace mu3d
 			vs << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
 			vs << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
 
+			vnFs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnFs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnFs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+
 			fs << "f " << index - 2 << "//0" << " " << index - 1 << "//0" << " " << index << "//0" << std::endl;
 		}
 
 		transfer << vs.str();
-		transfer << vns.str() << std::endl;
+		transfer << vnFs.str() << std::endl;
 		transfer << vts.str();
 		transfer << "s off" << std::endl;
 		transfer << fs.str();
@@ -320,6 +325,8 @@ namespace mu3d
 		transferGT << "o Gluetabs" << std::endl;
 		std::stringstream vsGt;
 		std::stringstream fsGt;
+		std::stringstream vnGTs;
+
 		index = 0;
 		for (auto& f2p : _CplanarGluetabs)
 		{
@@ -329,17 +336,25 @@ namespace mu3d
 			vsGt << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
 			vsGt << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
 
+			vnGTs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnGTs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnGTs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnGTs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+
 			fsGt << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
 			fsGt << "f " << index - 1 << "//0 " << index - 2 << "//0 " << index << "//0" << std::endl;
 		}
 
 		transferGT << vsGt.str() << std::endl;
+		transferGT << vnGTs.str() << std::endl;
+		transferGT << "s off" << std::endl;
 		transferGT << fsGt.str() << std::endl;
 		transferGT.close();
 
 		std::ofstream transfermirrorGT(gluetabsMirror);
 		transfermirrorGT << "o GluetabsMirrored" << std::endl;
 		std::stringstream vsmGt;
+		std::stringstream vnGTMs;
 		std::stringstream fsmGt;
 		index = 0;
 		for (auto& f2p : _CplanarMirrorGT)
@@ -350,11 +365,18 @@ namespace mu3d
 			vsmGt << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
 			vsmGt << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
 
+			vnGTMs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnGTMs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnGTMs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+			vnGTMs << "vn " << 0 << " " << 0 << " " << 1 << std::endl;
+
 			fsmGt << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
 			fsmGt << "f " << index - 1 << "//0 " << index - 2 << "//0 " << index << "//0" << std::endl;
 		}
 
 		transfermirrorGT << vsmGt.str() << std::endl;
+		transfermirrorGT << vnGTMs.str() << std::endl;
+		transfermirrorGT << "s off" << std::endl;
 		transfermirrorGT << fsmGt.str() << std::endl;
 		transfermirrorGT.close();
 	}
@@ -367,6 +389,7 @@ namespace mu3d
 		std::stringstream vts;
 		std::stringstream fs;
 		std::stringstream vns;
+		std::stringstream vnGTs;
 
 		int index = 0;
 		for (auto& f2p : _CplanarFaces)
@@ -376,6 +399,10 @@ namespace mu3d
 			vs << "v "		<< f2p.B.x		<< " " << f2p.B.y		<< " "	<< f2p.B.z << std::endl;
 			vs << "v "		<< f2p.C.x		<< " " << f2p.C.y		<< " "	<< f2p.C.z << std::endl;
 
+			vns << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vns << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vns << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+
 			fs << "f "		<< index - 2	<< "/" << index - 2		<< "/0" << " "
 							<< index - 1	<< "/" << index - 1		<< "/0" << " "
 							<< index		<< "/" << index			<< "/0" << std::endl;
@@ -384,7 +411,6 @@ namespace mu3d
 			vts << "vt "	<< f2p.b.x		<< " " << f2p.b.y		<< std::endl;
 			vts << "vt "	<< f2p.c.x		<< " " << f2p.c.y		<< std::endl;
 
-			vns << "vn 0 0 0" << std::endl;
 		}
 
 		transfer << vs.str();
@@ -408,11 +434,17 @@ namespace mu3d
 			vsGt << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
 			vsGt << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
 
+			vnGTs << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vnGTs << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vnGTs << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vnGTs << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+
 			fsGt << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
 			fsGt << "f " << index - 1 << "//0 " << index - 2 << "//0 " << index << "//0" << std::endl;
 		}
 
 		transferGT << vsGt.str() << std::endl;
+		transferGT << vnGTs.str() << std::endl;
 		transferGT << fsGt.str() << std::endl;
 		transferGT.close();
 	}
@@ -421,6 +453,7 @@ namespace mu3d
 	{
 		std::stringstream vs;
 		std::stringstream fs;
+		std::stringstream vn;
 
 		int index = 0;
 		for (auto& f2p : _CplanarFaces)
@@ -429,6 +462,10 @@ namespace mu3d
 			vs << "v " << f2p.a.x << " " << f2p.a.y << " " << 0 << std::endl;
 			vs << "v " << f2p.b.x << " " << f2p.b.y << " " << 0 << std::endl;
 			vs << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
+
+			vn << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vn << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vn << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
 
 			fs << "f " << index - 2 << "//0" << " " << index - 1 << "//0" << " " << index << "//0" << std::endl;
 		}
@@ -441,6 +478,11 @@ namespace mu3d
 			vs << "v " << f2p.c.x << " " << f2p.c.y << " " << 0 << std::endl;
 			vs << "v " << f2p.d.x << " " << f2p.d.y << " " << 0 << std::endl;
 
+			vn << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vn << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vn << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+			vn << "vn " << 0 << " " << 0 << " " << 0 << std::endl;
+
 			fs << "f " << index - 3 << "//0 " << index - 2 << "//0 " << index - 1 << "//0" << std::endl;
 			fs << "f " << index - 1 << "//0 " << index - 2 << "//0 " << index << "//0" << std::endl;
 		}
@@ -448,6 +490,8 @@ namespace mu3d
 		std::ofstream transfer(filepath);
 		transfer << "o Model" << std::endl;
 		transfer << vs.str();
+		transfer << std::endl;
+		transfer << vn.str();
 		transfer << "s off" << std::endl;
 		transfer << fs.str();
 
