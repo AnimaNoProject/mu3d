@@ -259,7 +259,7 @@ namespace mu3d
 
 					gluetabToPlane mirror(gt);
 
-					if (P1 == gt->_bl)
+					if (P1 == gt->_br)
 					{
 						mirror.a = p1;
 						mirror.b = p2;
@@ -275,8 +275,8 @@ namespace mu3d
 					mirror.b = mirror.b - side;
 					mirror.a = mirror.a + side;
 
-					utility::planar(gt->_bl, gt->_br, gt->_tl, mirror.a, mirror.b, p3prev, mirror.c, true);
-					utility::planar(gt->_bl, gt->_br, gt->_tr, mirror.a, mirror.b, p3prev, mirror.d, true);
+					utility::planar(gt->_br, gt->_bl, gt->_tr, mirror.a, mirror.b, p3prev, mirror.c, true);
+					utility::planar(gt->_br, gt->_bl, gt->_tl, mirror.a, mirror.b, p3prev, mirror.d, true);
 
 					_CplanarMirrorGT.push_back(mirror);
 				}
